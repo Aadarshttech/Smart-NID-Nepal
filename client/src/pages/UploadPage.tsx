@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import DropZone from "../components/DropZone";
-import JsonViewer from "../components/JsonViewer";
-import { useEnrollmentStore } from "../store/enrollmentStore";
+import FormTabs from "../components/FormTabs";
+import { useEnrollmentStore, ENROLLMENT_STEPS } from "../store/enrollmentStore";
 import type { ExtractResponse } from "../types/extraction";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3001";
@@ -12,6 +12,7 @@ export default function UploadPage() {
     isExtracting,
     extractionError,
     imagePreview,
+    currentStep,
     setExtractedData,
     setIsExtracting,
     setExtractionError,
@@ -75,33 +76,37 @@ export default function UploadPage() {
         <p className="upload-header__subtitle">
           AI-Powered National ID Pre-Enrollment
         </p>
-        <p className="upload-header__description">
-          Upload your citizenship certificate — AI will read it and fill out the
-          entire NID enrollment form for you.
-        </p>
+        {currentStep === 0 && (
+          <p className="upload-header__description">
+            Upload your citizenship certificate — AI will read it and fill out the
+            entire NID enrollment form for you.
+          </p>
+        )}
       </header>
 
       <main className="upload-main">
         {/* Step indicator */}
         <div className="step-indicator">
-          <div className={`step ${!extractedData ? "step--active" : "step--done"}`}>
-            <span className="step__number">1</span>
-            <span className="step__label">Upload</span>
-          </div>
-          <div className="step__connector" />
-          <div className={`step ${extractedData ? "step--active" : ""}`}>
-            <span className="step__number">2</span>
-            <span className="step__label">Review</span>
-          </div>
-          <div className="step__connector" />
-          <div className="step">
-            <span className="step__number">3</span>
-            <span className="step__label">Fill Form</span>
-          </div>
+          {ENROLLMENT_STEPS.map((step, idx) => {
+            const isActive = currentStep === idx;
+            const isDone = currentStep > idx;
+
+            return (
+              <div key={step.label} className="step-indicator__item">
+                {idx > 0 && <div className={`step__connector ${isDone ? "step__connector--done" : ""}`} />}
+                <div className={`step ${isActive ? "step--active" : ""} ${isDone ? "step--done" : ""}`}>
+                  <span className="step__number">
+                    {isDone ? "✓" : idx + 1}
+                  </span>
+                  <span className="step__label">{step.label}</span>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Upload Section */}
-        {!extractedData && !isExtracting && (
+        {/* Upload Section (Step 0) */}
+        {currentStep === 0 && !isExtracting && !extractionError && (
           <div className="upload-section fade-in">
             <DropZone
               onFileSelected={handleFileSelected}
@@ -151,42 +156,34 @@ export default function UploadPage() {
           </div>
         )}
 
-        {/* Results */}
-        {extractedData && !isExtracting && (
-          <div className="results-section fade-in">
-            <div className="results-layout">
-              {/* Image preview */}
-              {imagePreview && (
-                <div className="results-image">
-                  <h3 className="results-image__title">Uploaded Document</h3>
+        {/* Form Wizard (Steps 1-4) */}
+        {extractedData && !isExtracting && currentStep >= 1 && (
+          <div className="form-wizard-layout">
+            {/* Collapsible image sidebar */}
+            {imagePreview && (
+              <aside className="form-sidebar">
+                <details className="form-sidebar__details" open>
+                  <summary className="form-sidebar__summary">
+                    📷 Uploaded Document
+                  </summary>
                   <img
                     src={imagePreview}
                     alt="Citizenship certificate"
-                    className="results-image__img"
+                    className="form-sidebar__img"
                   />
-                </div>
-              )}
+                </details>
+                <button
+                  onClick={handleRetry}
+                  className="btn btn--outline btn--sm form-sidebar__reupload"
+                >
+                  ↻ Re-upload
+                </button>
+              </aside>
+            )}
 
-              {/* Extracted data */}
-              <div className="results-data">
-                <div className="results-data__header">
-                  <h3>Extracted Data</h3>
-                  <button onClick={handleRetry} className="btn btn--outline btn--sm">
-                    ↻ Re-upload
-                  </button>
-                </div>
-                <JsonViewer data={extractedData} />
-              </div>
-            </div>
-
-            {/* Continue button (placeholder for Phase 2) */}
-            <div className="results-actions">
-              <button className="btn btn--primary btn--lg" disabled>
-                Continue to Enrollment Form →
-              </button>
-              <p className="results-actions__hint">
-                Form filling will be available in Phase 2
-              </p>
+            {/* Form tabs */}
+            <div className="form-wizard-main">
+              <FormTabs />
             </div>
           </div>
         )}

@@ -77,7 +77,14 @@ export async function extractCitizenship(
   let parsed: ExtractionResult;
   try {
     parsed = JSON.parse(cleanedText) as ExtractionResult;
-  } catch {
+  } catch (err) {
+    console.error("[extract] ❌ Failed to parse JSON. Raw AI response was:");
+    console.error("--- RAW TEXT START ---");
+    console.error(text);
+    console.error("--- RAW TEXT END ---");
+    console.error("--- CLEANED TEXT START ---");
+    console.error(cleanedText);
+    console.error("--- CLEANED TEXT END ---");
     throw new Error(
       "AI returned invalid JSON. The image may not be a citizenship certificate."
     );
