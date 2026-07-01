@@ -51,21 +51,7 @@ export default function UploadPage() {
     setIsExtracting(true);
     setExtractionError(null);
 
-    const startTime = Date.now();
-    
-    // Helper to ensure minimum loading time is met before resolving or rejecting
-    const ensureDelay = async () => {
-      const elapsed = Date.now() - startTime;
-      if (elapsed < 1500) {
-        await new Promise(resolve => setTimeout(resolve, 1500 - elapsed));
-      }
-    };
-
     try {
-      // Small delay to allow React to flush the 'isExtracting: true' state to the DOM
-      // and let the browser paint the loading spinner before we block the thread or instantly fail
-      await new Promise(resolve => setTimeout(resolve, 50));
-
       const formData = new FormData();
       formData.append("front", frontFile);
       formData.append("back", backFile);
@@ -81,15 +67,15 @@ export default function UploadPage() {
         throw new Error(result.error || "Failed to extract data from the images");
       }
 
-      await ensureDelay();
       setExtractedData(result.data);
     } catch (error) {
-      await ensureDelay();
       const message =
         error instanceof Error
           ? error.message
           : "An unexpected error occurred. Please try again.";
       setExtractionError(message);
+    } finally {
+      setIsExtracting(false);
     }
   }, [frontFile, backFile, setExtractedData, setIsExtracting, setExtractionError]);
 
@@ -103,6 +89,78 @@ export default function UploadPage() {
 
   return (
     <div className="upload-page">
+      {/* ══════════════════════════════════════════════════════
+          FULL-SCREEN LOADING OVERLAY
+          Rendered at the TOP LEVEL — completely independent of
+          currentStep, extractionError, or any other conditional.
+          This guarantees it is always visible when isExtracting is true.
+         ══════════════════════════════════════════════════════ */}
+      {isExtracting && (
+        <div
+          className="extraction-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(255, 255, 255, 0.88)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <div
+            className="loading-spinner"
+            style={{ width: "70px", height: "70px", borderWidth: "6px", marginBottom: "0" }}
+          />
+          <h3
+            style={{
+              marginTop: "1.5rem",
+              color: "var(--nepal-blue)",
+              fontFamily: "var(--font-nepali)",
+              fontSize: "1.6rem",
+              fontWeight: 700,
+            }}
+          >
+            नागरिकता प्रमाणपत्र पढ्दै…
+          </h3>
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              marginTop: "0.5rem",
+              fontSize: "1.05rem",
+            }}
+          >
+            Extracting data with AI, please wait...
+          </p>
+          {/* Animated progress bar */}
+          <div
+            style={{
+              marginTop: "2rem",
+              width: "240px",
+              height: "5px",
+              background: "#e2e8f0",
+              borderRadius: "999px",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                width: "40%",
+                height: "100%",
+                background: "linear-gradient(90deg, var(--nepal-blue), var(--crimson))",
+                borderRadius: "999px",
+                animation: "progressPulse 1.5s ease-in-out infinite",
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Hero Header */}
       <header className="upload-header">
         <div className="upload-header__flag" style={{ marginBottom: '0.5rem' }}>
@@ -148,40 +206,7 @@ export default function UploadPage() {
 
         {/* Upload Section (Step 0) */}
         {currentStep === 0 && !extractionError && (
-          <div className="upload-section fade-in" style={{ position: 'relative', minHeight: isExtracting ? '400px' : undefined }}>
-            {/* ── Full overlay loading state ── */}
-            {isExtracting && (
-              <div style={{
-                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                backgroundColor: 'rgba(255, 255, 255, 0.92)', zIndex: 50,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                borderRadius: 'var(--radius-xl)', backdropFilter: 'blur(4px)',
-              }}>
-                <div className="loading-spinner" style={{ width: '60px', height: '60px', borderWidth: '5px' }} />
-                <h3 style={{
-                  marginTop: '1.25rem', color: 'var(--nepal-blue)',
-                  fontFamily: 'var(--font-nepali)', fontSize: '1.4rem', fontWeight: 700,
-                }}>
-                  नागरिकता प्रमाणपत्र पढ्दै…
-                </h3>
-                <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', fontSize: '1rem' }}>
-                  Extracting data with AI, please wait...
-                </p>
-                {/* Pulsing progress bar */}
-                <div style={{
-                  marginTop: '1.5rem', width: '200px', height: '4px',
-                  background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden',
-                }}>
-                  <div style={{
-                    width: '40%', height: '100%',
-                    background: 'linear-gradient(90deg, var(--nepal-blue), var(--crimson))',
-                    borderRadius: '999px',
-                    animation: 'progressPulse 1.5s ease-in-out infinite',
-                  }} />
-                </div>
-              </div>
-            )}
-
+          <div className="upload-section fade-in">
             <div className="upload-grid">
               <div className="upload-box">
                 {frontPreview ? (
