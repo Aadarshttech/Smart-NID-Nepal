@@ -140,7 +140,22 @@ export default function UploadPage() {
 
         {/* Upload Section (Step 0) */}
         {currentStep === 0 && !extractionError && (
-          <div className="upload-section fade-in">
+          <div className="upload-section fade-in" style={{ position: 'relative' }}>
+            {isExtracting && (
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                backgroundColor: 'rgba(255, 255, 255, 0.9)', zIndex: 50,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 'var(--radius-xl)'
+              }}>
+                <div className="loading-spinner" style={{ width: '60px', height: '60px', borderWidth: '6px' }} />
+                <h3 style={{ marginTop: '1rem', color: 'var(--primary)', fontFamily: 'var(--font-nepali)' }}>
+                  नागरिकता प्रमाणपत्र पढ्दै…
+                </h3>
+                <p style={{ color: 'var(--text-secondary)' }}>Extracting data with AI, please wait...</p>
+              </div>
+            )}
+            
             <div className="upload-grid">
               <div className="upload-box">
                 {frontPreview ? (
@@ -184,17 +199,6 @@ export default function UploadPage() {
               </button>
               {!canExtract && !isExtracting && (
                 <p className="upload-action__hint">Please upload both sides to continue.</p>
-              )}
-              {isExtracting && (
-                <div className="loading-status" style={{ marginTop: '2rem', width: '100%' }}>
-                  <div className="loading-spinner" />
-                  <p className="loading-status__text">
-                    📄 Reading your citizenship certificate…
-                  </p>
-                  <p className="loading-status__subtext">
-                    नागरिकता प्रमाणपत्र पढ्दै…
-                  </p>
-                </div>
               )}
             </div>
           </div>
