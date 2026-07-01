@@ -194,8 +194,18 @@ export default function UploadPage() {
                 className="btn btn--primary btn--lg"
                 disabled={!canExtract || isExtracting}
                 onClick={handleExtract}
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', minWidth: '280px' }}
               >
-                {isExtracting ? "Extracting... Please wait" : "Extract Data with AI ✨"}
+                {isExtracting ? (
+                  <>
+                    <div style={{
+                      width: '24px', height: '24px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 1s linear infinite'
+                    }} />
+                    <span>Extracting... Please wait</span>
+                  </>
+                ) : (
+                  <span>Extract Data with AI ✨</span>
+                )}
               </button>
               {!canExtract && !isExtracting && (
                 <p className="upload-action__hint">Please upload both sides to continue.</p>
