@@ -89,12 +89,12 @@ export default function UploadPage() {
     <div className="upload-page">
       {/* Hero Header */}
       <header className="upload-header">
-        <div className="upload-header__flag">
+        <div className="upload-header__flag" style={{ marginBottom: '0.5rem' }}>
           <img 
             src="/nepal-flag.svg" 
             alt="Nepal Flag" 
-            height="48" 
-            style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))", display: "block" }} 
+            height="32" 
+            style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))", display: "inline-block" }} 
           />
         </div>
         <h1 className="upload-header__title">
