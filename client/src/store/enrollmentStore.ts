@@ -1,22 +1,20 @@
 /**
  * Zustand enrollment store — holds extracted data, draft,
- * additional user-entered fields, appointment preferences,
- * and UI state for the entire enrollment flow.
+ * additional user-entered fields, and UI state for the entire enrollment flow.
  */
 
 import { create } from "zustand";
 import type {
   ExtractionResult,
   AdditionalFields,
-  AppointmentPreferences,
 } from "../types/extraction";
 
 /** Steps in the enrollment wizard */
 export const ENROLLMENT_STEPS = [
   { label: "Upload", labelNp: "अपलोड" },
-  { label: "Edit Details", labelNp: "विवरण सम्पादन" },
-  { label: "Appointment", labelNp: "भेटघाट" },
-  { label: "Review", labelNp: "समीक्षा" },
+  { label: "Personal Info", labelNp: "व्यक्तिगत विवरण" },
+  { label: "Family Info", labelNp: "पारिवारिक विवरण" },
+  { label: "Export", labelNp: "निर्यात" },
 ] as const;
 
 /** Default values for user-entered additional fields */
@@ -57,9 +55,6 @@ interface EnrollmentState {
   /** Current step in the enrollment wizard (0-3) */
   currentStep: number;
 
-  /** Appointment preferences selected by user */
-  appointmentPreferences: AppointmentPreferences | null;
-
   /** Extraction UI state */
   isExtracting: boolean;
   extractionError: string | null;
@@ -88,7 +83,6 @@ interface EnrollmentState {
   setCurrentStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
-  setAppointmentPreferences: (prefs: AppointmentPreferences) => void;
   resetStore: () => void;
 }
 
@@ -97,7 +91,6 @@ const initialState = {
   draft: null,
   additional: { ...DEFAULT_ADDITIONAL },
   currentStep: 0,
-  appointmentPreferences: null,
   isExtracting: false,
   extractionError: null,
   frontPreview: null,
@@ -153,9 +146,6 @@ export const useEnrollmentStore = create<EnrollmentState>((set) => ({
     set((state) => ({
       currentStep: Math.max(state.currentStep - 1, 0),
     })),
-
-  setAppointmentPreferences: (prefs) =>
-    set({ appointmentPreferences: prefs }),
 
   resetStore: () => set(initialState),
 }));

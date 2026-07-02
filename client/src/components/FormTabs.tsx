@@ -1,14 +1,13 @@
 /**
  * FormTabs — Tab-based form wizard that renders the active
- * enrollment step. Controls navigation between the 4 tabs:
- * Personal Details → Document & Family → Appointment → Review
+ * enrollment step. Controls navigation between the 3 tabs:
+ * Personal Info → Family Info → Export
  */
 
 import { useEnrollmentStore, ENROLLMENT_STEPS } from "../store/enrollmentStore";
 import PersonalDetailsTab from "./PersonalDetailsTab";
 import DocumentFamilyTab from "./DocumentFamilyTab";
-import AppointmentTab from "./AppointmentTab";
-import ReviewTab from "./ReviewTab";
+import ExportTab from "./ExportTab";
 
 export default function FormTabs() {
   const { currentStep, setCurrentStep } = useEnrollmentStore();
@@ -22,9 +21,7 @@ export default function FormTabs() {
       case 2:
         return <DocumentFamilyTab />;
       case 3:
-        return <AppointmentTab />;
-      case 4:
-        return <ReviewTab />;
+        return <ExportTab />;
       default:
         return <PersonalDetailsTab />;
     }

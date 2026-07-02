@@ -350,7 +350,7 @@ export default function DocumentFamilyTab() {
           onClick={nextStep}
           disabled={!canProceed}
         >
-          Next: Appointment →
+          Next: Export →
         </button>
       </div>
 
