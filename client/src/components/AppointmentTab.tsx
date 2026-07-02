@@ -79,7 +79,20 @@ export default function AppointmentTab() {
     nextStep();
   };
 
+  const handleSkip = () => {
+    // Set a dummy appointment so the Review tab doesn't crash (it expects appointmentPreferences to exist)
+    setAppointmentPreferences({
+      district: "Skipped",
+      officeId: "skip",
+      officeName: "Will be selected on DoNIDCR portal",
+      selectedDate: "2099-12-31", // dummy date
+      selectedSlot: "TBD",
+    });
+    nextStep();
+  };
+
   const formatDate = (dateStr: string) => {
+    if (dateStr === "2099-12-31") return "TBD";
     const date = new Date(dateStr + "T00:00:00");
     return date.toLocaleDateString("en-US", {
       weekday: "short",
@@ -112,9 +125,9 @@ export default function AppointmentTab() {
           >
             <option value="">-- Choose a district --</option>
             {districts.map((d) => (
-              <option key={d.name} value={d.name}>
-                {d.name} ({d.nameNp}) — {d.province}
-              </option>
+               <option key={d.name} value={d.name}>
+                 {d.name} ({d.nameNp}) — {d.province}
+               </option>
             ))}
           </select>
         </div>
@@ -197,13 +210,18 @@ export default function AppointmentTab() {
         <button className="btn btn--outline" onClick={prevStep}>
           ← Back
         </button>
-        <button
-          className="btn btn--primary"
-          onClick={handleNext}
-          disabled={!canProceed}
-        >
-          Next: Review →
-        </button>
+        <div style={{ display: "flex", gap: "1rem" }}>
+          <button className="btn btn--outline" onClick={handleSkip}>
+            Skip for now
+          </button>
+          <button
+            className="btn btn--primary"
+            onClick={handleNext}
+            disabled={!canProceed}
+          >
+            Next: Review →
+          </button>
+        </div>
       </div>
     </div>
   );
