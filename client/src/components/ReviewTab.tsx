@@ -1,14 +1,18 @@
 /**
  * ReviewTab — Final read-only summary of all enrollment data
  * with the option to jump back and edit any section.
- * Submit button is a placeholder for future phases.
+ * Includes the "Transfer to DoNIDCR" auto-fill feature.
  */
 
+import { useState } from "react";
 import { useEnrollmentStore } from "../store/enrollmentStore";
+import { generateAutoFillScript } from "../utils/generateAutoFill";
 
 export default function ReviewTab() {
   const { draft, appointmentPreferences, setCurrentStep, prevStep } =
     useEnrollmentStore();
+
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
 
   if (!draft || !appointmentPreferences) return null;
 
@@ -20,6 +24,18 @@ export default function ReviewTab() {
       month: "long",
       day: "numeric",
     });
+  };
+
+  const handleTransfer = async () => {
+    try {
+      const script = generateAutoFillScript(draft);
+      await navigator.clipboard.writeText(script);
+      setCopyState("copied");
+      setTimeout(() => setCopyState("idle"), 4000);
+    } catch {
+      setCopyState("error");
+      setTimeout(() => setCopyState("idle"), 4000);
+    }
   };
 
   return (
@@ -120,17 +136,92 @@ export default function ReviewTab() {
         </div>
       </div>
 
-      {/* Submit */}
-      <div className="review-submit">
-        <p className="review-submit__disclaimer">
-          📌 यो एउटा प्रोटोटाइप हो। कुनै वास्तविक डाटा DoNIDCR मा पठाइने छैन।
+      {/* ═══ Transfer to DoNIDCR ═══ */}
+      <div className="review-section" style={{
+        background: "linear-gradient(135deg, #003893 0%, #1a5fc7 100%)",
+        borderRadius: "16px",
+        padding: "2rem",
+        color: "white",
+        textAlign: "center",
+      }}>
+        <div style={{ marginBottom: "1rem" }}>
+          <span style={{ fontSize: "2.5rem" }}>🇳🇵</span>
+        </div>
+        <h3 style={{
+          fontSize: "1.4rem",
+          fontWeight: 700,
+          marginBottom: "0.5rem",
+          color: "white",
+        }}>
+          Transfer to DoNIDCR
+        </h3>
+        <p style={{
+          fontSize: "0.95rem",
+          opacity: 0.85,
+          marginBottom: "1.5rem",
+          maxWidth: "500px",
+          margin: "0 auto 1.5rem",
+          lineHeight: 1.6,
+        }}>
+          Copy the auto-fill script to your clipboard. Then open{" "}
+          <a
+            href="https://enrollment.donidcr.gov.np/PreEnrollment/form"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#ffd700", textDecoration: "underline" }}
+          >
+            enrollment.donidcr.gov.np
+          </a>
+          , press <strong>F12</strong> → <strong>Console</strong> → paste (<strong>Ctrl+V</strong>) → press <strong>Enter</strong>.
         </p>
-        <p className="review-submit__disclaimer-en">
-          This is a prototype. No real data will be submitted to DoNIDCR.
-        </p>
-        <button className="btn btn--primary btn--lg" disabled>
-          Submit Application (Coming Soon)
+
+        <button
+          onClick={handleTransfer}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.75rem",
+            padding: "0.9rem 2.5rem",
+            fontSize: "1.1rem",
+            fontWeight: 700,
+            color: copyState === "copied" ? "#003893" : "white",
+            background: copyState === "copied"
+              ? "linear-gradient(135deg, #ffd700, #ffec4d)"
+              : "linear-gradient(135deg, #DC143C, #ff3366)",
+            border: "none",
+            borderRadius: "12px",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
+            minWidth: "280px",
+          }}
+        >
+          {copyState === "copied" ? (
+            <>✅ Copied to Clipboard!</>
+          ) : copyState === "error" ? (
+            <>❌ Copy Failed — Try Again</>
+          ) : (
+            <>📋 Copy Auto-Fill Script</>
+          )}
         </button>
+
+        {copyState === "copied" && (
+          <div style={{
+            marginTop: "1rem",
+            padding: "0.75rem 1.25rem",
+            background: "rgba(255,255,255,0.15)",
+            borderRadius: "10px",
+            fontSize: "0.9rem",
+            animation: "fadeIn 0.3s ease",
+          }}>
+            <strong>Next Steps:</strong><br />
+            1. Open DoNIDCR enrollment form<br />
+            2. Press F12 → Console tab<br />
+            3. Paste (Ctrl+V) and press Enter<br />
+            4. All fields will fill automatically! ✨
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
