@@ -9,7 +9,7 @@ import { useEnrollmentStore } from "../store/enrollmentStore";
 import { generateAutoFillScript } from "../utils/generateAutoFill";
 
 export default function ReviewTab() {
-  const { draft, appointmentPreferences, setCurrentStep, prevStep } =
+  const { draft, additional, appointmentPreferences, setCurrentStep, prevStep } =
     useEnrollmentStore();
 
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
@@ -28,7 +28,7 @@ export default function ReviewTab() {
 
   const handleTransfer = async () => {
     try {
-      const script = generateAutoFillScript(draft);
+      const script = generateAutoFillScript(draft, additional);
       await navigator.clipboard.writeText(script);
       setCopyState("copied");
       setTimeout(() => setCopyState("idle"), 4000);

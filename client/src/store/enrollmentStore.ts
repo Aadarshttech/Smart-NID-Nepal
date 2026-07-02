@@ -1,10 +1,15 @@
 /**
  * Zustand enrollment store — holds extracted data, draft,
- * appointment preferences, and UI state for the entire enrollment flow.
+ * additional user-entered fields, appointment preferences,
+ * and UI state for the entire enrollment flow.
  */
 
 import { create } from "zustand";
-import type { ExtractionResult, AppointmentPreferences } from "../types/extraction";
+import type {
+  ExtractionResult,
+  AdditionalFields,
+  AppointmentPreferences,
+} from "../types/extraction";
 
 /** Steps in the enrollment wizard */
 export const ENROLLMENT_STEPS = [
@@ -14,12 +19,40 @@ export const ENROLLMENT_STEPS = [
   { label: "Review", labelNp: "समीक्षा" },
 ] as const;
 
+/** Default values for user-entered additional fields */
+const DEFAULT_ADDITIONAL: AdditionalFields = {
+  maritalStatus: "",
+  educationLevel: "",
+  profession: "",
+  caste: "",
+  religion: "",
+  ccType: "1", // Default: Citizenship by Descent (most common)
+  phoneNo: "",
+  mobileNo: "",
+  temporaryAddressSameAsPermanent: true,
+  temporaryAddress: {
+    province: "",
+    district: "",
+    localLevel: "",
+    wardNo: "",
+    villageToleNp: "",
+    villageToleEn: "",
+  },
+  grandmotherName: { nepali: "", english: "" },
+  spouseFirstName: { nepali: "", english: "" },
+  spouseMiddleName: { nepali: "", english: "" },
+  spouseLastName: { nepali: "", english: "" },
+};
+
 interface EnrollmentState {
   /** Raw extraction result from OCR */
   extractedData: ExtractionResult | null;
 
   /** Working draft pre-filled from extraction, editable by user */
   draft: ExtractionResult | null;
+
+  /** Additional fields not present on citizenship certificate */
+  additional: AdditionalFields;
 
   /** Current step in the enrollment wizard (0-3) */
   currentStep: number;
@@ -48,6 +81,10 @@ interface EnrollmentState {
     field: K,
     value: ExtractionResult[K]
   ) => void;
+  updateAdditionalField: <K extends keyof AdditionalFields>(
+    field: K,
+    value: AdditionalFields[K]
+  ) => void;
   setCurrentStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
@@ -58,6 +95,7 @@ interface EnrollmentState {
 const initialState = {
   extractedData: null,
   draft: null,
+  additional: { ...DEFAULT_ADDITIONAL },
   currentStep: 0,
   appointmentPreferences: null,
   isExtracting: false,
@@ -97,6 +135,11 @@ export const useEnrollmentStore = create<EnrollmentState>((set) => ({
         draft: { ...state.draft, [field]: value },
       };
     }),
+
+  updateAdditionalField: (field, value) =>
+    set((state) => ({
+      additional: { ...state.additional, [field]: value },
+    })),
 
   setCurrentStep: (step) =>
     set({ currentStep: Math.max(0, Math.min(step, ENROLLMENT_STEPS.length - 1)) }),

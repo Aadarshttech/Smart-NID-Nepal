@@ -12,7 +12,7 @@
  * - Fuzzy district matching
  */
 
-import type { ExtractionResult } from "../types/extraction";
+import type { ExtractionResult, AdditionalFields } from "../types/extraction";
 import { findDistrictValue, mapGender } from "./districtMap";
 
 /**
@@ -29,12 +29,17 @@ function formatDateForInput(dateStr: string): string {
  * Generate the auto-fill JavaScript snippet for DoNIDCR.
  *
  * @param data - The extracted (or user-edited draft) citizenship data
+ * @param additional - The user-entered additional fields
  * @returns A self-contained JavaScript string ready to paste into the console
  */
-export function generateAutoFillScript(data: ExtractionResult): string {
+export function generateAutoFillScript(data: ExtractionResult, additional: AdditionalFields): string {
   const birthDistrictVal = findDistrictValue(data.birthPlace);
   const issuingDistrictVal = findDistrictValue(data.issuingDistrict);
   const permanentDistrictVal = findDistrictValue(data.permanentAddress.district);
+  const tempDistrictVal = additional.temporaryAddressSameAsPermanent
+    ? permanentDistrictVal
+    : findDistrictValue(additional.temporaryAddress.district);
+  
   const genderVal = mapGender(data.gender);
   const dobAD = formatDateForInput(data.dobAD);
 
@@ -51,6 +56,7 @@ export function generateAutoFillScript(data: ExtractionResult): string {
   lines.push(``);
   lines.push(`  // Helper: set a text input value and dispatch events`);
   lines.push(`  function setText(id, value) {`);
+  lines.push(`    if (!value) return;`);
   lines.push(`    const el = document.getElementById(id);`);
   lines.push(`    if (!el) { console.warn('⚠️ Field not found:', id); return; }`);
   lines.push(`    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;`);
@@ -61,6 +67,7 @@ export function generateAutoFillScript(data: ExtractionResult): string {
   lines.push(``);
   lines.push(`  // Helper: set a select dropdown value and dispatch events`);
   lines.push(`  function setSelect(id, value) {`);
+  lines.push(`    if (!value) return;`);
   lines.push(`    const el = document.getElementById(id);`);
   lines.push(`    if (!el) { console.warn('⚠️ Select not found:', id); return; }`);
   lines.push(`    el.value = value;`);
@@ -69,6 +76,7 @@ export function generateAutoFillScript(data: ExtractionResult): string {
   lines.push(``);
   lines.push(`  // Helper: set a date input`);
   lines.push(`  function setDate(id, value) {`);
+  lines.push(`    if (!value) return;`);
   lines.push(`    const el = document.getElementById(id);`);
   lines.push(`    if (!el) { console.warn('⚠️ Date field not found:', id); return; }`);
   lines.push(`    el.value = value;`);
@@ -88,33 +96,50 @@ export function generateAutoFillScript(data: ExtractionResult): string {
   lines.push(`  setText('dobLoc', ${JSON.stringify(data.dobBS)});`);
   lines.push(`  setDate('dob', ${JSON.stringify(dobAD)});`);
 
-  if (birthDistrictVal) {
-    lines.push(`  setSelect('birthDistrictPlace', ${JSON.stringify(birthDistrictVal)});`);
-  }
-
-  // Default CC Type to "Citizenship by Descent" (val=1) — most common
-  lines.push(`  setSelect('ccType', '1');`);
-
+  if (birthDistrictVal) lines.push(`  setSelect('birthDistrictPlace', ${JSON.stringify(birthDistrictVal)});`);
+  lines.push(`  setSelect('ccType', ${JSON.stringify(additional.ccType || '1')});`);
   lines.push(`  setText('ccNumberLoc', ${JSON.stringify(data.citizenshipNo)});`);
-
-  if (issuingDistrictVal) {
-    lines.push(`  setSelect('ccIssuingDistrict', ${JSON.stringify(issuingDistrictVal)});`);
-  }
-
+  if (issuingDistrictVal) lines.push(`  setSelect('ccIssuingDistrict', ${JSON.stringify(issuingDistrictVal)});`);
   lines.push(`  setText('ccIssuingDateLoc', ${JSON.stringify(data.issueDateBS)});`);
+  if (genderVal) lines.push(`  setSelect('gender', ${JSON.stringify(genderVal)});`);
 
-  if (genderVal) {
-    lines.push(`  setSelect('gender', ${JSON.stringify(genderVal)});`);
-  }
+  // Additional Applicant Fields
+  lines.push(`  setSelect('maritalStatus', ${JSON.stringify(additional.maritalStatus)});`);
+  lines.push(`  setSelect('educationLevel', ${JSON.stringify(additional.educationLevel)});`);
+  lines.push(`  setSelect('profession', ${JSON.stringify(additional.profession)});`);
+  lines.push(`  setSelect('caste', ${JSON.stringify(additional.caste)});`);
+  lines.push(`  setSelect('religion', ${JSON.stringify(additional.religion)});`);
 
   // Default father status to KNOWN
   lines.push(`  setSelect('fatherStatus', '1');`);
 
   lines.push(``);
 
+  // ── Tab 2: Contact Details (Permanent Address) ──
+  lines.push(`  // ── Tab 2: Contact Details ──`);
+  lines.push(`  setText('mobileNo', ${JSON.stringify(additional.mobileNo)});`);
+  lines.push(`  setText('phoneNo', ${JSON.stringify(additional.phoneNo)});`);
+  
+  if (permanentDistrictVal) lines.push(`  setSelect('pDistrict', ${JSON.stringify(permanentDistrictVal)});`);
+  lines.push(`  setText('pWardNo', ${JSON.stringify(data.permanentAddress.wardNo)});`);
+  lines.push(`  setText('pToleLoc', ${JSON.stringify(data.permanentAddress.villageToleNp)});`);
+  lines.push(`  setText('pTole', ${JSON.stringify(data.permanentAddress.villageToleEn)});`);
+
+  if (additional.temporaryAddressSameAsPermanent) {
+    lines.push(`  const pSame = document.getElementById('pSameAsTemp');`);
+    lines.push(`  if (pSame && !pSame.checked) { pSame.click(); }`);
+  } else {
+    if (tempDistrictVal) lines.push(`  setSelect('tDistrict', ${JSON.stringify(tempDistrictVal)});`);
+    lines.push(`  setText('tWardNo', ${JSON.stringify(additional.temporaryAddress.wardNo)});`);
+    lines.push(`  setText('tToleLoc', ${JSON.stringify(additional.temporaryAddress.villageToleNp)});`);
+    lines.push(`  setText('tTole', ${JSON.stringify(additional.temporaryAddress.villageToleEn)});`);
+  }
+
+  lines.push(``);
+
   // ── Tab 3: Family Details ──
-  // Father's name — split into first/middle/last
   lines.push(`  // ── Tab 3: Family Details ──`);
+  // Father
   const fatherNpParts = splitName(data.fatherName.nepali);
   const fatherEnParts = splitName(data.fatherName.english);
   lines.push(`  setText('fFnLoc', ${JSON.stringify(fatherNpParts.first)});`);
@@ -124,7 +149,7 @@ export function generateAutoFillScript(data: ExtractionResult): string {
   lines.push(`  setText('fMn', ${JSON.stringify(fatherEnParts.middle)});`);
   lines.push(`  setText('fLn', ${JSON.stringify(fatherEnParts.last)});`);
 
-  // Mother's name
+  // Mother
   const motherNpParts = splitName(data.motherName.nepali);
   const motherEnParts = splitName(data.motherName.english);
   lines.push(`  setText('mFnLoc', ${JSON.stringify(motherNpParts.first)});`);
@@ -134,7 +159,7 @@ export function generateAutoFillScript(data: ExtractionResult): string {
   lines.push(`  setText('mMn', ${JSON.stringify(motherEnParts.middle)});`);
   lines.push(`  setText('mLn', ${JSON.stringify(motherEnParts.last)});`);
 
-  // Grandfather's name
+  // Grandfather
   const gfNpParts = splitName(data.grandfatherName.nepali);
   const gfEnParts = splitName(data.grandfatherName.english);
   lines.push(`  setText('gfFnLoc', ${JSON.stringify(gfNpParts.first)});`);
@@ -144,24 +169,29 @@ export function generateAutoFillScript(data: ExtractionResult): string {
   lines.push(`  setText('gfMn', ${JSON.stringify(gfEnParts.middle)});`);
   lines.push(`  setText('gfLn', ${JSON.stringify(gfEnParts.last)});`);
 
-  lines.push(``);
+  // Grandmother
+  const gmNpParts = splitName(additional.grandmotherName.nepali);
+  const gmEnParts = splitName(additional.grandmotherName.english);
+  lines.push(`  setText('gmFnLoc', ${JSON.stringify(gmNpParts.first)});`);
+  lines.push(`  setText('gmMnLoc', ${JSON.stringify(gmNpParts.middle)});`);
+  lines.push(`  setText('gmLnLoc', ${JSON.stringify(gmNpParts.last)});`);
+  lines.push(`  setText('gmFn', ${JSON.stringify(gmEnParts.first)});`);
+  lines.push(`  setText('gmMn', ${JSON.stringify(gmEnParts.middle)});`);
+  lines.push(`  setText('gmLn', ${JSON.stringify(gmEnParts.last)});`);
 
-  // ── Tab 2: Contact Details (Permanent Address) ──
-  if (permanentDistrictVal) {
-    lines.push(`  // ── Tab 2: Contact Details (Permanent Address) ──`);
-    lines.push(`  // Note: District dropdown may need province to be set first.`);
-    lines.push(`  // The script attempts to set the district; if the municipality`);
-    lines.push(`  // dropdown doesn't populate, set the province manually first.`);
-    lines.push(`  setSelect('pDistrict', ${JSON.stringify(permanentDistrictVal)});`);
-  }
-  if (data.permanentAddress.wardNo) {
-    lines.push(`  setText('pWardNo', ${JSON.stringify(data.permanentAddress.wardNo)});`);
+  // Spouse (if married)
+  if (additional.maritalStatus === "1") {
+    lines.push(`  setText('sFnLoc', ${JSON.stringify(additional.spouseFirstName.nepali)});`);
+    lines.push(`  setText('sMnLoc', ${JSON.stringify(additional.spouseMiddleName.nepali)});`);
+    lines.push(`  setText('sLnLoc', ${JSON.stringify(additional.spouseLastName.nepali)});`);
+    lines.push(`  setText('sFn', ${JSON.stringify(additional.spouseFirstName.english)});`);
+    lines.push(`  setText('sMn', ${JSON.stringify(additional.spouseMiddleName.english)});`);
+    lines.push(`  setText('sLn', ${JSON.stringify(additional.spouseLastName.english)});`);
   }
 
   lines.push(``);
   lines.push(`  console.log('✅ Smart NID Nepal: All available fields filled successfully!');`);
-  lines.push(`  console.log('📋 Please review each tab and fill any remaining fields manually.');`);
-  lines.push(`  alert('✅ Smart NID Nepal Auto-Fill Complete!\\n\\nPlease review each tab and fill remaining fields (marital status, education, profession, caste, religion, etc.) manually.');`);
+  lines.push(`  alert('✅ Smart NID Nepal Auto-Fill Complete!\\n\\nNote: For cascading dropdowns like Local Level, you may need to re-select the Province/District manually to load the municipalities.\\nPlease review each tab before submitting.');`);
   lines.push(`})();`);
 
   return lines.join("\n");
@@ -169,9 +199,9 @@ export function generateAutoFillScript(data: ExtractionResult): string {
 
 /**
  * Split a full name string into first/middle/last parts.
- * Assumes format: "FirstName MiddleName LastName" or "FirstName LastName"
  */
 function splitName(fullName: string): { first: string; middle: string; last: string } {
+  if (!fullName) return { first: "", middle: "", last: "" };
   const parts = fullName.trim().split(/\s+/);
   if (parts.length === 0) return { first: "", middle: "", last: "" };
   if (parts.length === 1) return { first: parts[0], middle: "", last: "" };
