@@ -4,7 +4,7 @@
  * all their extracted and manually entered data to DoNIDCR.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEnrollmentStore } from "../store/enrollmentStore";
 import { generateAutoFillScript } from "../utils/generateAutoFill";
 
@@ -20,16 +20,48 @@ const NepalFlagSVG = () => (
 
 export default function ExportTab() {
   const { draft, additional, prevStep } = useEnrollmentStore();
-  const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "error" | "transferring">("idle");
+  const [hasExtension, setHasExtension] = useState(false);
+
+  useEffect(() => {
+    const handleExtensionReady = () => setHasExtension(true);
+    
+    // Listen for the ready event
+    window.addEventListener("SMART_NID_EXTENSION_READY", handleExtensionReady);
+    
+    // Listen for success/error from the extension
+    const handleTransferSuccess = () => setCopyState("copied");
+    const handleTransferError = () => setCopyState("error");
+    
+    window.addEventListener("SMART_NID_TRANSFER_SUCCESS", handleTransferSuccess);
+    window.addEventListener("SMART_NID_TRANSFER_ERROR", handleTransferError);
+
+    // Ping the extension in case we missed the initial ready event
+    window.dispatchEvent(new CustomEvent("SMART_NID_PING"));
+
+    return () => {
+      window.removeEventListener("SMART_NID_EXTENSION_READY", handleExtensionReady);
+      window.removeEventListener("SMART_NID_TRANSFER_SUCCESS", handleTransferSuccess);
+      window.removeEventListener("SMART_NID_TRANSFER_ERROR", handleTransferError);
+    };
+  }, []);
 
   if (!draft) return null;
 
   const handleTransfer = async () => {
     try {
       const script = generateAutoFillScript(draft, additional);
-      await navigator.clipboard.writeText(script);
-      setCopyState("copied");
-      setTimeout(() => setCopyState("idle"), 4000);
+      
+      if (hasExtension) {
+        setCopyState("transferring");
+        // Dispatch to extension
+        window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER", { detail: { script } }));
+      } else {
+        // Fallback: Manual copy to clipboard
+        await navigator.clipboard.writeText(script);
+        setCopyState("copied");
+        setTimeout(() => setCopyState("idle"), 4000);
+      }
     } catch {
       setCopyState("error");
       setTimeout(() => setCopyState("idle"), 4000);
@@ -87,11 +119,15 @@ export default function ExportTab() {
               maxWidth: "480px",
               margin: "0 auto 2.5rem",
             }}>
-              Your data is secured and ready. Copy the smart script below, then paste it into the official DoNIDCR portal to complete your registration instantly.
+              {hasExtension 
+                ? "Your Smart NID Helper extension is connected! Click below to automatically open the government portal and inject your data."
+                : "Your data is secured and ready. Copy the smart script below, then paste it into the official DoNIDCR portal to complete your registration instantly."
+              }
             </p>
 
             <button
               onClick={handleTransfer}
+              disabled={copyState === "transferring"}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -106,32 +142,42 @@ export default function ExportTab() {
                   : "linear-gradient(135deg, #003893, #1a5fc7)",
                 border: "none",
                 borderRadius: "14px",
-                cursor: "pointer",
+                cursor: copyState === "transferring" ? "wait" : "pointer",
                 transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 boxShadow: copyState === "copied" 
                   ? "0 10px 25px rgba(0, 176, 155, 0.3)"
                   : "0 10px 25px rgba(0, 56, 147, 0.25)",
                 width: "100%",
-                maxWidth: "360px",
+                maxWidth: "380px",
                 transform: copyState === "copied" ? "scale(0.98)" : "scale(1)",
               }}
             >
-              {copyState === "copied" ? (
+              {copyState === "transferring" ? (
+                <>⏳ Transferring to DoNIDCR...</>
+              ) : copyState === "copied" ? (
                 <>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  Copied to Clipboard!
+                  {hasExtension ? "Transfer Started!" : "Copied to Clipboard!"}
                 </>
               ) : copyState === "error" ? (
-                <>❌ Copy Failed — Try Again</>
+                <>❌ Transfer Failed — Try Again</>
               ) : (
                 <>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  Copy Auto-Fill Script
+                  {hasExtension ? "1-Click Transfer to DoNIDCR" : "Copy Auto-Fill Script"}
                 </>
               )}
             </button>
 
-            {copyState === "copied" && (
+            {!hasExtension && (
+              <div style={{ marginTop: "1rem" }}>
+                <p style={{ fontSize: "0.85rem", color: "#6b7280" }}>
+                  💡 <strong>Pro Tip:</strong> Install our Chrome Extension for true 1-click magic without copying!
+                </p>
+              </div>
+            )}
+
+            {copyState === "copied" && !hasExtension && (
               <div style={{
                 marginTop: "2rem",
                 padding: "1.5rem",

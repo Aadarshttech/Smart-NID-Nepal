@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Smart NID Helper",
+  "version": "1.0",
+  "description": "Seamlessly transfer data from Smart NID to the official DoNIDCR portal.",
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://enrollment.donidcr.gov.np/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:*/*",
+        "http://127.0.0.1:*/*",
+        "https://smart-nid-nepal.vercel.app/*"
+      ],
+      "js": ["content-app.js"]
+    },
+    {
+      "matches": [
+        "*://enrollment.donidcr.gov.np/*"
+      ],
+      "js": ["content-donidcr.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
