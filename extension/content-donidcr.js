@@ -231,13 +231,26 @@
             instructions.forEach(inst => {
               if (!inst.value) return;
 
+              // 1. ALWAYS enforce YYYY-MM-DD format for dates
+              if (inst.id === 'dobLoc' || inst.id === 'ccIssuingDateLoc') {
+                const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+                let engDate = inst.value.replace(/[०-९]/g, d => nepaliDigits.indexOf(d).toString());
+                engDate = engDate.replace(/[\/\.]/g, '-');
+                
+                const parts = engDate.split('-');
+                if (parts.length === 3 && parts[2].length === 4) {
+                  // It's DD-MM-YYYY (e.g. 24-05-2079), convert to YYYY-MM-DD
+                  engDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                } else if (parts.length === 3 && parts[0].length === 4) {
+                  // It's YYYY-MM-DD but let's ensure padding
+                  engDate = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                }
+                
+                inst.value = engDate;
+              }
+
               // Apply dynamic migration for old profiles
               if (isOldProfile) {
-                // 1. Fix Nepali date digits
-                if (inst.id === 'dobLoc' || inst.id === 'ccIssuingDateLoc') {
-                  const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
-                  inst.value = inst.value.replace(/[०-९]/g, d => nepaliDigits.indexOf(d).toString());
-                }
                 // 2. Fix Religion shift (old 1=Hindu, now 2=Hindu)
                 if (inst.id === 'religion') {
                   const num = parseInt(inst.value, 10);

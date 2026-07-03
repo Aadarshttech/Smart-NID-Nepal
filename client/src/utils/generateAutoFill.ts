@@ -34,13 +34,26 @@ function nepaliToEnglishDigits(str: string): string {
 }
 
 /**
- * Convert a DOB from YYYY-MM-DD to MM/DD/YYYY for the AD date input.
- * DoNIDCR date input expects the native HTML date format (YYYY-MM-DD).
+ * Format a date string to strictly YYYY-MM-DD.
+ * Converts from DD-MM-YYYY if necessary.
  */
 function formatDateForInput(dateStr: string): string {
-  // Already in YYYY-MM-DD format
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-  return dateStr;
+  if (!dateStr) return "";
+  
+  // Clean separators
+  let cleanDate = dateStr.replace(/[\/\.]/g, '-');
+  
+  const parts = cleanDate.split('-');
+  if (parts.length === 3) {
+    if (parts[2].length === 4) {
+      // DD-MM-YYYY -> YYYY-MM-DD
+      return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    } else if (parts[0].length === 4) {
+      // YYYY-MM-DD
+      return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+    }
+  }
+  return cleanDate;
 }
 
 /**
@@ -261,8 +274,8 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   
   const genderVal = mapGender(data.gender);
   const dobAD = formatDateForInput(data.dobAD);
-  const dobBS_EN = nepaliToEnglishDigits(data.dobBS);
-  const issueDateBS_EN = nepaliToEnglishDigits(data.issueDateBS);
+  const dobBS_EN = formatDateForInput(nepaliToEnglishDigits(data.dobBS));
+  const issueDateBS_EN = formatDateForInput(nepaliToEnglishDigits(data.issueDateBS));
 
   pushText('firstNameLoc', data.firstName.nepali);
   pushText('firstName', data.firstName.english);
