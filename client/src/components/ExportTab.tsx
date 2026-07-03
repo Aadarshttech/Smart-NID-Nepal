@@ -9,13 +9,17 @@ import { useEnrollmentStore } from "../store/enrollmentStore";
 import { generateAutoFillScript } from "../utils/generateAutoFill";
 
 const NepalFlagSVG = () => (
-  <svg width="64" height="80" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: "drop-shadow(0px 4px 6px rgba(0,0,0,0.2))" }}>
-    <path d="M10 10 L90 50 L35 55 L90 100 L10 105 Z" fill="#DC143C" stroke="#003893" strokeWidth="4" strokeLinejoin="round"/>
-    <circle cx="30" cy="40" r="6" fill="white" />
-    <path d="M25 40 Q30 35 35 40" stroke="white" strokeWidth="2" fill="none"/>
-    <path d="M30 80 L25 85 L35 85 Z" fill="white"/>
-    <circle cx="30" cy="88" r="6" fill="white" />
-  </svg>
+  <img 
+    src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Flag_of_Nepal.svg" 
+    alt="Nepal Flag" 
+    style={{ 
+      width: "56px", 
+      height: "auto", 
+      filter: "drop-shadow(0px 8px 12px rgba(0,0,0,0.15))",
+      transform: "scale(1.1)",
+      marginBottom: "0.5rem"
+    }} 
+  />
 );
 
 export default function ExportTab() {
