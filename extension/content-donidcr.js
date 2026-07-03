@@ -225,8 +225,29 @@
 
         try {
           if (instructions) {
+            // Check if this is an old profile (pre-v1.1) by seeing if it lacks pProvince
+            const isOldProfile = !instructions.some(i => i.id === 'pProvince');
+
             instructions.forEach(inst => {
               if (!inst.value) return;
+
+              // Apply dynamic migration for old profiles
+              if (isOldProfile) {
+                // 1. Fix Nepali date digits
+                if (inst.id === 'dobLoc' || inst.id === 'ccIssuingDateLoc') {
+                  const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+                  inst.value = inst.value.replace(/[०-९]/g, d => nepaliDigits.indexOf(d).toString());
+                }
+                // 2. Fix Religion shift (old 1=Hindu, now 2=Hindu)
+                if (inst.id === 'religion') {
+                  const num = parseInt(inst.value, 10);
+                  if (!isNaN(num)) {
+                    if (num === 10) inst.value = "1"; // Old Other -> New Other
+                    else inst.value = (num + 1).toString(); // Shift everything else up by 1
+                  }
+                }
+              }
+
               const el = document.getElementById(inst.id);
               if (!el) { console.warn('Smart NID: Field not found:', inst.id); return; }
               
@@ -244,6 +265,40 @@
                 el.dispatchEvent(new Event('change', { bubbles: true }));
               }
             });
+
+            // Dynamically inject missing province data for old profiles
+            if (isOldProfile) {
+              const pDistInst = instructions.find(i => i.id === 'pDistrict');
+              const tDistInst = instructions.find(i => i.id === 'tDistrict');
+              
+              const getProv = (d) => {
+                const n = parseInt(d, 10);
+                if (isNaN(n)) return "";
+                if (n >= 1 && n <= 14) return "1";
+                if (n >= 15 && n <= 22) return "2";
+                if (n >= 23 && n <= 35) return "3";
+                if (n >= 36 && n <= 46) return "4";
+                if (n >= 47 && n <= 58) return "5";
+                if (n >= 59 && n <= 68) return "6";
+                if (n >= 69 && n <= 77) return "7";
+                return "";
+              };
+
+              if (pDistInst && pDistInst.value) {
+                const pProv = getProv(pDistInst.value);
+                if (pProv) {
+                  const pEl = document.getElementById('pProvince');
+                  if (pEl) { pEl.value = pProv; pEl.dispatchEvent(new Event('change', { bubbles: true })); }
+                }
+              }
+              if (tDistInst && tDistInst.value) {
+                const tProv = getProv(tDistInst.value);
+                if (tProv) {
+                  const tEl = document.getElementById('tProvince');
+                  if (tEl) { tEl.value = tProv; tEl.dispatchEvent(new Event('change', { bubbles: true })); }
+                }
+              }
+            }
           } else if (fallbackScript) {
             // Fallback to inline script injection for older versions
             const scriptEl = document.createElement("script");
