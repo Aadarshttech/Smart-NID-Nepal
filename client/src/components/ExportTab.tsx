@@ -70,33 +70,29 @@ export default function ExportTab() {
 
   return (
     <div className="form-tab-panel fade-in">
-      <div className="form-section" style={{ textAlign: "center", padding: "1rem 0 3rem" }}>
+      <div className="form-section" style={{ 
+        textAlign: "center", 
+        padding: "4rem 2rem",
+        position: "relative",
+        overflow: "hidden",
+        border: "none",
+        boxShadow: "none",
+        background: "transparent"
+      }}>
         
-        {/* Premium Export Card */}
+        {/* Decorative background glow */}
         <div style={{
-          background: "linear-gradient(145deg, #ffffff, #f3f6fa)",
-          borderRadius: "24px",
-          padding: "3rem 2.5rem",
-          boxShadow: "0 20px 40px rgba(0, 56, 147, 0.08), inset 0 1px 0 rgba(255,255,255,1)",
-          border: "1px solid rgba(0, 56, 147, 0.1)",
-          maxWidth: "600px",
-          margin: "0 auto",
-          position: "relative",
-          overflow: "hidden"
-        }}>
-          {/* Decorative background glow */}
-          <div style={{
-            position: "absolute",
-            top: "-50%",
-            left: "-20%",
-            width: "140%",
-            height: "140%",
-            background: "radial-gradient(circle, rgba(220, 20, 60, 0.03) 0%, rgba(0, 56, 147, 0.03) 50%, transparent 70%)",
-            zIndex: 0,
-            pointerEvents: "none"
-          }} />
+          position: "absolute",
+          top: "-50%",
+          left: "-20%",
+          width: "140%",
+          height: "140%",
+          background: "radial-gradient(circle, rgba(220, 20, 60, 0.03) 0%, rgba(0, 56, 147, 0.03) 50%, transparent 70%)",
+          zIndex: 0,
+          pointerEvents: "none"
+        }} />
 
-          <div style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ maxWidth: "600px", margin: "0 auto", position: "relative", zIndex: 1 }}>
             <div style={{ marginBottom: "1.5rem", display: "flex", justifyContent: "center" }}>
               <NepalFlagSVG />
             </div>
@@ -233,10 +229,36 @@ export default function ExportTab() {
                     </div>
                   </div>
                 </div>
+
+                <div style={{ marginTop: "2rem", display: "flex", justifyContent: "center" }}>
+                  <a 
+                    href="https://enrollment.donidcr.gov.np/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      padding: "1rem 2.5rem",
+                      backgroundColor: "#1e293b",
+                      color: "white",
+                      borderRadius: "12px",
+                      textDecoration: "none",
+                      fontWeight: "bold",
+                      fontSize: "1.1rem",
+                      boxShadow: "0 10px 25px rgba(30, 41, 59, 0.3)",
+                      transition: "transform 0.2s"
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+                    onMouseOut={(e) => e.currentTarget.style.transform = "scale(1)"}
+                  >
+                    Head towards DoNIDCR 
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                  </a>
+                </div>
               </div>
             )}
           </div>
-        </div>
       </div>
 
       {/* Navigation */}
