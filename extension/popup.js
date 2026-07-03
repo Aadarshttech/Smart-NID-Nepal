@@ -7,9 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnOpenApp = document.getElementById('btnOpenApp');
   const btnOpenGov = document.getElementById('btnOpenGov');
 
-  // Check storage for the script
-  chrome.storage.local.get(["autoFillScript"], (result) => {
-    if (result.autoFillScript) {
+  function updateUI(hasScript) {
+    if (hasScript) {
       // Data is ready
       statusContainer.className = 'status-card ready';
       statusIcon.textContent = '🟢';
@@ -21,6 +20,18 @@ document.addEventListener('DOMContentLoaded', () => {
       statusIcon.textContent = '⚪';
       statusTitle.textContent = 'Waiting for Data';
       statusDesc.textContent = 'No data saved. Extract NID first.';
+    }
+  }
+
+  // Initial check storage for the script
+  chrome.storage.local.get(["autoFillScript"], (result) => {
+    updateUI(!!result.autoFillScript);
+  });
+
+  // Listen for real-time changes
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local' && changes.autoFillScript !== undefined) {
+      updateUI(!!changes.autoFillScript.newValue);
     }
   });
 
