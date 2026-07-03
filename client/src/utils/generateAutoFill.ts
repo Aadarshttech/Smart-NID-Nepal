@@ -13,7 +13,7 @@
  */
 
 import type { ExtractionResult, AdditionalFields } from "../types/extraction";
-import { findDistrictValue, mapGender } from "./districtMap";
+import { findDistrictValue, mapGender, getProvinceFromDistrictId } from "./districtMap";
 
 export interface AutoFillInstruction {
   id: string;
@@ -249,9 +249,15 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   const birthDistrictVal = findDistrictValue(data.birthPlace);
   const issuingDistrictVal = findDistrictValue(data.issuingDistrict);
   const permanentDistrictVal = findDistrictValue(data.permanentAddress.district);
+  const pProvinceVal = data.permanentAddress.province || getProvinceFromDistrictId(permanentDistrictVal);
+  
   const tempDistrictVal = additional.temporaryAddressSameAsPermanent
     ? permanentDistrictVal
     : findDistrictValue(additional.temporaryAddress.district);
+  
+  const tProvinceVal = additional.temporaryAddressSameAsPermanent
+    ? pProvinceVal
+    : (additional.temporaryAddress.province || getProvinceFromDistrictId(tempDistrictVal));
   
   const genderVal = mapGender(data.gender);
   const dobAD = formatDateForInput(data.dobAD);
@@ -284,12 +290,14 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('mobileNo', additional.mobileNo);
   pushText('phoneNo', additional.phoneNo);
   
+  pushSelect('pProvince', pProvinceVal);
   pushSelect('pDistrict', permanentDistrictVal);
   pushText('pWardNo', data.permanentAddress.wardNo);
   pushText('pToleLoc', data.permanentAddress.villageToleNp);
   pushText('pTole', data.permanentAddress.villageToleEn);
 
   if (!additional.temporaryAddressSameAsPermanent) {
+    pushSelect('tProvince', tProvinceVal);
     pushSelect('tDistrict', tempDistrictVal);
     pushText('tWardNo', additional.temporaryAddress.wardNo);
     pushText('tToleLoc', additional.temporaryAddress.villageToleNp);

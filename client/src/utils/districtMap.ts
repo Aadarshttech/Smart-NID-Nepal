@@ -144,3 +144,23 @@ export function mapGender(gender: string): string {
   if (g === "OTHER") return "O";
   return "";
 }
+
+/**
+ * Derives the DoNIDCR Province numeric ID (1-7) from a District numeric ID (1-77).
+ * DoNIDCR districts are perfectly grouped by province in ascending order.
+ */
+export function getProvinceFromDistrictId(districtVal: string | undefined): string | undefined {
+  if (!districtVal) return undefined;
+  const d = parseInt(districtVal, 10);
+  if (isNaN(d)) return undefined;
+  
+  if (d >= 1 && d <= 14) return "1"; // Koshi
+  if (d >= 15 && d <= 22) return "2"; // Madhesh
+  if (d >= 23 && d <= 35) return "3"; // Bagmati
+  if (d >= 36 && d <= 46) return "4"; // Gandaki
+  if (d >= 47 && d <= 58) return "5"; // Lumbini
+  if (d >= 59 && d <= 68) return "6"; // Karnali
+  if (d >= 69 && d <= 77) return "7"; // Sudurpashchim
+  
+  return undefined;
+}

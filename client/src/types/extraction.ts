@@ -147,18 +147,29 @@ export const CC_TYPE_OPTIONS = [
   { val: "6", text: "Honorary Citizenship / सम्मानार्थ" },
 ];
 
+export const PROVINCE_OPTIONS = [
+  { val: "", text: "-- Select Province / प्रदेश छान्नुहोस् --" },
+  { val: "1", text: "Koshi Province / कोशी प्रदेश" },
+  { val: "2", text: "Madhesh Province / मधेश प्रदेश" },
+  { val: "3", text: "Bagmati Province / बागमती प्रदेश" },
+  { val: "4", text: "Gandaki Province / गण्डकी प्रदेश" },
+  { val: "5", text: "Lumbini Province / लुम्बिनी प्रदेश" },
+  { val: "6", text: "Karnali Province / कर्णाली प्रदेश" },
+  { val: "7", text: "Sudurpashchim Province / सुदूरपश्चिम प्रदेश" },
+];
+
 export const RELIGION_OPTIONS = [
   { val: "", text: "-- Select / छान्नुहोस् --" },
-  { val: "1", text: "Hindu / हिन्दु" },
-  { val: "2", text: "Buddhist / बौद्ध" },
-  { val: "3", text: "Islam / इस्लाम" },
-  { val: "4", text: "Kirat / किराँत" },
-  { val: "5", text: "Christian / ईसाई" },
-  { val: "6", text: "Prakriti / प्रकृति" },
-  { val: "7", text: "Bon / बोन" },
-  { val: "8", text: "Jain / जैन" },
-  { val: "9", text: "Bahai / बहाई" },
-  { val: "10", text: "Other / अन्य" },
+  { val: "1", text: "Other / अन्य" },
+  { val: "2", text: "Hindu / हिन्दु" },
+  { val: "3", text: "Buddhist / बौद्ध" },
+  { val: "4", text: "Islam / इस्लाम" },
+  { val: "5", text: "Kirat / किराँत" },
+  { val: "6", text: "Christian / ईसाई" },
+  { val: "7", text: "Prakriti / प्रकृति" },
+  { val: "8", text: "Bon / बोन" },
+  { val: "9", text: "Jain / जैन" },
+  { val: "10", text: "Bahai / बहाई" },
 ];
 
 export const CASTE_OPTIONS = [

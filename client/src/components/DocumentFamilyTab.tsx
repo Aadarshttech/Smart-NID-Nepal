@@ -6,6 +6,7 @@
 
 import { useEnrollmentStore } from "../store/enrollmentStore";
 import type { NameField, AddressField, ExtractionResult, AdditionalFields } from "../types/extraction";
+import { PROVINCE_OPTIONS } from "../types/extraction";
 
 function NameInput({
   label,
@@ -74,6 +75,39 @@ function TextInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || label}
       />
+    </div>
+  );
+}
+
+function SelectInput({
+  label,
+  labelNp,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  labelNp: string;
+  value: string;
+  onChange: (val: string) => void;
+  options: { text: string; val: string }[];
+}) {
+  return (
+    <div className="form-field">
+      <label className="form-field__label">
+        {labelNp} / {label}
+      </label>
+      <select
+        className="form-field__input form-field__select"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        {options.map((opt) => (
+          <option key={opt.val} value={opt.val}>
+            {opt.text}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -234,11 +268,12 @@ export default function DocumentFamilyTab() {
         </h3>
 
         <div className="form-grid form-grid--3col">
-          <TextInput
+          <SelectInput
             label="Province"
             labelNp="प्रदेश"
             value={draft.permanentAddress.province}
             onChange={(val) => handleAddressChange("province", val)}
+            options={PROVINCE_OPTIONS}
           />
           <TextInput
             label="District"
@@ -296,12 +331,13 @@ export default function DocumentFamilyTab() {
 
         {!additional.temporaryAddressSameAsPermanent && (
           <>
-            <div className="form-grid form-grid--3col">
-              <TextInput
+            <div className="form-grid form-grid--3col fade-in">
+              <SelectInput
                 label="Province"
                 labelNp="प्रदेश"
                 value={additional.temporaryAddress.province}
                 onChange={(val) => handleTempAddressChange("province", val)}
+                options={PROVINCE_OPTIONS}
               />
               <TextInput
                 label="District"
