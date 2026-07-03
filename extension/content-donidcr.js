@@ -56,17 +56,17 @@
       return;
     }
 
-    chrome.storage.local.get(["autoFillScript", "autoFillInstructions"], (result) => {
+    chrome.storage.local.get(["savedProfiles", "activeProfileId"], (result) => {
       if (chrome.runtime.lastError) {
         console.warn("Smart NID: Storage access error —", chrome.runtime.lastError.message);
         return;
       }
 
-      if (result.autoFillInstructions && result.autoFillInstructions.length > 0) {
-        injectFloatingButton(result.autoFillInstructions, null);
-      } else if (result.autoFillScript) {
-        // Fallback for older versions
-        injectFloatingButton(null, result.autoFillScript);
+      const profiles = result.savedProfiles || [];
+      const activeProfile = profiles.find(p => p.id === result.activeProfileId);
+      
+      if (activeProfile && (activeProfile.autoFillScript || activeProfile.autoFillInstructions)) {
+        injectFloatingButton(activeProfile.autoFillInstructions, activeProfile.autoFillScript);
       }
     });
   }
