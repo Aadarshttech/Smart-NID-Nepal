@@ -22,6 +22,18 @@ export interface AutoFillInstruction {
 }
 
 /**
+ * Convert Nepali digits (०-९) to English digits (0-9).
+ * Used for date fields on the DoNIDCR portal, which expects standard digits.
+ */
+function nepaliToEnglishDigits(str: string): string {
+  if (!str) return "";
+  const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+  return str.replace(/[०-९]/g, (match) => {
+    return nepaliDigits.indexOf(match).toString();
+  });
+}
+
+/**
  * Convert a DOB from YYYY-MM-DD to MM/DD/YYYY for the AD date input.
  * DoNIDCR date input expects the native HTML date format (YYYY-MM-DD).
  */
@@ -48,6 +60,8 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   
   const genderVal = mapGender(data.gender);
   const dobAD = formatDateForInput(data.dobAD);
+  const dobBS_EN = nepaliToEnglishDigits(data.dobBS);
+  const issueDateBS_EN = nepaliToEnglishDigits(data.issueDateBS);
 
   // Build an array of field assignments as JS statements
   const lines: string[] = [];
@@ -99,14 +113,14 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   lines.push(`  setText('middleName', ${JSON.stringify(data.middleName.english)});`);
   lines.push(`  setText('lastNameLoc', ${JSON.stringify(data.lastName.nepali)});`);
   lines.push(`  setText('lastName', ${JSON.stringify(data.lastName.english)});`);
-  lines.push(`  setText('dobLoc', ${JSON.stringify(data.dobBS)});`);
+  lines.push(`  setText('dobLoc', ${JSON.stringify(dobBS_EN)});`);
   lines.push(`  setDate('dob', ${JSON.stringify(dobAD)});`);
 
   if (birthDistrictVal) lines.push(`  setSelect('birthDistrictPlace', ${JSON.stringify(birthDistrictVal)});`);
   lines.push(`  setSelect('ccType', ${JSON.stringify(additional.ccType || '1')});`);
   lines.push(`  setText('ccNumberLoc', ${JSON.stringify(data.citizenshipNo)});`);
   if (issuingDistrictVal) lines.push(`  setSelect('ccIssuingDistrict', ${JSON.stringify(issuingDistrictVal)});`);
-  lines.push(`  setText('ccIssuingDateLoc', ${JSON.stringify(data.issueDateBS)});`);
+  lines.push(`  setText('ccIssuingDateLoc', ${JSON.stringify(issueDateBS_EN)});`);
   if (genderVal) lines.push(`  setSelect('gender', ${JSON.stringify(genderVal)});`);
 
   // Additional Applicant Fields
@@ -241,6 +255,8 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   
   const genderVal = mapGender(data.gender);
   const dobAD = formatDateForInput(data.dobAD);
+  const dobBS_EN = nepaliToEnglishDigits(data.dobBS);
+  const issueDateBS_EN = nepaliToEnglishDigits(data.issueDateBS);
 
   pushText('firstNameLoc', data.firstName.nepali);
   pushText('firstName', data.firstName.english);
@@ -248,14 +264,14 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('middleName', data.middleName.english);
   pushText('lastNameLoc', data.lastName.nepali);
   pushText('lastName', data.lastName.english);
-  pushText('dobLoc', data.dobBS);
+  pushText('dobLoc', dobBS_EN);
   pushDate('dob', dobAD);
 
   pushSelect('birthDistrictPlace', birthDistrictVal);
   pushSelect('ccType', additional.ccType || '1');
   pushText('ccNumberLoc', data.citizenshipNo);
   pushSelect('ccIssuingDistrict', issuingDistrictVal);
-  pushText('ccIssuingDateLoc', data.issueDateBS);
+  pushText('ccIssuingDateLoc', issueDateBS_EN);
   pushSelect('gender', genderVal);
 
   pushSelect('maritalStatus', additional.maritalStatus);
