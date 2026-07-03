@@ -21,11 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (draftData) {
         savedDataContainer.style.display = 'block';
         savedDataGrid.innerHTML = `
-          <div style="grid-column: span 2"><strong>Name:</strong> ${draftData.first_name_en} ${draftData.last_name_en}</div>
-          <div><strong>Cit. No:</strong> ${draftData.citizenship_no}</div>
-          <div><strong>District:</strong> ${draftData.district}</div>
-          <div><strong>DOB (BS):</strong> ${draftData.dob_bs}</div>
-          <div><strong>Gender:</strong> ${draftData.gender}</div>
+          <div style="grid-column: span 2"><strong>Name:</strong> ${draftData.firstName?.english || ''} ${draftData.lastName?.english || ''}</div>
+          <div><strong>Cit. No:</strong> ${draftData.citizenshipNo || ''}</div>
+          <div><strong>District:</strong> ${draftData.issuingDistrict || ''}</div>
+          <div><strong>DOB (BS):</strong> ${draftData.dobBS || ''}</div>
+          <div><strong>Gender:</strong> ${draftData.gender || ''}</div>
         `;
       } else {
         savedDataContainer.style.display = 'none';

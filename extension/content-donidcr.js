@@ -225,7 +225,7 @@
         scriptEl.remove();
 
         // Clear storage so the button doesn't keep appearing on future visits
-        chrome.storage.local.remove(["autoFillScript"]);
+        chrome.storage.local.remove(["autoFillScript", "draftData"]);
 
         // Update button to success state
         btn.innerHTML = "✅ Filled!";
