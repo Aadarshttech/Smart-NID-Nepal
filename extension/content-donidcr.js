@@ -209,34 +209,48 @@
         return;
       }
 
-      try {
-        if (instructions) {
-          instructions.forEach(inst => {
-            if (!inst.value) return;
-            const el = document.getElementById(inst.id);
-            if (!el) { console.warn('Smart NID: Field not found:', inst.id); return; }
-            
-            if (inst.type === 'text' || inst.type === 'date') {
-              const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-              if (nativeInputValueSetter) {
-                nativeInputValueSetter.call(el, inst.value);
-              } else {
-                el.value = inst.value;
-              }
-              el.dispatchEvent(new Event('input', { bubbles: true }));
-              el.dispatchEvent(new Event('change', { bubbles: true }));
-            } else if (inst.type === 'select') {
-              el.value = inst.value;
-              el.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-          });
-        } else if (fallbackScript) {
-          // Fallback to inline script injection for older versions
-          const scriptEl = document.createElement("script");
-          scriptEl.textContent = fallbackScript;
-          (document.head || document.documentElement).appendChild(scriptEl);
-          scriptEl.remove();
+      // Fetch latest data dynamically when clicked
+      chrome.storage.local.get(["savedProfiles", "activeProfileId"], (result) => {
+        const profiles = result.savedProfiles || [];
+        const activeProfile = profiles.find(p => p.id === result.activeProfileId);
+        
+        if (!activeProfile) {
+          btn.innerHTML = "❌ No Profile Selected";
+          setTimeout(() => { btn.innerHTML = `${logoSvg} <span>Auto-Fill Form</span>`; }, 2000);
+          return;
         }
+
+        const instructions = activeProfile.autoFillInstructions;
+        const fallbackScript = activeProfile.autoFillScript;
+
+        try {
+          if (instructions) {
+            instructions.forEach(inst => {
+              if (!inst.value) return;
+              const el = document.getElementById(inst.id);
+              if (!el) { console.warn('Smart NID: Field not found:', inst.id); return; }
+              
+              if (inst.type === 'text' || inst.type === 'date') {
+                const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                if (nativeInputValueSetter) {
+                  nativeInputValueSetter.call(el, inst.value);
+                } else {
+                  el.value = inst.value;
+                }
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+              } else if (inst.type === 'select') {
+                el.value = inst.value;
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+            });
+          } else if (fallbackScript) {
+            // Fallback to inline script injection for older versions
+            const scriptEl = document.createElement("script");
+            scriptEl.textContent = fallbackScript;
+            (document.head || document.documentElement).appendChild(scriptEl);
+            scriptEl.remove();
+          }
 
         // Do NOT clear storage here. DoNIDCR has multiple tabs (Applicant, Contact, Family)
         // that load lazily. The user needs to click the auto-fill button on each tab.
@@ -261,20 +275,21 @@
           statusBadge.style.opacity = "0";
         }, 3000);
       } catch (err) {
-        console.error("Smart NID: Script injection error —", err);
-        btn.innerHTML = "❌ Error";
-        btn.style.backgroundColor = "#dc3545";
-        statusBadge.innerHTML = "❌ Injection failed. Try refreshing the page.";
-        statusBadge.style.backgroundColor = "#dc3545";
-        statusBadge.style.opacity = "1";
-        statusBadge.style.transform = "translateY(0)";
+          console.error("Smart NID: Script injection error —", err);
+          btn.innerHTML = "❌ Error";
+          btn.style.backgroundColor = "#dc3545";
+          statusBadge.innerHTML = "❌ Injection failed. Try refreshing the page.";
+          statusBadge.style.backgroundColor = "#dc3545";
+          statusBadge.style.opacity = "1";
+          statusBadge.style.transform = "translateY(0)";
 
-        setTimeout(() => {
-          btn.innerHTML = `${logoSvg} <span>Auto-Fill Form</span>`;
-          btn.style.backgroundColor = "#28a745";
-          statusBadge.style.opacity = "0";
-        }, 3000);
-      }
+          setTimeout(() => {
+            btn.innerHTML = `${logoSvg} <span>Auto-Fill Form</span>`;
+            btn.style.backgroundColor = "#28a745";
+            statusBadge.style.opacity = "0";
+          }, 3000);
+        }
+      });
     };
 
     container.appendChild(statusBadge);
@@ -314,9 +329,16 @@
   }
 
   // ── Run ──
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", checkAndInject);
-  } else {
+  // Use a continuous interval to handle SPA navigation and lazy-loaded tabs.
+  // This ensures the button stays alive or gets re-injected if the DOM changes.
+  function startChecks() {
     checkAndInject();
+    setInterval(checkAndInject, 1000);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startChecks);
+  } else {
+    startChecks();
   }
 })();
