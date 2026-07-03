@@ -88,71 +88,132 @@
     const container = document.createElement("div");
     container.id = "smart-nid-container";
 
+    const isReady = hasFormFields();
+
     const btn = document.createElement("button");
     btn.id = "smart-nid-autofill-btn";
-    btn.innerHTML = "✨ Auto-Fill Form ✨";
 
-    // Styling the floating button
+    // Nepal Flag / Smart NID Logo SVG
+    const logoSvg = `
+      <svg width="24" height="24" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.2)); flex-shrink: 0; margin-right: ${isReady ? '8px' : '0'}">
+        <path d="M10 10 L90 50 L35 55 L90 100 L10 105 Z" fill="#DC143C" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
+        <circle cx="30" cy="40" r="8" fill="white" />
+        <path d="M22 40 Q30 32 38 40" stroke="white" stroke-width="3" fill="none"/>
+        <path d="M30 80 L22 88 L38 88 Z" fill="white"/>
+        <circle cx="30" cy="92" r="8" fill="white" />
+      </svg>
+    `;
+
+    // Styling the floating button (Initial Logo State vs Ready State)
     Object.assign(btn.style, {
       position: "fixed",
       bottom: "40px",
       right: "40px",
-      padding: "16px 28px",
-      backgroundColor: "#003893",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: isReady ? "14px 28px" : "18px",
+      backgroundColor: isReady ? "#28a745" : "#003893",
       color: "white",
-      border: "none",
+      border: isReady ? "2px solid #fff" : "3px solid #fff",
       borderRadius: "50px",
-      fontSize: "18px",
+      fontSize: "17px",
       fontWeight: "bold",
       cursor: "pointer",
-      boxShadow: "0 10px 25px rgba(0, 56, 147, 0.4)",
+      boxShadow: isReady ? "0 10px 30px rgba(40, 167, 69, 0.4)" : "0 10px 25px rgba(0, 56, 147, 0.4)",
       zIndex: "999999",
-      transition: "all 0.2s ease-in-out",
+      transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
       fontFamily: "sans-serif",
-      lineHeight: "1.4",
-      letterSpacing: "0.5px",
+      whiteSpace: "nowrap",
+      overflow: "hidden"
     });
 
-    btn.onmouseover = () => {
-      btn.style.transform = "scale(1.05) translateY(-5px)";
-      btn.style.boxShadow = "0 15px 30px rgba(0, 56, 147, 0.5)";
-    };
-    btn.onmouseout = () => {
-      btn.style.transform = "scale(1) translateY(0)";
-      btn.style.boxShadow = "0 10px 25px rgba(0, 56, 147, 0.4)";
-    };
+    btn.innerHTML = isReady 
+      ? `${logoSvg} <span>✨ Auto-Fill Form</span>`
+      : `${logoSvg}`;
 
-    // Status indicator (shows whether form is ready)
+    if (!isReady) {
+      // Add a subtle pulse animation when waiting (using standard DOM animate)
+      try {
+        btn.animate([
+          { transform: 'scale(1)', boxShadow: '0 10px 25px rgba(0, 56, 147, 0.4)' },
+          { transform: 'scale(1.08)', boxShadow: '0 15px 35px rgba(0, 56, 147, 0.6)' },
+          { transform: 'scale(1)', boxShadow: '0 10px 25px rgba(0, 56, 147, 0.4)' }
+        ], { duration: 2500, iterations: Infinity });
+      } catch (e) { /* fallback for older browsers */ }
+    }
+
+    // Tooltip/Status Badge
     const statusBadge = document.createElement("div");
     statusBadge.id = "smart-nid-status";
     Object.assign(statusBadge.style, {
       position: "fixed",
       bottom: "100px",
       right: "40px",
-      padding: "8px 16px",
-      backgroundColor: hasFormFields() ? "#28a745" : "#f59e0b",
+      padding: "12px 20px",
+      backgroundColor: "#1e293b",
       color: "white",
-      borderRadius: "20px",
-      fontSize: "12px",
+      borderRadius: "12px",
+      fontSize: "14px",
       fontWeight: "600",
-      zIndex: "999999",
+      zIndex: "999998",
       fontFamily: "sans-serif",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+      boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
       transition: "all 0.3s ease",
+      opacity: "0",
+      transform: "translateY(10px)",
+      pointerEvents: "none",
+      maxWidth: "280px",
+      lineHeight: "1.4"
     });
-    statusBadge.textContent = hasFormFields()
-      ? "✅ Form detected — ready to fill"
-      : "⏳ Navigate to the enrollment form first";
+    
+    // Set initial text for tooltip
+    if (isReady) {
+      statusBadge.innerHTML = "✅ <b>Ready!</b> Click to auto-fill your form.";
+      statusBadge.style.backgroundColor = "#28a745";
+    } else {
+      statusBadge.innerHTML = "⏳ <b>Action Required:</b> Complete OTP and click <i>New Enrollment</i> to unlock Auto-Fill.";
+      statusBadge.style.backgroundColor = "#1e293b";
+    }
+
+    btn.onmouseover = () => {
+      btn.style.transform = "scale(1.08) translateY(-5px)";
+      statusBadge.style.opacity = "1";
+      statusBadge.style.transform = "translateY(0)";
+    };
+    btn.onmouseout = () => {
+      btn.style.transform = "scale(1) translateY(0)";
+      statusBadge.style.opacity = "0";
+      statusBadge.style.transform = "translateY(10px)";
+    };
 
     btn.onclick = () => {
       if (!hasFormFields()) {
-        // Warn the user if no form is detected
-        statusBadge.textContent = "⚠️ No form found on this page. Please navigate to the enrollment form.";
+        // User clicked the logo before reaching the form
+        statusBadge.style.opacity = "1";
+        statusBadge.style.transform = "translateY(0)";
+        statusBadge.innerHTML = "⚠️ <b>Not on form page!</b> Navigate to <i>New Enrollment</i> first.";
         statusBadge.style.backgroundColor = "#dc3545";
+        
+        // Shake animation
+        try {
+          btn.animate([
+            { transform: 'translateX(0)' },
+            { transform: 'translateX(-5px)' },
+            { transform: 'translateX(5px)' },
+            { transform: 'translateX(-5px)' },
+            { transform: 'translateX(5px)' },
+            { transform: 'translateX(0)' }
+          ], { duration: 400 });
+        } catch(e){}
+
         setTimeout(() => {
-          statusBadge.textContent = "⏳ Navigate to the enrollment form first";
-          statusBadge.style.backgroundColor = "#f59e0b";
-        }, 4000);
+          statusBadge.style.opacity = "0";
+          setTimeout(() => {
+            statusBadge.innerHTML = "⏳ <b>Action Required:</b> Complete OTP and click <i>New Enrollment</i> to unlock Auto-Fill.";
+            statusBadge.style.backgroundColor = "#1e293b";
+          }, 300);
+        }, 3000);
         return;
       }
 
@@ -167,15 +228,20 @@
         chrome.storage.local.remove(["autoFillScript"]);
 
         // Update button to success state
-        btn.innerHTML = "✅ Filled Successfully!";
+        btn.innerHTML = "✅ Filled!";
         btn.style.backgroundColor = "#28a745";
+        btn.style.border = "2px solid #fff";
         btn.style.boxShadow = "0 10px 25px rgba(40, 167, 69, 0.4)";
         btn.style.cursor = "default";
         btn.onclick = null;
+        btn.onmouseover = null;
+        btn.onmouseout = null;
 
         // Update status badge
-        statusBadge.textContent = "✅ All fields filled! Please review before submitting.";
+        statusBadge.innerHTML = "✅ All fields filled! Please review before submitting.";
         statusBadge.style.backgroundColor = "#28a745";
+        statusBadge.style.opacity = "1";
+        statusBadge.style.transform = "translateY(0)";
 
         // Fade out after 5 seconds
         setTimeout(() => {
@@ -185,14 +251,17 @@
         }, 5000);
       } catch (err) {
         console.error("Smart NID: Script injection error —", err);
-        btn.innerHTML = "❌ Error — Try Again";
+        btn.innerHTML = "❌ Error";
         btn.style.backgroundColor = "#dc3545";
-        statusBadge.textContent = "❌ Injection failed. Try refreshing the page.";
+        statusBadge.innerHTML = "❌ Injection failed. Try refreshing the page.";
         statusBadge.style.backgroundColor = "#dc3545";
+        statusBadge.style.opacity = "1";
+        statusBadge.style.transform = "translateY(0)";
 
         setTimeout(() => {
-          btn.innerHTML = "✨ Auto-Fill Form ✨";
-          btn.style.backgroundColor = "#003893";
+          btn.innerHTML = `${logoSvg} <span>✨ Auto-Fill Form</span>`;
+          btn.style.backgroundColor = "#28a745";
+          statusBadge.style.opacity = "0";
         }, 3000);
       }
     };
@@ -201,17 +270,42 @@
     container.appendChild(btn);
     document.body.appendChild(container);
 
-    // Periodically update the status badge as the user navigates
+    // Periodically check if the user navigated to the form page via SPA navigation
     const statusInterval = setInterval(() => {
-      if (!document.getElementById("smart-nid-status")) {
+      const currentBtn = document.getElementById("smart-nid-autofill-btn");
+      if (!currentBtn) {
         clearInterval(statusInterval);
         return;
       }
-      if (hasFormFields()) {
-        statusBadge.textContent = "✅ Form detected — ready to fill";
+      
+      const formReady = hasFormFields();
+      
+      if (formReady && currentBtn.style.backgroundColor !== "rgb(40, 167, 69)") { // #28a745
+        // Transition to Ready state
+        currentBtn.style.backgroundColor = "#28a745";
+        currentBtn.style.border = "2px solid #fff";
+        currentBtn.style.padding = "14px 28px";
+        currentBtn.style.boxShadow = "0 10px 30px rgba(40, 167, 69, 0.4)";
+        
+        // Re-inject SVG with margin
+        const svgReady = `
+          <svg width="24" height="24" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.2)); flex-shrink: 0; margin-right: 8px;">
+            <path d="M10 10 L90 50 L35 55 L90 100 L10 105 Z" fill="#DC143C" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
+            <circle cx="30" cy="40" r="8" fill="white" />
+            <path d="M22 40 Q30 32 38 40" stroke="white" stroke-width="3" fill="none"/>
+            <path d="M30 80 L22 88 L38 88 Z" fill="white"/>
+            <circle cx="30" cy="92" r="8" fill="white" />
+          </svg>
+        `;
+        currentBtn.innerHTML = `${svgReady} <span>✨ Auto-Fill Form</span>`;
+        
+        statusBadge.innerHTML = "✅ <b>Ready!</b> Click to auto-fill your form.";
         statusBadge.style.backgroundColor = "#28a745";
+        
+        // Cancel pulse animation
+        currentBtn.getAnimations().forEach(anim => anim.cancel());
       }
-    }, 2000);
+    }, 1500);
   }
 
   // ── Run ──

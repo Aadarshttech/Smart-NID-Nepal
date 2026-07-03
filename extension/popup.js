@@ -4,34 +4,54 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusTitle = document.getElementById('statusTitle');
   const statusDesc = document.getElementById('statusDesc');
 
+  const savedDataContainer = document.getElementById('savedDataContainer');
+  const savedDataGrid = document.getElementById('savedDataGrid');
+
   const btnOpenApp = document.getElementById('btnOpenApp');
   const btnOpenGov = document.getElementById('btnOpenGov');
 
-  function updateUI(hasScript) {
+  function updateUI(hasScript, draftData) {
     if (hasScript) {
       // Data is ready
       statusContainer.className = 'status-card ready';
       statusIcon.textContent = '🟢';
       statusTitle.textContent = 'Data Ready!';
       statusDesc.textContent = 'Navigate to DoNIDCR to auto-fill.';
+
+      if (draftData) {
+        savedDataContainer.style.display = 'block';
+        savedDataGrid.innerHTML = `
+          <div style="grid-column: span 2"><strong>Name:</strong> ${draftData.first_name_en} ${draftData.last_name_en}</div>
+          <div><strong>Cit. No:</strong> ${draftData.citizenship_no}</div>
+          <div><strong>District:</strong> ${draftData.district}</div>
+          <div><strong>DOB (BS):</strong> ${draftData.dob_bs}</div>
+          <div><strong>Gender:</strong> ${draftData.gender}</div>
+        `;
+      } else {
+        savedDataContainer.style.display = 'none';
+      }
     } else {
       // Waiting for data
       statusContainer.className = 'status-card waiting';
       statusIcon.textContent = '⚪';
       statusTitle.textContent = 'Waiting for Data';
       statusDesc.textContent = 'No data saved. Extract NID first.';
+      savedDataContainer.style.display = 'none';
     }
   }
 
   // Initial check storage for the script
-  chrome.storage.local.get(["autoFillScript"], (result) => {
-    updateUI(!!result.autoFillScript);
+  chrome.storage.local.get(["autoFillScript", "draftData"], (result) => {
+    updateUI(!!result.autoFillScript, result.draftData);
   });
 
   // Listen for real-time changes
   chrome.storage.onChanged.addListener((changes, namespace) => {
-    if (namespace === 'local' && changes.autoFillScript !== undefined) {
-      updateUI(!!changes.autoFillScript.newValue);
+    if (namespace === 'local' && (changes.autoFillScript || changes.draftData)) {
+      // Get the latest values if not present in the changes object
+      chrome.storage.local.get(["autoFillScript", "draftData"], (result) => {
+        updateUI(!!result.autoFillScript, result.draftData);
+      });
     }
   });
 

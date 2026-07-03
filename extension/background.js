@@ -22,8 +22,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return true;
     }
 
-    // Store the script — the content script on DoNIDCR will pick it up
-    chrome.storage.local.set({ autoFillScript: scriptData }, () => {
+    // Store the script and raw data — the content script on DoNIDCR will pick it up
+    chrome.storage.local.set({ autoFillScript: scriptData, draftData: message.draft }, () => {
       if (chrome.runtime.lastError) {
         console.error("Smart NID: Storage error —", chrome.runtime.lastError.message);
         sendResponse({ status: "error", message: chrome.runtime.lastError.message });

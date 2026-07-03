@@ -59,7 +59,7 @@ export default function ExportTab() {
       if (hasExtension) {
         setCopyState("transferring");
         // Dispatch to extension
-        window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER", { detail: { script } }));
+        window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER", { detail: { script, draft } }));
       } else {
         // Fallback: Manual copy to clipboard
         await navigator.clipboard.writeText(script);

@@ -51,7 +51,11 @@
 
     try {
       chrome.runtime.sendMessage(
-        { type: "NID_TRANSFER_SCRIPT", script: scriptToTransfer },
+        { 
+          type: "NID_TRANSFER_SCRIPT", 
+          script: scriptToTransfer,
+          draft: e.detail.draft 
+        },
         (response) => {
           // Check for runtime errors (extension context invalidated)
           if (chrome.runtime.lastError) {
