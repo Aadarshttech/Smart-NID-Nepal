@@ -120,8 +120,8 @@ export default function ExportTab() {
               margin: "0 auto 2.5rem",
             }}>
               {hasExtension 
-                ? "Your Smart NID Helper extension is connected! Click below to automatically open the government portal and inject your data."
-                : "Your data is secured and ready. Copy the smart script below, then paste it into the official DoNIDCR portal to complete your registration instantly."
+                ? "Your Smart NID Helper extension is connected! Click below to save your data to the extension. Then navigate to the DoNIDCR portal, complete the Phone & OTP steps, click New Enrollment, and the auto-fill button will appear."
+                : "Your data is secured and ready. Copy the smart script below, then paste it into the official DoNIDCR portal console to complete your registration instantly."
               }
             </p>
 
@@ -157,14 +157,14 @@ export default function ExportTab() {
               ) : copyState === "copied" ? (
                 <>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  {hasExtension ? "Transfer Started!" : "Copied to Clipboard!"}
+                   {hasExtension ? "Data Saved to Extension!" : "Copied to Clipboard!"}
                 </>
               ) : copyState === "error" ? (
                 <>❌ Transfer Failed — Try Again</>
               ) : (
                 <>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  {hasExtension ? "1-Click Transfer to DoNIDCR" : "Copy Auto-Fill Script"}
+                   {hasExtension ? "Save Data to Extension" : "Copy Auto-Fill Script"}
                 </>
               )}
             </button>
@@ -177,25 +177,62 @@ export default function ExportTab() {
               </div>
             )}
 
-            {copyState === "copied" && !hasExtension && (
+             {copyState === "copied" && (
               <div style={{
-                marginTop: "2rem",
-                padding: "1.5rem",
-                background: "rgba(0, 56, 147, 0.04)",
-                border: "1px solid rgba(0, 56, 147, 0.1)",
-                borderRadius: "16px",
+                marginTop: "2.5rem",
                 textAlign: "left",
-                animation: "fadeIn 0.4s ease",
+                animation: "fadeIn 0.5s ease-out",
               }}>
-                <strong style={{ display: "block", marginBottom: "0.75rem", fontSize: "1.05rem", color: "#1a1f36" }}>
-                  Next Steps:
-                </strong>
-                <ol style={{ margin: 0, paddingLeft: "1.2rem", lineHeight: 1.6, color: "#4f566b" }}>
-                  <li>Open <a href="https://enrollment.donidcr.gov.np/PreEnrollment/form" target="_blank" rel="noopener noreferrer" style={{ color: "#003893", fontWeight: 600, textDecoration: "none" }}>enrollment.donidcr.gov.np ↗</a></li>
-                  <li>Press <kbd style={{ background: "#e3e8ee", padding: "0.2rem 0.4rem", borderRadius: "4px", fontSize: "0.9em" }}>F12</kbd> and click the <strong>Console</strong> tab</li>
-                  <li>Press <kbd style={{ background: "#e3e8ee", padding: "0.2rem 0.4rem", borderRadius: "4px", fontSize: "0.9em" }}>Ctrl</kbd> + <kbd style={{ background: "#e3e8ee", padding: "0.2rem 0.4rem", borderRadius: "4px", fontSize: "0.9em" }}>V</kbd> to paste</li>
-                  <li>Press <kbd style={{ background: "#e3e8ee", padding: "0.2rem 0.4rem", borderRadius: "4px", fontSize: "0.9em" }}>Enter</kbd> to autofill everything instantly!</li>
-                </ol>
+                <h4 style={{ 
+                  fontSize: "1.2rem", 
+                  color: "#1a1f36", 
+                  marginBottom: "1.5rem",
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem"
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#003893" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                  What to do next?
+                </h4>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {/* Step 1 */}
+                  <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start", background: "white", padding: "1.25rem", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px rgba(0,0,0,0.02)" }}>
+                    <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#f0fdf4", color: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", flexShrink: 0 }}>1</div>
+                    <div>
+                      <h5 style={{ margin: "0 0 0.25rem 0", fontSize: "1.05rem", color: "#1e293b" }}>Open the Portal</h5>
+                      <p style={{ margin: 0, color: "#64748b", fontSize: "0.95rem", lineHeight: 1.5 }}>Go to <a href="https://enrollment.donidcr.gov.np/" target="_blank" rel="noopener noreferrer" style={{ color: "#003893", fontWeight: 600, textDecoration: "none" }}>enrollment.donidcr.gov.np ↗</a> in a new tab.</p>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start", background: "white", padding: "1.25rem", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px rgba(0,0,0,0.02)" }}>
+                    <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#eff6ff", color: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", flexShrink: 0 }}>2</div>
+                    <div>
+                      <h5 style={{ margin: "0 0 0.25rem 0", fontSize: "1.05rem", color: "#1e293b" }}>Login & Start</h5>
+                      <p style={{ margin: 0, color: "#64748b", fontSize: "0.95rem", lineHeight: 1.5 }}>Enter your <strong>mobile number</strong>, verify with <strong>OTP</strong>, and click <strong>"New Enrollment"</strong>.</p>
+                    </div>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start", background: "white", padding: "1.25rem", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px rgba(0,0,0,0.02)", position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: 0, left: 0, width: "4px", height: "100%", background: "linear-gradient(to bottom, #003893, #dc143c)" }} />
+                    <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#fff1f2", color: "#e11d48", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", flexShrink: 0 }}>3</div>
+                    <div>
+                      <h5 style={{ margin: "0 0 0.25rem 0", fontSize: "1.05rem", color: "#1e293b" }}>{hasExtension ? "Click Auto-Fill" : "Paste the Script"}</h5>
+                      {hasExtension ? (
+                        <p style={{ margin: 0, color: "#64748b", fontSize: "0.95rem", lineHeight: 1.5 }}>
+                          The <strong style={{ color: "#003893", background: "#f1f5f9", padding: "2px 6px", borderRadius: "4px" }}>✨ Auto-Fill Form ✨</strong> button will appear at the bottom right. Click it and watch the magic!
+                        </p>
+                      ) : (
+                        <p style={{ margin: 0, color: "#64748b", fontSize: "0.95rem", lineHeight: 1.5 }}>
+                          Press <kbd style={{ background: "#f1f5f9", padding: "2px 6px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.85em" }}>F12</kbd> (Console), <kbd style={{ background: "#f1f5f9", padding: "2px 6px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.85em" }}>Ctrl</kbd> + <kbd style={{ background: "#f1f5f9", padding: "2px 6px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.85em" }}>V</kbd>, then <kbd style={{ background: "#f1f5f9", padding: "2px 6px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.85em" }}>Enter</kbd>.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>

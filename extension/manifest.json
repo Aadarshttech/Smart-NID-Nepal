@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Smart NID Helper",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Seamlessly transfer data from Smart NID to the official DoNIDCR portal.",
   "permissions": [
     "storage",
-    "tabs"
+    "tabs",
+    "scripting"
   ],
   "host_permissions": [
     "*://enrollment.donidcr.gov.np/*"
