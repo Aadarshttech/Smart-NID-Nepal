@@ -26,6 +26,7 @@ export default function ExportTab() {
   const { draft, additional, prevStep } = useEnrollmentStore();
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error" | "transferring">("idle");
   const [hasExtension, setHasExtension] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     const handleExtensionReady = () => setHasExtension(true);
@@ -35,7 +36,10 @@ export default function ExportTab() {
     
     // Listen for success/error from the extension
     const handleTransferSuccess = () => setCopyState("copied");
-    const handleTransferError = () => setCopyState("error");
+    const handleTransferError = () => {
+      setErrorMsg("Extension connection lost. Please refresh this page (F5) and try again.");
+      setCopyState("error");
+    };
     
     window.addEventListener("SMART_NID_TRANSFER_SUCCESS", handleTransferSuccess);
     window.addEventListener("SMART_NID_TRANSFER_ERROR", handleTransferError);
@@ -59,6 +63,27 @@ export default function ExportTab() {
       
       if (hasExtension) {
         setCopyState("transferring");
+        setErrorMsg("");
+
+        // Set a timeout — if no success/error event within 3s, the extension is stale
+        const timeout = setTimeout(async () => {
+          // Fallback: copy to clipboard so user isn't stuck
+          try {
+            await navigator.clipboard.writeText(script);
+            setErrorMsg("Extension didn't respond. Script copied to clipboard instead. Try refreshing the page (F5).");
+            setCopyState("error");
+          } catch {
+            setErrorMsg("Extension connection lost. Please refresh this page (F5) and try again.");
+            setCopyState("error");
+          }
+        }, 3000);
+
+        // Listen for resolution to clear the timeout
+        const clearOnSuccess = () => { clearTimeout(timeout); setErrorMsg(""); };
+        const clearOnError = () => { clearTimeout(timeout); };
+        window.addEventListener("SMART_NID_TRANSFER_SUCCESS", clearOnSuccess, { once: true });
+        window.addEventListener("SMART_NID_TRANSFER_ERROR", clearOnError, { once: true });
+
         // Dispatch to extension
         window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER", { detail: { script, draft, instructions } }));
       } else {
@@ -69,6 +94,7 @@ export default function ExportTab() {
       }
     } catch {
       setCopyState("error");
+      setErrorMsg("Something went wrong. Please try again.");
       setTimeout(() => setCopyState("idle"), 4000);
     }
   };
@@ -169,6 +195,24 @@ export default function ExportTab() {
                 </>
               )}
             </button>
+
+            {errorMsg && copyState === "error" && (
+              <div style={{
+                marginTop: "1rem",
+                padding: "0.75rem 1rem",
+                background: "#fef2f2",
+                border: "1px solid #fecaca",
+                borderRadius: "10px",
+                color: "#991b1b",
+                fontSize: "0.9rem",
+                lineHeight: 1.5,
+                maxWidth: "380px",
+                width: "100%",
+                textAlign: "center",
+              }}>
+                ⚠️ {errorMsg}
+              </div>
+            )}
 
             {!hasExtension && (
               <div style={{ marginTop: "1rem" }}>
