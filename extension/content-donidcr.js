@@ -231,7 +231,7 @@
             instructions.forEach(inst => {
               if (!inst.value) return;
 
-              // 1. ALWAYS enforce YYYY-MM-DD format for dates
+              // 1. ALWAYS enforce YYYY-MM-DD format and send Nepali numerals for Loc date fields
               if (inst.id === 'dobLoc' || inst.id === 'ccIssuingDateLoc') {
                 const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
                 let engDate = inst.value.replace(/[०-९]/g, d => nepaliDigits.indexOf(d).toString());
@@ -239,14 +239,13 @@
                 
                 const parts = engDate.split('-');
                 if (parts.length === 3 && parts[2].length === 4) {
-                  // It's DD-MM-YYYY (e.g. 24-05-2079), convert to YYYY-MM-DD
                   engDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
                 } else if (parts.length === 3 && parts[0].length === 4) {
-                  // It's YYYY-MM-DD but let's ensure padding
                   engDate = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
                 }
                 
-                inst.value = engDate;
+                // Convert back to Nepali digits because the portal's validator expects it for 'Loc' fields
+                inst.value = engDate.replace(/[0-9]/g, d => nepaliDigits[parseInt(d)]);
               }
 
               // Apply dynamic migration for old profiles
@@ -265,14 +264,19 @@
               if (!el) { console.warn('Smart NID: Field not found:', inst.id); return; }
               
               if (inst.type === 'text' || inst.type === 'date') {
+                el.dispatchEvent(new Event('focus', { bubbles: true }));
+                
                 const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
                 if (nativeInputValueSetter) {
                   nativeInputValueSetter.call(el, inst.value);
                 } else {
                   el.value = inst.value;
                 }
+                
                 el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter', code: 'Enter' }));
                 el.dispatchEvent(new Event('change', { bubbles: true }));
+                el.dispatchEvent(new Event('blur', { bubbles: true }));
               } else if (inst.type === 'select') {
                 el.value = inst.value;
                 el.dispatchEvent(new Event('change', { bubbles: true }));
