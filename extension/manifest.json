@@ -3,6 +3,12 @@
   "name": "Smart NID Helper",
   "version": "1.1",
   "description": "Seamlessly transfer data from Smart NID to the official DoNIDCR portal.",
+  "icons": {
+    "16": "icons/icon.png",
+    "32": "icons/icon.png",
+    "48": "icons/icon.png",
+    "128": "icons/icon.png"
+  },
   "permissions": [
     "storage",
     "tabs",
