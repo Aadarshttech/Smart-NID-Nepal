@@ -15,6 +15,12 @@
 import type { ExtractionResult, AdditionalFields } from "../types/extraction";
 import { findDistrictValue, mapGender } from "./districtMap";
 
+export interface AutoFillInstruction {
+  id: string;
+  type: 'text' | 'select' | 'date';
+  value: string;
+}
+
 /**
  * Convert a DOB from YYYY-MM-DD to MM/DD/YYYY for the AD date input.
  * DoNIDCR date input expects the native HTML date format (YYYY-MM-DD).
@@ -211,4 +217,113 @@ function splitName(fullName: string): { first: string; middle: string; last: str
     middle: parts.slice(1, -1).join(" "),
     last: parts[parts.length - 1],
   };
+}
+
+export function generateAutoFillInstructions(data: ExtractionResult, additional: AdditionalFields): AutoFillInstruction[] {
+  const instructions: AutoFillInstruction[] = [];
+  
+  const pushText = (id: string, value: string | undefined) => {
+    if (value) instructions.push({ id, type: 'text', value });
+  };
+  const pushSelect = (id: string, value: string | undefined) => {
+    if (value) instructions.push({ id, type: 'select', value });
+  };
+  const pushDate = (id: string, value: string | undefined) => {
+    if (value) instructions.push({ id, type: 'date', value });
+  };
+
+  const birthDistrictVal = findDistrictValue(data.birthPlace);
+  const issuingDistrictVal = findDistrictValue(data.issuingDistrict);
+  const permanentDistrictVal = findDistrictValue(data.permanentAddress.district);
+  const tempDistrictVal = additional.temporaryAddressSameAsPermanent
+    ? permanentDistrictVal
+    : findDistrictValue(additional.temporaryAddress.district);
+  
+  const genderVal = mapGender(data.gender);
+  const dobAD = formatDateForInput(data.dobAD);
+
+  pushText('firstNameLoc', data.firstName.nepali);
+  pushText('firstName', data.firstName.english);
+  pushText('middleNameLoc', data.middleName.nepali);
+  pushText('middleName', data.middleName.english);
+  pushText('lastNameLoc', data.lastName.nepali);
+  pushText('lastName', data.lastName.english);
+  pushText('dobLoc', data.dobBS);
+  pushDate('dob', dobAD);
+
+  pushSelect('birthDistrictPlace', birthDistrictVal);
+  pushSelect('ccType', additional.ccType || '1');
+  pushText('ccNumberLoc', data.citizenshipNo);
+  pushSelect('ccIssuingDistrict', issuingDistrictVal);
+  pushText('ccIssuingDateLoc', data.issueDateBS);
+  pushSelect('gender', genderVal);
+
+  pushSelect('maritalStatus', additional.maritalStatus);
+  pushSelect('educationLevel', additional.educationLevel);
+  pushSelect('profession', additional.profession);
+  pushSelect('caste', additional.caste);
+  pushSelect('religion', additional.religion);
+  pushSelect('fatherStatus', '1');
+
+  pushText('mobileNo', additional.mobileNo);
+  pushText('phoneNo', additional.phoneNo);
+  
+  pushSelect('pDistrict', permanentDistrictVal);
+  pushText('pWardNo', data.permanentAddress.wardNo);
+  pushText('pToleLoc', data.permanentAddress.villageToleNp);
+  pushText('pTole', data.permanentAddress.villageToleEn);
+
+  if (!additional.temporaryAddressSameAsPermanent) {
+    pushSelect('tDistrict', tempDistrictVal);
+    pushText('tWardNo', additional.temporaryAddress.wardNo);
+    pushText('tToleLoc', additional.temporaryAddress.villageToleNp);
+    pushText('tTole', additional.temporaryAddress.villageToleEn);
+  }
+
+  const fatherNpParts = splitName(data.fatherName.nepali);
+  const fatherEnParts = splitName(data.fatherName.english);
+  pushText('fFnLoc', fatherNpParts.first);
+  pushText('fMnLoc', fatherNpParts.middle);
+  pushText('fLnLoc', fatherNpParts.last);
+  pushText('fFn', fatherEnParts.first);
+  pushText('fMn', fatherEnParts.middle);
+  pushText('fLn', fatherEnParts.last);
+
+  const motherNpParts = splitName(data.motherName.nepali);
+  const motherEnParts = splitName(data.motherName.english);
+  pushText('mFnLoc', motherNpParts.first);
+  pushText('mMnLoc', motherNpParts.middle);
+  pushText('mLnLoc', motherNpParts.last);
+  pushText('mFn', motherEnParts.first);
+  pushText('mMn', motherEnParts.middle);
+  pushText('mLn', motherEnParts.last);
+
+  const gfNpParts = splitName(data.grandfatherName.nepali);
+  const gfEnParts = splitName(data.grandfatherName.english);
+  pushText('gfFnLoc', gfNpParts.first);
+  pushText('gfMnLoc', gfNpParts.middle);
+  pushText('gfLnLoc', gfNpParts.last);
+  pushText('gfFn', gfEnParts.first);
+  pushText('gfMn', gfEnParts.middle);
+  pushText('gfLn', gfEnParts.last);
+
+  const gmNpParts = splitName(additional.grandmotherName.nepali);
+  const gmEnParts = splitName(additional.grandmotherName.english);
+  pushText('gmFnLoc', gmNpParts.first);
+  pushText('gmMnLoc', gmNpParts.middle);
+  pushText('gmLnLoc', gmNpParts.last);
+  pushText('gmFn', gmEnParts.first);
+  pushText('gmMn', gmEnParts.middle);
+  pushText('gmLn', gmEnParts.last);
+
+  if (additional.maritalStatus === "1") {
+    pushText('sFnLoc', additional.spouseFirstName.nepali);
+    pushText('sMnLoc', additional.spouseMiddleName.nepali);
+    pushText('sLnLoc', additional.spouseLastName.nepali);
+    pushText('sFn', additional.spouseFirstName.english);
+    pushText('sMn', additional.spouseMiddleName.english);
+    pushText('sLn', additional.spouseLastName.english);
+  }
+
+  return instructions;
 }

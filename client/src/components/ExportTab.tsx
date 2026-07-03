@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from "react";
 import { useEnrollmentStore } from "../store/enrollmentStore";
-import { generateAutoFillScript } from "../utils/generateAutoFill";
+import { generateAutoFillScript, generateAutoFillInstructions } from "../utils/generateAutoFill";
 
 const NepalFlagSVG = () => (
   <img 
@@ -55,11 +55,12 @@ export default function ExportTab() {
   const handleTransfer = async () => {
     try {
       const script = generateAutoFillScript(draft, additional);
+      const instructions = generateAutoFillInstructions(draft, additional);
       
       if (hasExtension) {
         setCopyState("transferring");
         // Dispatch to extension
-        window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER", { detail: { script, draft } }));
+        window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER", { detail: { script, draft, instructions } }));
       } else {
         // Fallback: Manual copy to clipboard
         await navigator.clipboard.writeText(script);

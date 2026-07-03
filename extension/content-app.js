@@ -54,7 +54,8 @@
         { 
           type: "NID_TRANSFER_SCRIPT", 
           script: scriptToTransfer,
-          draft: e.detail.draft 
+          draft: e.detail.draft,
+          instructions: e.detail.instructions
         },
         (response) => {
           // Check for runtime errors (extension context invalidated)

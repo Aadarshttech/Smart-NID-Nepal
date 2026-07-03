@@ -56,31 +56,29 @@
       return;
     }
 
-    chrome.storage.local.get(["autoFillScript"], (result) => {
+    chrome.storage.local.get(["autoFillScript", "autoFillInstructions"], (result) => {
       if (chrome.runtime.lastError) {
         console.warn("Smart NID: Storage access error —", chrome.runtime.lastError.message);
         return;
       }
 
-      if (!result.autoFillScript) {
-        return; // No pending script — nothing to do
+      if (result.autoFillInstructions && result.autoFillInstructions.length > 0) {
+        injectFloatingButton(result.autoFillInstructions, null);
+      } else if (result.autoFillScript) {
+        // Fallback for older versions
+        injectFloatingButton(null, result.autoFillScript);
       }
-
-      // Always show the floating button if we have a script, even if we can't
-      // detect form fields yet (user might be on the mobile number / OTP page
-      // and will navigate to the form page)
-      injectFloatingButton(result.autoFillScript);
     });
   }
 
   // ── Inject the floating auto-fill button ──
-  function injectFloatingButton(scriptContent) {
+  function injectFloatingButton(instructions, fallbackScript) {
     // Prevent multiple injections
     if (document.getElementById("smart-nid-autofill-btn")) return;
 
     // Wait for document.body to exist
     if (!document.body) {
-      document.addEventListener("DOMContentLoaded", () => injectFloatingButton(scriptContent));
+      document.addEventListener("DOMContentLoaded", () => injectFloatingButton(instructions, fallbackScript));
       return;
     }
 
@@ -95,13 +93,7 @@
 
     // Nepal Flag / Smart NID Logo SVG
     const logoSvg = `
-      <svg width="24" height="24" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.2)); flex-shrink: 0; margin-right: ${isReady ? '8px' : '0'}">
-        <path d="M10 10 L90 50 L35 55 L90 100 L10 105 Z" fill="#DC143C" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
-        <circle cx="30" cy="40" r="8" fill="white" />
-        <path d="M22 40 Q30 32 38 40" stroke="white" stroke-width="3" fill="none"/>
-        <path d="M30 80 L22 88 L38 88 Z" fill="white"/>
-        <circle cx="30" cy="92" r="8" fill="white" />
-      </svg>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Flag_of_Nepal.svg" alt="Nepal Flag" style="width: 24px; height: 28px; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.2)); flex-shrink: 0; margin-right: ${isReady ? '8px' : '0'}; object-fit: contain;">
     `;
 
     // Styling the floating button (Initial Logo State vs Ready State)
@@ -129,7 +121,7 @@
     });
 
     btn.innerHTML = isReady 
-      ? `${logoSvg} <span>✨ Auto-Fill Form</span>`
+      ? `${logoSvg} <span>Auto-Fill Form</span>`
       : `${logoSvg}`;
 
     if (!isReady) {
@@ -218,14 +210,36 @@
       }
 
       try {
-        // Inject the script into the page context
-        const scriptEl = document.createElement("script");
-        scriptEl.textContent = scriptContent;
-        (document.head || document.documentElement).appendChild(scriptEl);
-        scriptEl.remove();
+        if (instructions) {
+          instructions.forEach(inst => {
+            if (!inst.value) return;
+            const el = document.getElementById(inst.id);
+            if (!el) { console.warn('Smart NID: Field not found:', inst.id); return; }
+            
+            if (inst.type === 'text' || inst.type === 'date') {
+              const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+              if (nativeInputValueSetter) {
+                nativeInputValueSetter.call(el, inst.value);
+              } else {
+                el.value = inst.value;
+              }
+              el.dispatchEvent(new Event('input', { bubbles: true }));
+              el.dispatchEvent(new Event('change', { bubbles: true }));
+            } else if (inst.type === 'select') {
+              el.value = inst.value;
+              el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          });
+        } else if (fallbackScript) {
+          // Fallback to inline script injection for older versions
+          const scriptEl = document.createElement("script");
+          scriptEl.textContent = fallbackScript;
+          (document.head || document.documentElement).appendChild(scriptEl);
+          scriptEl.remove();
+        }
 
         // Clear storage so the button doesn't keep appearing on future visits
-        chrome.storage.local.remove(["autoFillScript", "draftData"]);
+        chrome.storage.local.remove(["autoFillScript", "draftData", "autoFillInstructions"]);
 
         // Update button to success state
         btn.innerHTML = "✅ Filled!";
@@ -259,7 +273,7 @@
         statusBadge.style.transform = "translateY(0)";
 
         setTimeout(() => {
-          btn.innerHTML = `${logoSvg} <span>✨ Auto-Fill Form</span>`;
+          btn.innerHTML = `${logoSvg} <span>Auto-Fill Form</span>`;
           btn.style.backgroundColor = "#28a745";
           statusBadge.style.opacity = "0";
         }, 3000);
@@ -289,15 +303,9 @@
         
         // Re-inject SVG with margin
         const svgReady = `
-          <svg width="24" height="24" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.2)); flex-shrink: 0; margin-right: 8px;">
-            <path d="M10 10 L90 50 L35 55 L90 100 L10 105 Z" fill="#DC143C" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
-            <circle cx="30" cy="40" r="8" fill="white" />
-            <path d="M22 40 Q30 32 38 40" stroke="white" stroke-width="3" fill="none"/>
-            <path d="M30 80 L22 88 L38 88 Z" fill="white"/>
-            <circle cx="30" cy="92" r="8" fill="white" />
-          </svg>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Flag_of_Nepal.svg" alt="Nepal Flag" style="width: 24px; height: 28px; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.2)); flex-shrink: 0; margin-right: 8px; object-fit: contain;">
         `;
-        currentBtn.innerHTML = `${svgReady} <span>✨ Auto-Fill Form</span>`;
+        currentBtn.innerHTML = `${svgReady} <span>Auto-Fill Form</span>`;
         
         statusBadge.innerHTML = "✅ <b>Ready!</b> Click to auto-fill your form.";
         statusBadge.style.backgroundColor = "#28a745";
