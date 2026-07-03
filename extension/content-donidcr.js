@@ -238,31 +238,28 @@
           scriptEl.remove();
         }
 
-        // Clear storage so the button doesn't keep appearing on future visits
-        chrome.storage.local.remove(["autoFillScript", "draftData", "autoFillInstructions"]);
+        // Do NOT clear storage here. DoNIDCR has multiple tabs (Applicant, Contact, Family)
+        // that load lazily. The user needs to click the auto-fill button on each tab.
+        // chrome.storage.local.remove(["autoFillScript", "draftData", "autoFillInstructions"]);
 
-        // Update button to success state
+        // Update button to success state momentarily
+        const originalHtml = btn.innerHTML;
         btn.innerHTML = "✅ Filled!";
         btn.style.backgroundColor = "#28a745";
         btn.style.border = "2px solid #fff";
         btn.style.boxShadow = "0 10px 25px rgba(40, 167, 69, 0.4)";
-        btn.style.cursor = "default";
-        btn.onclick = null;
-        btn.onmouseover = null;
-        btn.onmouseout = null;
-
+        
         // Update status badge
-        statusBadge.innerHTML = "✅ All fields filled! Please review before submitting.";
+        statusBadge.innerHTML = "✅ Fields on this tab filled! Click again on the next tab.";
         statusBadge.style.backgroundColor = "#28a745";
         statusBadge.style.opacity = "1";
         statusBadge.style.transform = "translateY(0)";
 
-        // Fade out after 5 seconds
+        // Revert back to ready state after 3 seconds so they can use it on the next tab
         setTimeout(() => {
-          btn.style.opacity = "0";
+          btn.innerHTML = originalHtml;
           statusBadge.style.opacity = "0";
-          setTimeout(() => container.remove(), 300);
-        }, 5000);
+        }, 3000);
       } catch (err) {
         console.error("Smart NID: Script injection error —", err);
         btn.innerHTML = "❌ Error";
