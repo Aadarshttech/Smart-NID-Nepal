@@ -224,34 +224,67 @@
         const fallbackScript = activeProfile.autoFillScript;
 
         try {
+          let result = null;
           if (instructions) {
             // Check if this is an old profile (pre-v1.1) by seeing if it lacks pProvince
             const isOldProfile = !instructions.some(i => i.id === 'pProvince');
 
             const processInstructions = async () => {
+              let filledCount = 0;
+              let skippedCount = 0;
+
               for (const inst of instructions) {
                 if (!inst.value && !inst.textValue) continue;
 
                 const el = document.getElementById(inst.id);
                 if (!el) {
-                  console.warn('Smart NID: Field not found:', inst.id);
+                  skippedCount++;
+                  console.warn('Smart NID: Field not found (likely on another tab):', inst.id);
                   continue;
                 }
 
                 if (inst.type === 'text' || inst.type === 'date') {
                   el.dispatchEvent(new Event('focus', { bubbles: true }));
                   
-                  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-                  if (nativeInputValueSetter) {
-                    nativeInputValueSetter.call(el, inst.value);
+                  // Check if this is a nepalify field — these have special JS that
+                  // processes keystrokes and validates Nepali dates. Direct .value 
+                  // setting bypasses this and causes validation errors.
+                  const isNepalifyField = el.classList.contains('nepalify') || el.classList.contains('nepaliDate');
+                  
+                  if (isNepalifyField) {
+                    // For nepalify fields, set value directly with Devanagari digits
+                    // (the generateAutoFill already sends Devanagari), then simulate
+                    // the complete event lifecycle so the portal's validation runs.
+                    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                    if (nativeInputValueSetter) {
+                      nativeInputValueSetter.call(el, inst.value);
+                    } else {
+                      el.value = inst.value;
+                    }
+                    
+                    // Simulate typing events for the last character to trigger nepalify processing
+                    const lastChar = inst.value.slice(-1) || '';
+                    el.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: lastChar, code: 'Digit0' }));
+                    el.dispatchEvent(new KeyboardEvent('keypress', { bubbles: true, key: lastChar, code: 'Digit0' }));
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: lastChar, code: 'Digit0' }));
+                    
+                    // Small delay for nepalify processing
+                    await new Promise(r => setTimeout(r, 80));
                   } else {
-                    el.value = inst.value;
+                    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                    if (nativeInputValueSetter) {
+                      nativeInputValueSetter.call(el, inst.value);
+                    } else {
+                      el.value = inst.value;
+                    }
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter', code: 'Enter' }));
                   }
                   
-                  el.dispatchEvent(new Event('input', { bubbles: true }));
-                  el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter', code: 'Enter' }));
                   el.dispatchEvent(new Event('change', { bubbles: true }));
                   el.dispatchEvent(new Event('blur', { bubbles: true }));
+                  filledCount++;
                 } else if (inst.type === 'select') {
                   // Wait for options to populate (for cascading dropdowns like VDC)
                   let attempts = 0;
@@ -285,6 +318,7 @@
                   }
                   
                   el.dispatchEvent(new Event('change', { bubbles: true }));
+                  filledCount++;
                 }
 
                 // Small delay to allow framework state updates before next field
@@ -325,11 +359,12 @@
                 }
               }
               
-              // Status updates are handled below in the outer scope
+              // Return counts for status reporting
+              return { filledCount, skippedCount };
             };
 
             // Wait for the async process to complete before updating status
-            await processInstructions();
+            result = await processInstructions();
 
           } else if (fallbackScript) {
             // Fallback to inline script injection for older versions
@@ -345,14 +380,27 @@
 
         // Update button to success state momentarily
         const originalHtml = btn.innerHTML;
-        btn.innerHTML = "✅ Filled!";
         btn.style.backgroundColor = "#28a745";
         btn.style.border = "2px solid #fff";
         btn.style.boxShadow = "0 10px 25px rgba(40, 167, 69, 0.4)";
         
-        // Update status badge
-        statusBadge.innerHTML = "✅ Fields on this tab filled! Click again on the next tab.";
-        statusBadge.style.backgroundColor = "#28a745";
+        // Update status badge with contextual message based on fill results
+        const filled = (typeof result === 'object' && result) ? result.filledCount : 0;
+        const skipped = (typeof result === 'object' && result) ? result.skippedCount : 0;
+        
+        if (filled > 0 && skipped > 0) {
+          btn.innerHTML = `✅ Filled ${filled} fields!`;
+          statusBadge.innerHTML = `✅ <b>${filled} fields filled!</b> ${skipped} fields are on other tabs — navigate there and click Auto-Fill again.`;
+        } else if (filled > 0) {
+          btn.innerHTML = "✅ All Filled!";
+          statusBadge.innerHTML = "✅ <b>All fields on this tab filled!</b> Check the next tab.";
+        } else {
+          btn.innerHTML = "⚠️ No Fields Found";
+          statusBadge.innerHTML = "⚠️ No fillable fields found on this tab. Navigate to the correct tab first.";
+          statusBadge.style.backgroundColor = "#f59e0b";
+        }
+        
+        if (filled > 0) statusBadge.style.backgroundColor = "#28a745";
         statusBadge.style.opacity = "1";
         statusBadge.style.transform = "translateY(0)";
 

@@ -24,13 +24,26 @@ export interface AutoFillInstruction {
 
 /**
  * Convert Nepali digits (०-९) to English digits (0-9).
- * Used for date fields on the DoNIDCR portal, which expects standard digits.
  */
 function nepaliToEnglishDigits(str: string): string {
   if (!str) return "";
   const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
   return str.replace(/[०-९]/g, (match) => {
     return nepaliDigits.indexOf(match).toString();
+  });
+}
+
+/**
+ * Convert English digits (0-9) to Nepali/Devanagari digits (०-९).
+ * The DoNIDCR portal fields with `nepalify` class expect Devanagari numerals.
+ * Setting English digits directly bypasses the nepalify library and causes
+ * validation errors like "year range should be in 1970-2099 BS".
+ */
+function englishToNepaliDigits(str: string): string {
+  if (!str) return "";
+  const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+  return str.replace(/[0-9]/g, (match) => {
+    return nepaliDigits[parseInt(match, 10)];
   });
 }
 
@@ -74,8 +87,9 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   
   const genderVal = mapGender(data.gender);
   const dobAD = formatDateForInput(data.dobAD);
-  const dobBS_EN = nepaliToEnglishDigits(data.dobBS);
-  const issueDateBS_EN = nepaliToEnglishDigits(data.issueDateBS);
+  // BS date fields have `nepalify` class — must use Devanagari digits
+  const dobBS_NP = englishToNepaliDigits(formatDateForInput(nepaliToEnglishDigits(data.dobBS)));
+  const issueDateBS_NP = englishToNepaliDigits(formatDateForInput(nepaliToEnglishDigits(data.issueDateBS)));
 
   // Build an array of field assignments as JS statements
   const lines: string[] = [];
@@ -127,14 +141,14 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   lines.push(`  setText('middleName', ${JSON.stringify(data.middleName.english)});`);
   lines.push(`  setText('lastNameLoc', ${JSON.stringify(data.lastName.nepali)});`);
   lines.push(`  setText('lastName', ${JSON.stringify(data.lastName.english)});`);
-  lines.push(`  setText('dobLoc', ${JSON.stringify(dobBS_EN)});`);
+  lines.push(`  setText('dobLoc', ${JSON.stringify(dobBS_NP)});`);
   lines.push(`  setDate('dob', ${JSON.stringify(dobAD)});`);
 
   if (birthDistrictVal) lines.push(`  setSelect('birthDistrictPlace', ${JSON.stringify(birthDistrictVal)});`);
   lines.push(`  setSelect('ccType', ${JSON.stringify(additional.ccType || '1')});`);
   lines.push(`  setText('ccNumberLoc', ${JSON.stringify(data.citizenshipNo)});`);
   if (issuingDistrictVal) lines.push(`  setSelect('ccIssuingDistrict', ${JSON.stringify(issuingDistrictVal)});`);
-  lines.push(`  setText('ccIssuingDateLoc', ${JSON.stringify(issueDateBS_EN)});`);
+  lines.push(`  setText('ccIssuingDateLoc', ${JSON.stringify(issueDateBS_NP)});`);
   if (genderVal) lines.push(`  setSelect('gender', ${JSON.stringify(genderVal)});`);
 
   // Additional Applicant Fields
@@ -280,8 +294,9 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   
   const genderVal = mapGender(data.gender);
   const dobAD = formatDateForInput(data.dobAD);
-  const dobBS_EN = formatDateForInput(nepaliToEnglishDigits(data.dobBS));
-  const issueDateBS_EN = formatDateForInput(nepaliToEnglishDigits(data.issueDateBS));
+  // BS date fields have `nepalify` class — must use Devanagari digits
+  const dobBS_NP = englishToNepaliDigits(formatDateForInput(nepaliToEnglishDigits(data.dobBS)));
+  const issueDateBS_NP = englishToNepaliDigits(formatDateForInput(nepaliToEnglishDigits(data.issueDateBS)));
 
   pushText('firstNameLoc', data.firstName.nepali);
   pushText('firstName', data.firstName.english);
@@ -289,14 +304,14 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('middleName', data.middleName.english);
   pushText('lastNameLoc', data.lastName.nepali);
   pushText('lastName', data.lastName.english);
-  pushText('dobLoc', dobBS_EN);
+  pushText('dobLoc', dobBS_NP);
   pushDate('dob', dobAD);
 
   pushSelect('birthDistrictPlace', birthDistrictVal);
   pushSelect('ccType', additional.ccType || '1');
   pushText('ccNumberLoc', data.citizenshipNo);
   pushSelect('ccIssuingDistrict', issuingDistrictVal);
-  pushText('ccIssuingDateLoc', issueDateBS_EN);
+  pushText('ccIssuingDateLoc', issueDateBS_NP);
   pushSelect('gender', genderVal);
 
   pushSelect('maritalStatus', additional.maritalStatus);
