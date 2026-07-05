@@ -210,7 +210,7 @@
       }
 
       // Fetch latest data dynamically when clicked
-      chrome.storage.local.get(["savedProfiles", "activeProfileId"], (result) => {
+      chrome.storage.local.get(["savedProfiles", "activeProfileId"], async (result) => {
         const profiles = result.savedProfiles || [];
         const activeProfile = profiles.find(p => p.id === result.activeProfileId);
         
@@ -228,94 +228,109 @@
             // Check if this is an old profile (pre-v1.1) by seeing if it lacks pProvince
             const isOldProfile = !instructions.some(i => i.id === 'pProvince');
 
-            instructions.forEach(inst => {
-              if (!inst.value) return;
+            const processInstructions = async () => {
+              for (const inst of instructions) {
+                if (!inst.value && !inst.textValue) continue;
 
-              // 1. ALWAYS enforce YYYY-MM-DD format and send Nepali numerals for Loc date fields
-              if (inst.id === 'dobLoc' || inst.id === 'ccIssuingDateLoc') {
-                const nepaliDigits = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
-                let engDate = inst.value.replace(/[०-९]/g, d => nepaliDigits.indexOf(d).toString());
-                engDate = engDate.replace(/[\/\.]/g, '-');
-                
-                const parts = engDate.split('-');
-                if (parts.length === 3 && parts[2].length === 4) {
-                  engDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-                } else if (parts.length === 3 && parts[0].length === 4) {
-                  engDate = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                const el = document.getElementById(inst.id);
+                if (!el) {
+                  console.warn('Smart NID: Field not found:', inst.id);
+                  continue;
                 }
-                
-                // Convert back to Nepali digits because the portal's validator expects it for 'Loc' fields
-                inst.value = engDate.replace(/[0-9]/g, d => nepaliDigits[parseInt(d)]);
+
+                if (inst.type === 'text' || inst.type === 'date') {
+                  el.dispatchEvent(new Event('focus', { bubbles: true }));
+                  
+                  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                  if (nativeInputValueSetter) {
+                    nativeInputValueSetter.call(el, inst.value);
+                  } else {
+                    el.value = inst.value;
+                  }
+                  
+                  el.dispatchEvent(new Event('input', { bubbles: true }));
+                  el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter', code: 'Enter' }));
+                  el.dispatchEvent(new Event('change', { bubbles: true }));
+                  el.dispatchEvent(new Event('blur', { bubbles: true }));
+                } else if (inst.type === 'select') {
+                  // Wait for options to populate (for cascading dropdowns like VDC)
+                  let attempts = 0;
+                  while (el.options.length <= 1 && attempts < 10) {
+                    await new Promise(r => setTimeout(r, 200));
+                    attempts++;
+                  }
+
+                  let matched = false;
+                  // Try to match by value first
+                  if (inst.value) {
+                    for (let i = 0; i < el.options.length; i++) {
+                      if (el.options[i].value === inst.value) {
+                        el.value = inst.value;
+                        matched = true;
+                        break;
+                      }
+                    }
+                  }
+                  
+                  // If not matched by value, try to match by text content
+                  if (!matched && inst.textValue) {
+                    const normalized = inst.textValue.toLowerCase().trim();
+                    for (let i = 0; i < el.options.length; i++) {
+                      if (el.options[i].text.toLowerCase().includes(normalized)) {
+                        el.value = el.options[i].value;
+                        matched = true;
+                        break;
+                      }
+                    }
+                  }
+                  
+                  el.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+
+                // Small delay to allow framework state updates before next field
+                await new Promise(r => setTimeout(r, 50));
               }
 
-              // Apply dynamic migration for old profiles
+              // Dynamically inject missing province data for old profiles
               if (isOldProfile) {
-                // 2. Fix Religion shift (old 1=Hindu, now 2=Hindu)
-                if (inst.id === 'religion') {
-                  const num = parseInt(inst.value, 10);
-                  if (!isNaN(num)) {
-                    if (num === 10) inst.value = "1"; // Old Other -> New Other
-                    else inst.value = (num + 1).toString(); // Shift everything else up by 1
+                const pDistInst = instructions.find(i => i.id === 'pDistrict');
+                const tDistInst = instructions.find(i => i.id === 'tDistrict');
+                
+                const getProv = (d) => {
+                  const n = parseInt(d, 10);
+                  if (isNaN(n)) return "";
+                  if (n >= 1 && n <= 14) return "1";
+                  if (n >= 15 && n <= 22) return "2";
+                  if (n >= 23 && n <= 35) return "3";
+                  if (n >= 36 && n <= 46) return "4";
+                  if (n >= 47 && n <= 58) return "5";
+                  if (n >= 59 && n <= 68) return "6";
+                  if (n >= 69 && n <= 77) return "7";
+                  return "";
+                };
+
+                if (pDistInst && pDistInst.value) {
+                  const pProv = getProv(pDistInst.value);
+                  if (pProv) {
+                    const pEl = document.getElementById('pProvince');
+                    if (pEl) { pEl.value = pProv; pEl.dispatchEvent(new Event('change', { bubbles: true })); }
+                  }
+                }
+                if (tDistInst && tDistInst.value) {
+                  const tProv = getProv(tDistInst.value);
+                  if (tProv) {
+                    const tEl = document.getElementById('tProvince');
+                    if (tEl) { tEl.value = tProv; tEl.dispatchEvent(new Event('change', { bubbles: true })); }
                   }
                 }
               }
-
-              const el = document.getElementById(inst.id);
-              if (!el) { console.warn('Smart NID: Field not found:', inst.id); return; }
               
-              if (inst.type === 'text' || inst.type === 'date') {
-                el.dispatchEvent(new Event('focus', { bubbles: true }));
-                
-                const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-                if (nativeInputValueSetter) {
-                  nativeInputValueSetter.call(el, inst.value);
-                } else {
-                  el.value = inst.value;
-                }
-                
-                el.dispatchEvent(new Event('input', { bubbles: true }));
-                el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter', code: 'Enter' }));
-                el.dispatchEvent(new Event('change', { bubbles: true }));
-                el.dispatchEvent(new Event('blur', { bubbles: true }));
-              } else if (inst.type === 'select') {
-                el.value = inst.value;
-                el.dispatchEvent(new Event('change', { bubbles: true }));
-              }
-            });
+              // Status updates are handled below in the outer scope
+            };
 
-            // Dynamically inject missing province data for old profiles
-            if (isOldProfile) {
-              const pDistInst = instructions.find(i => i.id === 'pDistrict');
-              const tDistInst = instructions.find(i => i.id === 'tDistrict');
-              
-              const getProv = (d) => {
-                const n = parseInt(d, 10);
-                if (isNaN(n)) return "";
-                if (n >= 1 && n <= 14) return "1";
-                if (n >= 15 && n <= 22) return "2";
-                if (n >= 23 && n <= 35) return "3";
-                if (n >= 36 && n <= 46) return "4";
-                if (n >= 47 && n <= 58) return "5";
-                if (n >= 59 && n <= 68) return "6";
-                if (n >= 69 && n <= 77) return "7";
-                return "";
-              };
+            // Wait for the async process to complete before updating status
+            await processInstructions();
 
-              if (pDistInst && pDistInst.value) {
-                const pProv = getProv(pDistInst.value);
-                if (pProv) {
-                  const pEl = document.getElementById('pProvince');
-                  if (pEl) { pEl.value = pProv; pEl.dispatchEvent(new Event('change', { bubbles: true })); }
-                }
-              }
-              if (tDistInst && tDistInst.value) {
-                const tProv = getProv(tDistInst.value);
-                if (tProv) {
-                  const tEl = document.getElementById('tProvince');
-                  if (tEl) { tEl.value = tProv; tEl.dispatchEvent(new Event('change', { bubbles: true })); }
-                }
-              }
-            }
           } else if (fallbackScript) {
             // Fallback to inline script injection for older versions
             const scriptEl = document.createElement("script");

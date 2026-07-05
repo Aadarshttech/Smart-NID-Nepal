@@ -19,6 +19,7 @@ export interface AutoFillInstruction {
   id: string;
   type: 'text' | 'select' | 'date';
   value: string;
+  textValue?: string;
 }
 
 /**
@@ -252,8 +253,8 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   const pushText = (id: string, value: string | undefined) => {
     if (value) instructions.push({ id, type: 'text', value });
   };
-  const pushSelect = (id: string, value: string | undefined) => {
-    if (value) instructions.push({ id, type: 'select', value });
+  const pushSelect = (id: string, value: string | undefined, textValue?: string) => {
+    if (value || textValue) instructions.push({ id, type: 'select', value: value || "", textValue });
   };
   const pushDate = (id: string, value: string | undefined) => {
     if (value) instructions.push({ id, type: 'date', value });
@@ -263,6 +264,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   const issuingDistrictVal = findDistrictValue(data.issuingDistrict);
   const permanentDistrictVal = findDistrictValue(data.permanentAddress.district);
   const pProvinceVal = data.permanentAddress.province || getProvinceFromDistrictId(permanentDistrictVal);
+  const pLocalLevel = data.permanentAddress.localLevel;
   
   const tempDistrictVal = additional.temporaryAddressSameAsPermanent
     ? permanentDistrictVal
@@ -271,6 +273,10 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   const tProvinceVal = additional.temporaryAddressSameAsPermanent
     ? pProvinceVal
     : (additional.temporaryAddress.province || getProvinceFromDistrictId(tempDistrictVal));
+    
+  const tLocalLevel = additional.temporaryAddressSameAsPermanent
+    ? pLocalLevel
+    : additional.temporaryAddress.localLevel;
   
   const genderVal = mapGender(data.gender);
   const dobAD = formatDateForInput(data.dobAD);
@@ -305,6 +311,14 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   
   pushSelect('pProvince', pProvinceVal);
   pushSelect('pDistrict', permanentDistrictVal);
+  
+  // Try common DoNIDCR Local Level dropdown IDs by text matching
+  if (pLocalLevel) {
+    pushSelect('pVdc', "", pLocalLevel);
+    pushSelect('pvdc', "", pLocalLevel);
+    pushSelect('pLocalLevel', "", pLocalLevel);
+  }
+  
   pushText('pWardNo', data.permanentAddress.wardNo);
   pushText('pToleLoc', data.permanentAddress.villageToleNp);
   pushText('pTole', data.permanentAddress.villageToleEn);
@@ -312,6 +326,13 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   if (!additional.temporaryAddressSameAsPermanent) {
     pushSelect('tProvince', tProvinceVal);
     pushSelect('tDistrict', tempDistrictVal);
+    
+    if (tLocalLevel) {
+      pushSelect('tVdc', "", tLocalLevel);
+      pushSelect('tvdc', "", tLocalLevel);
+      pushSelect('tLocalLevel', "", tLocalLevel);
+    }
+    
     pushText('tWardNo', additional.temporaryAddress.wardNo);
     pushText('tToleLoc', additional.temporaryAddress.villageToleNp);
     pushText('tTole', additional.temporaryAddress.villageToleEn);
