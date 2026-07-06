@@ -30,6 +30,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         name: `${message.draft?.firstName?.english || ''} ${message.draft?.lastName?.english || ''}`.trim() || 'Unknown Name',
         citNo: message.draft?.citizenshipNo || '',
         draftData: message.draft,
+        additionalData: message.additional,
         autoFillInstructions: message.instructions,
         autoFillScript: scriptData
       };
@@ -89,5 +90,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
 
     return true; // Keep message channel open for async sendResponse
+  }
+
+  if (message.type === "NID_GET_PROFILES") {
+    chrome.storage.local.get(["savedProfiles"], (result) => {
+      sendResponse({ status: "success", profiles: result.savedProfiles || [] });
+    });
+    return true;
   }
 });

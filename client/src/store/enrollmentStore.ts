@@ -83,6 +83,7 @@ interface EnrollmentState {
   setCurrentStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
+  loadProfile: (draft: ExtractionResult, additional: AdditionalFields) => void;
   resetStore: () => void;
 }
 
@@ -146,6 +147,18 @@ export const useEnrollmentStore = create<EnrollmentState>((set) => ({
     set((state) => ({
       currentStep: Math.max(state.currentStep - 1, 0),
     })),
+
+  loadProfile: (draft, additional) =>
+    set({
+      draft,
+      extractedData: draft,
+      additional,
+      currentStep: 1, // Jump to Personal Info step
+      isExtracting: false,
+      extractionError: null,
+      frontPreview: null, // Clear previews since we're loading from saved state
+      backPreview: null
+    }),
 
   resetStore: () => set(initialState),
 }));

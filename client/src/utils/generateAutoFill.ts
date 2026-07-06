@@ -168,20 +168,33 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   lines.push(`  setText('mobilePhone', ${JSON.stringify(additional.mobileNo)});`);
   lines.push(`  setText('telephone', ${JSON.stringify(additional.phoneNo)});`);
   
+  lines.push(`  setSelect('permState', ${JSON.stringify(data.permanentAddress.province)});`);
   if (permanentDistrictVal) lines.push(`  setSelect('permDistrict', ${JSON.stringify(permanentDistrictVal)});`);
+  else lines.push(`  setSelect('permDistrict', ${JSON.stringify(data.permanentAddress.district)});`);
+  lines.push(`  setSelect('permRurMun', ${JSON.stringify(data.permanentAddress.localLevel)});`);
   lines.push(`  setText('permWardLoc', ${JSON.stringify(data.permanentAddress.wardNo)});`);
   lines.push(`  setText('permVillageTolLoc', ${JSON.stringify(data.permanentAddress.villageToleNp)});`);
   lines.push(`  setText('permVillageTol', ${JSON.stringify(data.permanentAddress.villageToleEn)});`);
 
+  // Handle "Same as Permanent Address" Checkbox Robustly
+  lines.push(`  const pSame = document.getElementById('tempAddressCopy');`);
+  lines.push(`  if (pSame) {`);
   if (additional.temporaryAddressSameAsPermanent) {
-    lines.push(`  const pSame = document.getElementById('tempAddressCopy');`);
-    lines.push(`  if (pSame && !pSame.checked) { pSame.click(); }`);
+    lines.push(`    if (!pSame.checked) {`);
+    lines.push(`      pSame.click();`);
+    lines.push(`    }`);
   } else {
-    if (tempDistrictVal) lines.push(`  setSelect('tempDistrict', ${JSON.stringify(tempDistrictVal)});`);
-    lines.push(`  setText('tempWardLoc', ${JSON.stringify(additional.temporaryAddress.wardNo)});`);
-    lines.push(`  setText('tempVillageTolLoc', ${JSON.stringify(additional.temporaryAddress.villageToleNp)});`);
-    lines.push(`  setText('tempVillageTol', ${JSON.stringify(additional.temporaryAddress.villageToleEn)});`);
+    lines.push(`    if (pSame.checked) {`);
+    lines.push(`      pSame.click();`);
+    lines.push(`    }`);
+    lines.push(`    setSelect('tempState', ${JSON.stringify(additional.temporaryAddress.province)});`);
+    lines.push(`    setSelect('tempDistrict', ${JSON.stringify(tempDistrictVal || additional.temporaryAddress.district)});`);
+    lines.push(`    setSelect('tempRurMun', ${JSON.stringify(additional.temporaryAddress.localLevel)});`);
+    lines.push(`    setText('tempWardLoc', ${JSON.stringify(additional.temporaryAddress.wardNo)});`);
+    lines.push(`    setText('tempVillageTolLoc', ${JSON.stringify(additional.temporaryAddress.villageToleNp)});`);
+    lines.push(`    setText('tempVillageTol', ${JSON.stringify(additional.temporaryAddress.villageToleEn)});`);
   }
+  lines.push(`  }`);
 
   lines.push(``);
 

@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Open localhost or the vercel app. For this extension, we'll open the local app if running, 
     // or just the vercel production link. Since we don't know if local is running, 
     // opening the default URL is safest.
-    chrome.tabs.create({ url: 'http://localhost:5175' });
+    chrome.tabs.create({ url: 'http://localhost:5173' });
   });
 
   // Open Gov Portal Button

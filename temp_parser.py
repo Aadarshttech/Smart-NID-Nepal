@@ -5,7 +5,7 @@ try:
         data = f.read()
     
     ids = set(re.findall(r'"id"\s*:\s*"([^"]+)"', data))
-    keywords = ['caste', 'religion', 'gender', 'marital', 'education']
+    keywords = ['permstate', 'permdistrict', 'permrurmun', 'perm']
     
     filtered = [i for i in ids if any(k in i.lower() for k in keywords)]
     print("MATCHED IDs:")

@@ -289,6 +289,70 @@ export default function PersonalDetailsTab() {
         </div>
       </div>
 
+      {/* ── Temporary Address ── */}
+      <div className="form-section">
+        <h3 className="form-section__title">
+          🏠 अस्थायी ठेगाना / Temporary Address
+        </h3>
+        <p className="form-section__hint">
+          यदि तपाईको अस्थायी ठेगाना स्थायी ठेगाना भन्दा फरक छ भने कृपया तल भर्नुहोस्। (If your temporary address is different from your permanent address, uncheck the box and fill below.)
+        </p>
+
+        <div className="form-field" style={{ marginBottom: "1.5rem" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontWeight: 500 }}>
+            <input
+              type="checkbox"
+              checked={additional.temporaryAddressSameAsPermanent}
+              onChange={(e) => updateAdditionalField("temporaryAddressSameAsPermanent", e.target.checked)}
+              style={{ width: "1.2rem", height: "1.2rem", cursor: "pointer" }}
+            />
+            Copy Permanent Address to Temporary Address (स्थायी ठेगाना नै अस्थायी ठेगाना हो)
+          </label>
+        </div>
+
+        {!additional.temporaryAddressSameAsPermanent && (
+          <div className="form-grid form-grid--2col" style={{ padding: "1rem", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px dashed #cbd5e1" }}>
+            <TextInput
+              label="Province/State"
+              labelNp="प्रदेश"
+              value={additional.temporaryAddress.province}
+              onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, province: val })}
+              placeholder="E.g. Bagmati"
+            />
+            <TextInput
+              label="District"
+              labelNp="जिल्ला"
+              value={additional.temporaryAddress.district}
+              onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, district: val })}
+            />
+            <TextInput
+              label="Local Level (Municipality)"
+              labelNp="गा.पा./न.पा."
+              value={additional.temporaryAddress.localLevel}
+              onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, localLevel: val })}
+            />
+            <TextInput
+              label="Ward No."
+              labelNp="वडा नं."
+              value={additional.temporaryAddress.wardNo}
+              onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, wardNo: val })}
+            />
+            <TextInput
+              label="Village/Tole (Nepali)"
+              labelNp="गाउँ/टोल (नेपाली)"
+              value={additional.temporaryAddress.villageToleNp}
+              onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, villageToleNp: val })}
+            />
+            <TextInput
+              label="Village/Tole (English)"
+              labelNp="गाउँ/टोल (English)"
+              value={additional.temporaryAddress.villageToleEn}
+              onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, villageToleEn: val })}
+            />
+          </div>
+        )}
+      </div>
+
       {/* Navigation */}
       <div className="form-nav">
         <div /> {/* Spacer — no back button on first tab */}

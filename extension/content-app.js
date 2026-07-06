@@ -85,4 +85,36 @@
       }));
     }
   });
+
+  // 3. Listen for the request profiles command
+  window.addEventListener("SMART_NID_REQUEST_PROFILES", () => {
+    if (!chrome || !chrome.runtime || !chrome.runtime.sendMessage) {
+      window.dispatchEvent(new CustomEvent("SMART_NID_PROFILES_RESPONSE", {
+        detail: { status: "error", profiles: [] }
+      }));
+      return;
+    }
+
+    try {
+      chrome.runtime.sendMessage({ type: "NID_GET_PROFILES" }, (response) => {
+        if (chrome.runtime.lastError) {
+          window.dispatchEvent(new CustomEvent("SMART_NID_PROFILES_RESPONSE", {
+            detail: { status: "error", profiles: [] }
+          }));
+          return;
+        }
+
+        window.dispatchEvent(new CustomEvent("SMART_NID_PROFILES_RESPONSE", {
+          detail: { 
+            status: response ? response.status : "error", 
+            profiles: (response && response.profiles) || [] 
+          }
+        }));
+      });
+    } catch (err) {
+      window.dispatchEvent(new CustomEvent("SMART_NID_PROFILES_RESPONSE", {
+        detail: { status: "error", profiles: [] }
+      }));
+    }
+  });
 })();

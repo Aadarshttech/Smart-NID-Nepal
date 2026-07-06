@@ -89,7 +89,7 @@ export default function ExportTab() {
         window.addEventListener("SMART_NID_TRANSFER_ERROR", clearOnError, { once: true });
 
         // Dispatch to extension
-        window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER", { detail: { script, draft, instructions } }));
+        window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER", { detail: { script, draft, additional, instructions } }));
       } else {
         // Fallback: Manual copy to clipboard
         await navigator.clipboard.writeText(script);
