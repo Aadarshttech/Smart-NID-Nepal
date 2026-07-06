@@ -165,22 +165,22 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
 
   // ── Tab 2: Contact Details (Permanent Address) ──
   lines.push(`  // ── Tab 2: Contact Details ──`);
-  lines.push(`  setText('mobileNo', ${JSON.stringify(additional.mobileNo)});`);
-  lines.push(`  setText('phoneNo', ${JSON.stringify(additional.phoneNo)});`);
+  lines.push(`  setText('mobilePhone', ${JSON.stringify(additional.mobileNo)});`);
+  lines.push(`  setText('telephone', ${JSON.stringify(additional.phoneNo)});`);
   
-  if (permanentDistrictVal) lines.push(`  setSelect('pDistrict', ${JSON.stringify(permanentDistrictVal)});`);
-  lines.push(`  setText('pWardNo', ${JSON.stringify(data.permanentAddress.wardNo)});`);
-  lines.push(`  setText('pToleLoc', ${JSON.stringify(data.permanentAddress.villageToleNp)});`);
-  lines.push(`  setText('pTole', ${JSON.stringify(data.permanentAddress.villageToleEn)});`);
+  if (permanentDistrictVal) lines.push(`  setSelect('permDistrict', ${JSON.stringify(permanentDistrictVal)});`);
+  lines.push(`  setText('permWardLoc', ${JSON.stringify(data.permanentAddress.wardNo)});`);
+  lines.push(`  setText('permVillageTolLoc', ${JSON.stringify(data.permanentAddress.villageToleNp)});`);
+  lines.push(`  setText('permVillageTol', ${JSON.stringify(data.permanentAddress.villageToleEn)});`);
 
   if (additional.temporaryAddressSameAsPermanent) {
-    lines.push(`  const pSame = document.getElementById('pSameAsTemp');`);
+    lines.push(`  const pSame = document.getElementById('tempAddressCopy');`);
     lines.push(`  if (pSame && !pSame.checked) { pSame.click(); }`);
   } else {
-    if (tempDistrictVal) lines.push(`  setSelect('tDistrict', ${JSON.stringify(tempDistrictVal)});`);
-    lines.push(`  setText('tWardNo', ${JSON.stringify(additional.temporaryAddress.wardNo)});`);
-    lines.push(`  setText('tToleLoc', ${JSON.stringify(additional.temporaryAddress.villageToleNp)});`);
-    lines.push(`  setText('tTole', ${JSON.stringify(additional.temporaryAddress.villageToleEn)});`);
+    if (tempDistrictVal) lines.push(`  setSelect('tempDistrict', ${JSON.stringify(tempDistrictVal)});`);
+    lines.push(`  setText('tempWardLoc', ${JSON.stringify(additional.temporaryAddress.wardNo)});`);
+    lines.push(`  setText('tempVillageTolLoc', ${JSON.stringify(additional.temporaryAddress.villageToleNp)});`);
+    lines.push(`  setText('tempVillageTol', ${JSON.stringify(additional.temporaryAddress.villageToleEn)});`);
   }
 
   lines.push(``);
@@ -190,51 +190,51 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   // Father
   const fatherNpParts = splitName(data.fatherName.nepali);
   const fatherEnParts = splitName(data.fatherName.english);
-  lines.push(`  setText('fFnLoc', ${JSON.stringify(fatherNpParts.first)});`);
-  lines.push(`  setText('fMnLoc', ${JSON.stringify(fatherNpParts.middle)});`);
-  lines.push(`  setText('fLnLoc', ${JSON.stringify(fatherNpParts.last)});`);
-  lines.push(`  setText('fFn', ${JSON.stringify(fatherEnParts.first)});`);
-  lines.push(`  setText('fMn', ${JSON.stringify(fatherEnParts.middle)});`);
-  lines.push(`  setText('fLn', ${JSON.stringify(fatherEnParts.last)});`);
+  lines.push(`  setText('fatherFirstNameLoc', ${JSON.stringify(fatherNpParts.first)});`);
+  lines.push(`  setText('fatherMiddleNameLoc', ${JSON.stringify(fatherNpParts.middle)});`);
+  lines.push(`  setText('fatherLastNameLoc', ${JSON.stringify(fatherNpParts.last)});`);
+  lines.push(`  setText('fatherFirstName', ${JSON.stringify(fatherEnParts.first)});`);
+  lines.push(`  setText('fatherMiddleName', ${JSON.stringify(fatherEnParts.middle)});`);
+  lines.push(`  setText('fatherLastName', ${JSON.stringify(fatherEnParts.last)});`);
 
   // Mother
   const motherNpParts = splitName(data.motherName.nepali);
   const motherEnParts = splitName(data.motherName.english);
-  lines.push(`  setText('mFnLoc', ${JSON.stringify(motherNpParts.first)});`);
-  lines.push(`  setText('mMnLoc', ${JSON.stringify(motherNpParts.middle)});`);
-  lines.push(`  setText('mLnLoc', ${JSON.stringify(motherNpParts.last)});`);
-  lines.push(`  setText('mFn', ${JSON.stringify(motherEnParts.first)});`);
-  lines.push(`  setText('mMn', ${JSON.stringify(motherEnParts.middle)});`);
-  lines.push(`  setText('mLn', ${JSON.stringify(motherEnParts.last)});`);
+  lines.push(`  setText('motherFirstNameLoc', ${JSON.stringify(motherNpParts.first)});`);
+  lines.push(`  setText('motherMiddleNameLoc', ${JSON.stringify(motherNpParts.middle)});`);
+  lines.push(`  setText('motherLastNameLoc', ${JSON.stringify(motherNpParts.last)});`);
+  lines.push(`  setText('motherFirstName', ${JSON.stringify(motherEnParts.first)});`);
+  lines.push(`  setText('motherMiddleName', ${JSON.stringify(motherEnParts.middle)});`);
+  lines.push(`  setText('motherLastName', ${JSON.stringify(motherEnParts.last)});`);
 
   // Grandfather
   const gfNpParts = splitName(data.grandfatherName.nepali);
   const gfEnParts = splitName(data.grandfatherName.english);
-  lines.push(`  setText('gfFnLoc', ${JSON.stringify(gfNpParts.first)});`);
-  lines.push(`  setText('gfMnLoc', ${JSON.stringify(gfNpParts.middle)});`);
-  lines.push(`  setText('gfLnLoc', ${JSON.stringify(gfNpParts.last)});`);
-  lines.push(`  setText('gfFn', ${JSON.stringify(gfEnParts.first)});`);
-  lines.push(`  setText('gfMn', ${JSON.stringify(gfEnParts.middle)});`);
-  lines.push(`  setText('gfLn', ${JSON.stringify(gfEnParts.last)});`);
+  lines.push(`  setText('grandFatherFirstNameLoc', ${JSON.stringify(gfNpParts.first)});`);
+  lines.push(`  setText('grandFatherMiddleNameLoc', ${JSON.stringify(gfNpParts.middle)});`);
+  lines.push(`  setText('grandFatherLastNameLoc', ${JSON.stringify(gfNpParts.last)});`);
+  lines.push(`  setText('grandFatherFirstName', ${JSON.stringify(gfEnParts.first)});`);
+  lines.push(`  setText('grandFatherMiddleName', ${JSON.stringify(gfEnParts.middle)});`);
+  lines.push(`  setText('grandFatherLastName', ${JSON.stringify(gfEnParts.last)});`);
 
   // Grandmother
   const gmNpParts = splitName(additional.grandmotherName.nepali);
   const gmEnParts = splitName(additional.grandmotherName.english);
-  lines.push(`  setText('gmFnLoc', ${JSON.stringify(gmNpParts.first)});`);
-  lines.push(`  setText('gmMnLoc', ${JSON.stringify(gmNpParts.middle)});`);
-  lines.push(`  setText('gmLnLoc', ${JSON.stringify(gmNpParts.last)});`);
-  lines.push(`  setText('gmFn', ${JSON.stringify(gmEnParts.first)});`);
-  lines.push(`  setText('gmMn', ${JSON.stringify(gmEnParts.middle)});`);
-  lines.push(`  setText('gmLn', ${JSON.stringify(gmEnParts.last)});`);
+  lines.push(`  setText('grandMotherFirstNameLoc', ${JSON.stringify(gmNpParts.first)});`);
+  lines.push(`  setText('grandMotherMiddleNameLoc', ${JSON.stringify(gmNpParts.middle)});`);
+  lines.push(`  setText('grandMotherLastNameLoc', ${JSON.stringify(gmNpParts.last)});`);
+  lines.push(`  setText('grandMotherFirstName', ${JSON.stringify(gmEnParts.first)});`);
+  lines.push(`  setText('grandMotherMiddleName', ${JSON.stringify(gmEnParts.middle)});`);
+  lines.push(`  setText('grandMotherLastName', ${JSON.stringify(gmEnParts.last)});`);
 
   // Spouse (if married)
   if (additional.maritalStatus === "1") {
-    lines.push(`  setText('sFnLoc', ${JSON.stringify(additional.spouseFirstName.nepali)});`);
-    lines.push(`  setText('sMnLoc', ${JSON.stringify(additional.spouseMiddleName.nepali)});`);
-    lines.push(`  setText('sLnLoc', ${JSON.stringify(additional.spouseLastName.nepali)});`);
-    lines.push(`  setText('sFn', ${JSON.stringify(additional.spouseFirstName.english)});`);
-    lines.push(`  setText('sMn', ${JSON.stringify(additional.spouseMiddleName.english)});`);
-    lines.push(`  setText('sLn', ${JSON.stringify(additional.spouseLastName.english)});`);
+    lines.push(`  setText('spouseFirstNameLoc', ${JSON.stringify(additional.spouseFirstName.nepali)});`);
+    lines.push(`  setText('spouseMiddleNameLoc', ${JSON.stringify(additional.spouseMiddleName.nepali)});`);
+    lines.push(`  setText('spouseLastNameLoc', ${JSON.stringify(additional.spouseLastName.nepali)});`);
+    lines.push(`  setText('spouseFirstName', ${JSON.stringify(additional.spouseFirstName.english)});`);
+    lines.push(`  setText('spouseMiddleName', ${JSON.stringify(additional.spouseMiddleName.english)});`);
+    lines.push(`  setText('spouseLastName', ${JSON.stringify(additional.spouseLastName.english)});`);
   }
 
   lines.push(``);
@@ -321,81 +321,77 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushSelect('religion', additional.religion);
   pushSelect('fatherStatus', '1');
 
-  pushText('mobileNo', additional.mobileNo);
-  pushText('phoneNo', additional.phoneNo);
+  pushText('mobilePhone', additional.mobileNo);
+  pushText('telephone', additional.phoneNo);
   
-  pushSelect('pProvince', pProvinceVal);
-  pushSelect('pDistrict', permanentDistrictVal);
+  pushSelect('permState', pProvinceVal);
+  pushSelect('permDistrict', permanentDistrictVal);
   
   // Try common DoNIDCR Local Level dropdown IDs by text matching
   if (pLocalLevel) {
-    pushSelect('pVdc', "", pLocalLevel);
-    pushSelect('pvdc', "", pLocalLevel);
-    pushSelect('pLocalLevel', "", pLocalLevel);
+    pushSelect('permRurMun', "", pLocalLevel);
   }
   
-  pushText('pWardNo', data.permanentAddress.wardNo);
-  pushText('pToleLoc', data.permanentAddress.villageToleNp);
-  pushText('pTole', data.permanentAddress.villageToleEn);
+  pushText('permWardLoc', data.permanentAddress.wardNo);
+  pushText('permVillageTolLoc', data.permanentAddress.villageToleNp);
+  pushText('permVillageTol', data.permanentAddress.villageToleEn);
 
   if (!additional.temporaryAddressSameAsPermanent) {
-    pushSelect('tProvince', tProvinceVal);
-    pushSelect('tDistrict', tempDistrictVal);
+    pushSelect('tempState', tProvinceVal);
+    pushSelect('tempDistrict', tempDistrictVal);
     
     if (tLocalLevel) {
-      pushSelect('tVdc', "", tLocalLevel);
-      pushSelect('tvdc', "", tLocalLevel);
-      pushSelect('tLocalLevel', "", tLocalLevel);
+      pushSelect('tempRurMun', "", tLocalLevel);
     }
     
-    pushText('tWardNo', additional.temporaryAddress.wardNo);
-    pushText('tToleLoc', additional.temporaryAddress.villageToleNp);
-    pushText('tTole', additional.temporaryAddress.villageToleEn);
+    pushText('tempWardLoc', additional.temporaryAddress.wardNo);
+    pushText('tempVillageTolLoc', additional.temporaryAddress.villageToleNp);
+    pushText('tempVillageTol', additional.temporaryAddress.villageToleEn);
   }
 
   const fatherNpParts = splitName(data.fatherName.nepali);
   const fatherEnParts = splitName(data.fatherName.english);
-  pushText('fFnLoc', fatherNpParts.first);
-  pushText('fMnLoc', fatherNpParts.middle);
-  pushText('fLnLoc', fatherNpParts.last);
-  pushText('fFn', fatherEnParts.first);
-  pushText('fMn', fatherEnParts.middle);
-  pushText('fLn', fatherEnParts.last);
+  pushText('fatherFirstNameLoc', fatherNpParts.first);
+  pushText('fatherMiddleNameLoc', fatherNpParts.middle);
+  pushText('fatherLastNameLoc', fatherNpParts.last);
+  pushText('fatherFirstName', fatherEnParts.first);
+  pushText('fatherMiddleName', fatherEnParts.middle);
+  pushText('fatherLastName', fatherEnParts.last);
 
   const motherNpParts = splitName(data.motherName.nepali);
   const motherEnParts = splitName(data.motherName.english);
-  pushText('mFnLoc', motherNpParts.first);
-  pushText('mMnLoc', motherNpParts.middle);
-  pushText('mLnLoc', motherNpParts.last);
-  pushText('mFn', motherEnParts.first);
-  pushText('mMn', motherEnParts.middle);
-  pushText('mLn', motherEnParts.last);
+  pushText('motherFirstNameLoc', motherNpParts.first);
+  pushText('motherMiddleNameLoc', motherNpParts.middle);
+  pushText('motherLastNameLoc', motherNpParts.last);
+  pushText('motherFirstName', motherEnParts.first);
+  pushText('motherMiddleName', motherEnParts.middle);
+  pushText('motherLastName', motherEnParts.last);
 
   const gfNpParts = splitName(data.grandfatherName.nepali);
   const gfEnParts = splitName(data.grandfatherName.english);
-  pushText('gfFnLoc', gfNpParts.first);
-  pushText('gfMnLoc', gfNpParts.middle);
-  pushText('gfLnLoc', gfNpParts.last);
-  pushText('gfFn', gfEnParts.first);
-  pushText('gfMn', gfEnParts.middle);
-  pushText('gfLn', gfEnParts.last);
+  pushText('grandFatherFirstNameLoc', gfNpParts.first);
+  pushText('grandFatherMiddleNameLoc', gfNpParts.middle);
+  pushText('grandFatherLastNameLoc', gfNpParts.last);
+  pushText('grandFatherFirstName', gfEnParts.first);
+  pushText('grandFatherMiddleName', gfEnParts.middle);
+  pushText('grandFatherLastName', gfEnParts.last);
 
   const gmNpParts = splitName(additional.grandmotherName.nepali);
   const gmEnParts = splitName(additional.grandmotherName.english);
-  pushText('gmFnLoc', gmNpParts.first);
-  pushText('gmMnLoc', gmNpParts.middle);
-  pushText('gmLnLoc', gmNpParts.last);
-  pushText('gmFn', gmEnParts.first);
-  pushText('gmMn', gmEnParts.middle);
-  pushText('gmLn', gmEnParts.last);
+  pushText('grandMotherFirstNameLoc', gmNpParts.first);
+  pushText('grandMotherMiddleNameLoc', gmNpParts.middle);
+  pushText('grandMotherLastNameLoc', gmNpParts.last);
+  pushText('grandMotherFirstName', gmEnParts.first);
+  pushText('grandMotherMiddleName', gmEnParts.middle);
+  pushText('grandMotherLastName', gmEnParts.last);
 
   if (additional.maritalStatus === "1") {
-    pushText('sFnLoc', additional.spouseFirstName.nepali);
-    pushText('sMnLoc', additional.spouseMiddleName.nepali);
-    pushText('sLnLoc', additional.spouseLastName.nepali);
-    pushText('sFn', additional.spouseFirstName.english);
-    pushText('sMn', additional.spouseMiddleName.english);
-    pushText('sLn', additional.spouseLastName.english);
+    pushText('spouseFirstNameLoc', additional.spouseFirstName.nepali);
+    pushText('spouseMiddleNameLoc', additional.spouseMiddleName.nepali);
+    pushText('spouseLastNameLoc', additional.spouseLastName.nepali);
+    pushText('spouseFirstName', additional.spouseFirstName.english);
+    pushText('spouseMiddleName', additional.spouseMiddleName.english);
+    pushText('spouseLastName', additional.spouseLastName.english);
   }
 
   return instructions;

@@ -226,8 +226,8 @@
         try {
           let result = null;
           if (instructions) {
-            // Check if this is an old profile (pre-v1.1) by seeing if it lacks pProvince
-            const isOldProfile = !instructions.some(i => i.id === 'pProvince');
+            // Check if this is an old profile (pre-v1.1) by seeing if it lacks permState
+            const isOldProfile = !instructions.some(i => i.id === 'permState' || i.id === 'pProvince');
 
             const processInstructions = async () => {
               let filledCount = 0;
