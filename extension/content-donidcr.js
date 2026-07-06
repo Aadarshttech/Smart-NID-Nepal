@@ -246,86 +246,16 @@
                 if (inst.type === 'text' || inst.type === 'date') {
                   el.dispatchEvent(new Event('focus', { bubbles: true }));
                   
-                  // Check if this is a nepalify field — these have special JS that
-                  // processes keystrokes and validates Nepali dates. Direct .value 
-                  // setting bypasses this and causes validation errors.
-                  const isNepalifyField = el.classList.contains('nepalify') || el.classList.contains('nepaliDate');
-                  
-                  if (isNepalifyField) {
-                    // The nepalify library intercepts keypress events, converts English
-                    // digits to Devanagari, and inserts them into the field.
-                    //
-                    // IMPORTANT: The DoNIDCR portal also auto-inserts hyphens for date
-                    // fields via an `input` event handler (inserts '-' after the 4th and
-                    // 6th digits). If WE also type dashes, they get doubled.
-                    // Fix: For date values on nepalify-only fields, strip dashes and let
-                    // the portal's auto-formatter insert them.
-                    
-                    const nepaliToEnglish = (s) => s.replace(/[०-९]/g, (m) => '०१२३४५६७८९'.indexOf(m).toString());
-                    let englishValue = nepaliToEnglish(inst.value);
-                    
-                    // Detect date pattern (YYYY-MM-DD) on fields that DON'T have nepaliDate class.
-                    // nepaliDate fields use a date picker that handles formatting differently.
-                    // Plain nepalify fields have the portal's auto-dash-inserter on the input event.
-                    const hasNepaliDateClass = el.classList.contains('nepaliDate');
-                    if (!hasNepaliDateClass && /^\d{4}-\d{2}-\d{2}$/.test(englishValue)) {
-                      englishValue = englishValue.replace(/-/g, '');
-                    }
-                    
-                    // Clear the field first
-                    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-                    if (nativeInputValueSetter) {
-                      nativeInputValueSetter.call(el, '');
-                    } else {
-                      el.value = '';
-                    }
-                    el.dispatchEvent(new Event('input', { bubbles: true }));
-                    
-                    // Type each character individually
-                    for (let ci = 0; ci < englishValue.length; ci++) {
-                      const char = englishValue[ci];
-                      const keyCode = char.charCodeAt(0);
-                      const eventInit = { bubbles: true, cancelable: true, key: char, code: char >= '0' && char <= '9' ? `Digit${char}` : `Key${char.toUpperCase()}`, keyCode: keyCode, which: keyCode, charCode: keyCode };
-                      
-                      // Capture value BEFORE dispatching events so we can detect
-                      // if nepalify processed the keystroke
-                      const valueBefore = el.value;
-                      
-                      el.dispatchEvent(new KeyboardEvent('keydown', eventInit));
-                      el.dispatchEvent(new KeyboardEvent('keypress', eventInit));
-                      
-                      // Give a micro-tick for nepalify processing
-                      await new Promise(r => setTimeout(r, 15));
-                      
-                      // Only manually insert if nepalify did NOT handle it
-                      if (el.value === valueBefore) {
-                        const newVal = valueBefore + char;
-                        if (nativeInputValueSetter) {
-                          nativeInputValueSetter.call(el, newVal);
-                        } else {
-                          el.value = newVal;
-                        }
-                        el.dispatchEvent(new Event('input', { bubbles: true }));
-                      }
-                      
-                      el.dispatchEvent(new KeyboardEvent('keyup', eventInit));
-                      
-                      // Small delay between characters
-                      await new Promise(r => setTimeout(r, 20));
-                    }
-                    
-                    // Final delay for nepalify to finish validation
-                    await new Promise(r => setTimeout(r, 100));
+                  // Use native React value setter to bypass custom UI library keypress listeners
+                  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                  if (nativeInputValueSetter) {
+                    nativeInputValueSetter.call(el, inst.value);
                   } else {
-                    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-                    if (nativeInputValueSetter) {
-                      nativeInputValueSetter.call(el, inst.value);
-                    } else {
-                      el.value = inst.value;
-                    }
-                    el.dispatchEvent(new Event('input', { bubbles: true }));
-                    el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter', code: 'Enter' }));
+                    el.value = inst.value;
                   }
+                  el.dispatchEvent(new Event('input', { bubbles: true }));
+                  // Optional: trigger keyup for any listeners that specifically bind to key events
+                  el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter', code: 'Enter' }));
                   
                   el.dispatchEvent(new Event('change', { bubbles: true }));
                   el.dispatchEvent(new Event('blur', { bubbles: true }));

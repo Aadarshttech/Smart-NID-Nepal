@@ -96,6 +96,14 @@ export default function ExportTab() {
         setCopyState("copied");
         setTimeout(() => setCopyState("idle"), 4000);
       }
+      
+      // ✨ NEW: Backup to localStorage in case the extension drops it
+      try {
+        localStorage.setItem(`smart_nid_backup_${draft.citizenshipNo}`, JSON.stringify(additional));
+      } catch (err) {
+        console.warn("Failed to backup to localStorage", err);
+      }
+      
     } catch {
       setCopyState("error");
       setErrorMsg("Something went wrong. Please try again.");

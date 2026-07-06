@@ -6,7 +6,7 @@
 
 import { useEnrollmentStore } from "../store/enrollmentStore";
 import type { NameField, AddressField, ExtractionResult, AdditionalFields } from "../types/extraction";
-import { PROVINCE_OPTIONS } from "../types/extraction";
+import { PROVINCE_OPTIONS, DISTRICT_OPTIONS } from "../types/extraction";
 
 function NameInput({
   label,
@@ -275,11 +275,12 @@ export default function DocumentFamilyTab() {
             onChange={(val) => handleAddressChange("province", val)}
             options={PROVINCE_OPTIONS}
           />
-          <TextInput
+          <SelectInput
             label="District"
             labelNp="जिल्ला"
             value={draft.permanentAddress.district}
             onChange={(val) => handleAddressChange("district", val)}
+            options={DISTRICT_OPTIONS}
           />
           <TextInput
             label="Local Level"

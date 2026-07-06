@@ -14,6 +14,8 @@ import {
   PROFESSION_OPTIONS,
   CASTE_OPTIONS,
   RELIGION_OPTIONS,
+  PROVINCE_OPTIONS,
+  DISTRICT_OPTIONS,
 } from "../types/extraction";
 
 /** Bilingual name input (nepali + english side by side) */
@@ -312,18 +314,19 @@ export default function PersonalDetailsTab() {
 
         {!additional.temporaryAddressSameAsPermanent && (
           <div className="form-grid form-grid--2col" style={{ padding: "1rem", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px dashed #cbd5e1" }}>
-            <TextInput
+            <SelectInput
               label="Province/State"
               labelNp="प्रदेश"
               value={additional.temporaryAddress.province}
               onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, province: val })}
-              placeholder="E.g. Bagmati"
+              options={PROVINCE_OPTIONS}
             />
-            <TextInput
+            <SelectInput
               label="District"
               labelNp="जिल्ला"
               value={additional.temporaryAddress.district}
               onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, district: val })}
+              options={DISTRICT_OPTIONS}
             />
             <TextInput
               label="Local Level (Municipality)"

@@ -55,6 +55,7 @@
           type: "NID_TRANSFER_SCRIPT", 
           script: scriptToTransfer,
           draft: e.detail.draft,
+          additional: e.detail.additional,
           instructions: e.detail.instructions
         },
         (response) => {

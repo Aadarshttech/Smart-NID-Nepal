@@ -42,7 +42,15 @@ export default function Dashboard({ onNewEnrollment, onEditProfile }: { onNewEnr
   const handleEdit = (profile: any) => {
     // Ensure both draftData and additionalData exist (backward compatibility for old profiles)
     const draft = profile.draftData || {};
-    const additional = profile.additionalData || {
+    
+    // Check if web app has a backup of the additional data for this CIT No (in case extension is outdated)
+    const backupStr = localStorage.getItem(`smart_nid_backup_${draft.citizenshipNo}`);
+    let backupAdditional = null;
+    if (backupStr) {
+      try { backupAdditional = JSON.parse(backupStr); } catch (e) {}
+    }
+
+    const additional = backupAdditional || profile.additionalData || {
       maritalStatus: "",
       educationLevel: "",
       profession: "",
