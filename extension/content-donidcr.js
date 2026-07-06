@@ -235,8 +235,17 @@
 
               for (const inst of instructions) {
                 if (!inst.value && !inst.textValue) continue;
+                
+                let el = document.getElementById(inst.id);
+                
+                // Fallback for checkbox if ID changed
+                if (!el && inst.id === 'tempAddressCopy') {
+                  const labels = Array.from(document.querySelectorAll('label, span, div'));
+                  const copyLabel = labels.find(l => l.innerText && l.innerText.includes('Copy Permanent Address'));
+                  if (copyLabel) el = copyLabel.querySelector('input[type="checkbox"]') || copyLabel.parentElement?.querySelector('input[type="checkbox"]');
+                  if (!el) el = document.querySelector('input[type="checkbox"]');
+                }
 
-                const el = document.getElementById(inst.id);
                 if (!el) {
                   skippedCount++;
                   console.warn('Smart NID: Field not found (likely on another tab):', inst.id);
@@ -260,12 +269,31 @@
                   el.dispatchEvent(new Event('change', { bubbles: true }));
                   el.dispatchEvent(new Event('blur', { bubbles: true }));
                   filledCount++;
+                } else if (inst.type === 'checkbox') {
+                  const shouldBeChecked = inst.value === 'true';
+                  if (el.checked !== shouldBeChecked) {
+                    el.click();
+                  }
+                  filledCount++;
                 } else if (inst.type === 'select') {
-                  // Wait for options to populate (for cascading dropdowns like VDC)
+                  // Wait for the specific option to populate (cascading dropdowns like District/Local Level)
                   let attempts = 0;
-                  while (el.options.length <= 1 && attempts < 10) {
-                    await new Promise(r => setTimeout(r, 200));
-                    attempts++;
+                  let hasOption = false;
+                  
+                  const targetVal = inst.value ? inst.value.toString() : "";
+                  const targetText = inst.textValue ? inst.textValue.toString().toLowerCase() : "";
+
+                  while (!hasOption && attempts < 20) {
+                    const options = Array.from(el.options);
+                    hasOption = options.some(opt => 
+                      (targetVal && opt.value === targetVal) || 
+                      (targetText && (opt.text.toLowerCase() === targetText || opt.text.toLowerCase().includes(targetText)))
+                    );
+                    
+                    if (!hasOption) {
+                      await new Promise(r => setTimeout(r, 100));
+                      attempts++;
+                    }
                   }
 
                   let matched = false;
@@ -273,7 +301,12 @@
                   if (inst.value) {
                     for (let i = 0; i < el.options.length; i++) {
                       if (el.options[i].value === inst.value) {
-                        el.value = inst.value;
+                        const nativeSelectValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')?.set;
+                        if (nativeSelectValueSetter) {
+                          nativeSelectValueSetter.call(el, inst.value);
+                        } else {
+                          el.value = inst.value;
+                        }
                         matched = true;
                         break;
                       }
@@ -282,13 +315,33 @@
                   
                   // If not matched by value, try to match by text content
                   if (!matched && inst.textValue) {
-                    const normalized = inst.textValue.toLowerCase().trim();
+                    const lowerVal = inst.textValue.toLowerCase();
+                    let fuzzyMatch = null;
+                    // 1. Exact text match
                     for (let i = 0; i < el.options.length; i++) {
-                      if (el.options[i].text.toLowerCase().includes(normalized)) {
-                        el.value = el.options[i].value;
-                        matched = true;
+                      if (el.options[i].text.toLowerCase() === lowerVal) {
+                        fuzzyMatch = el.options[i];
                         break;
                       }
+                    }
+                    // 2. Contains match
+                    if (!fuzzyMatch) {
+                      for (let i = 0; i < el.options.length; i++) {
+                        if (el.options[i].text.toLowerCase().includes(lowerVal)) {
+                          fuzzyMatch = el.options[i];
+                          break;
+                        }
+                      }
+                    }
+                    
+                    if (fuzzyMatch) {
+                      const nativeSelectValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')?.set;
+                      if (nativeSelectValueSetter) {
+                        nativeSelectValueSetter.call(el, fuzzyMatch.value);
+                      } else {
+                        el.value = fuzzyMatch.value;
+                      }
+                      matched = true;
                     }
                   }
                   
@@ -365,27 +418,41 @@
         
         if (filled > 0 && skipped > 0) {
           btn.innerHTML = `✅ Filled ${filled} fields!`;
-          statusBadge.innerHTML = `✅ <b>${filled} fields filled!</b> ${skipped} fields are on other tabs — navigate there and click Auto-Fill again.`;
+          statusBadge.innerHTML = `✅ <b>${filled} fields filled!</b> Navigating to next tab...`;
+          
+          // Auto-navigate to next tab
+          setTimeout(() => {
+            const buttons = Array.from(document.querySelectorAll('button'));
+            const nextBtn = buttons.find(b => b.innerText && b.innerText.trim().toLowerCase() === 'next');
+            if (nextBtn) {
+              sessionStorage.setItem('smart_nid_autorun', 'true');
+              nextBtn.click();
+            }
+          }, 1000);
+          
         } else if (filled > 0) {
           btn.innerHTML = "✅ All Filled!";
-          statusBadge.innerHTML = "✅ <b>All fields on this tab filled!</b> Check the next tab.";
+          statusBadge.innerHTML = "✅ <b>All fields filled!</b> Review and submit.";
+          sessionStorage.removeItem('smart_nid_autorun');
         } else {
           btn.innerHTML = "⚠️ No Fields Found";
-          statusBadge.innerHTML = "⚠️ No fillable fields found on this tab. Navigate to the correct tab first.";
+          statusBadge.innerHTML = "⚠️ No fillable fields found on this tab.";
           statusBadge.style.backgroundColor = "#f59e0b";
+          sessionStorage.removeItem('smart_nid_autorun');
         }
         
         if (filled > 0) statusBadge.style.backgroundColor = "#28a745";
         statusBadge.style.opacity = "1";
         statusBadge.style.transform = "translateY(0)";
 
-        // Revert back to ready state after 3 seconds so they can use it on the next tab
+        // Revert back to ready state after 3 seconds
         setTimeout(() => {
           btn.innerHTML = originalHtml;
           statusBadge.style.opacity = "0";
         }, 3000);
       } catch (err) {
           console.error("Smart NID: Script injection error —", err);
+          sessionStorage.removeItem('smart_nid_autorun');
           btn.innerHTML = "❌ Error";
           btn.style.backgroundColor = "#dc3545";
           statusBadge.innerHTML = "❌ Injection failed. Try refreshing the page.";
@@ -434,6 +501,14 @@
         
         // Cancel pulse animation
         currentBtn.getAnimations().forEach(anim => anim.cancel());
+        
+        // 🚀 Auto-Run feature for multi-tab wizard
+        if (sessionStorage.getItem('smart_nid_autorun') === 'true') {
+          sessionStorage.removeItem('smart_nid_autorun'); // Prevent infinite loops
+          setTimeout(() => {
+            currentBtn.click();
+          }, 500); // Small delay to let React fully mount the fields
+        }
       }
     }, 1500);
   }

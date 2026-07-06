@@ -17,7 +17,7 @@ import { findDistrictValue, mapGender, getProvinceFromDistrictId } from "./distr
 
 export interface AutoFillInstruction {
   id: string;
-  type: 'text' | 'select' | 'date';
+  type: 'text' | 'select' | 'date' | 'checkbox';
   value: string;
   textValue?: string;
 }
@@ -395,7 +395,10 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('permVillageTolLoc', data.permanentAddress.villageToleNp);
   pushText('permVillageTol', data.permanentAddress.villageToleEn);
 
-  if (!additional.temporaryAddressSameAsPermanent) {
+  if (additional.temporaryAddressSameAsPermanent) {
+    instructions.push({ id: 'tempAddressCopy', type: 'checkbox', value: 'true' });
+  } else {
+    instructions.push({ id: 'tempAddressCopy', type: 'checkbox', value: 'false' });
     pushSelect('tempState', tProvinceVal);
     pushSelect('tempDistrict', tempDistrictVal);
     
