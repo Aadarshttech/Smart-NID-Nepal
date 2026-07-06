@@ -283,7 +283,7 @@
                   const targetVal = inst.value ? inst.value.toString() : "";
                   const targetText = inst.textValue ? inst.textValue.toString().toLowerCase() : "";
 
-                  while (!hasOption && attempts < 20) {
+                  while (!hasOption && attempts < 50) {
                     const options = Array.from(el.options);
                     hasOption = options.some(opt => 
                       (targetVal && opt.value === targetVal) || 
@@ -345,6 +345,7 @@
                     }
                   }
                   
+                  el.dispatchEvent(new Event('input', { bubbles: true }));
                   el.dispatchEvent(new Event('change', { bubbles: true }));
                   filledCount++;
                 }
@@ -416,11 +417,8 @@
         const filled = (typeof result === 'object' && result) ? result.filledCount : 0;
         const skipped = (typeof result === 'object' && result) ? result.skippedCount : 0;
         
-        if (filled > 0 && skipped > 0) {
-          btn.innerHTML = `✅ Filled ${filled} fields!`;
-          statusBadge.innerHTML = `✅ <b>${filled} fields filled!</b> Navigating to next tab...`;
-          
-          // Auto-navigate to next tab
+        if (filled > 0) {
+          // Always try to click Next to proceed through the wizard
           setTimeout(() => {
             const buttons = Array.from(document.querySelectorAll('button'));
             const nextBtn = buttons.find(b => b.innerText && b.innerText.trim().toLowerCase() === 'next');
@@ -429,11 +427,14 @@
               nextBtn.click();
             }
           }, 1000);
-          
+        }
+
+        if (filled > 0 && skipped > 0) {
+          btn.innerHTML = `✅ Filled ${filled} fields!`;
+          statusBadge.innerHTML = `✅ <b>${filled} fields filled!</b> Navigating to next tab...`;
         } else if (filled > 0) {
           btn.innerHTML = "✅ All Filled!";
-          statusBadge.innerHTML = "✅ <b>All fields filled!</b> Review and submit.";
-          sessionStorage.removeItem('smart_nid_autorun');
+          statusBadge.innerHTML = "✅ <b>All fields filled!</b> Navigating or Review and submit.";
         } else {
           btn.innerHTML = "⚠️ No Fields Found";
           statusBadge.innerHTML = "⚠️ No fillable fields found on this tab.";

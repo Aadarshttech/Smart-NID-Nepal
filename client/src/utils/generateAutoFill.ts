@@ -383,8 +383,8 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('mobilePhone', additional.mobileNo);
   pushText('telephone', additional.phoneNo);
   
-  pushSelect('permState', pProvinceVal);
-  pushSelect('permDistrict', permanentDistrictVal);
+  pushSelect('permState', pProvinceVal, data.permanentAddress.province);
+  pushSelect('permDistrict', permanentDistrictVal, data.permanentAddress.district);
   
   // Try common DoNIDCR Local Level dropdown IDs by text matching
   if (pLocalLevel) {
@@ -399,8 +399,8 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
     instructions.push({ id: 'tempAddressCopy', type: 'checkbox', value: 'true' });
   } else {
     instructions.push({ id: 'tempAddressCopy', type: 'checkbox', value: 'false' });
-    pushSelect('tempState', tProvinceVal);
-    pushSelect('tempDistrict', tempDistrictVal);
+    pushSelect('tempState', tProvinceVal, additional.temporaryAddress.province);
+    pushSelect('tempDistrict', tempDistrictVal, additional.temporaryAddress.district);
     
     if (tLocalLevel) {
       pushSelect('tempRurMun', "", tLocalLevel);
