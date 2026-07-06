@@ -252,25 +252,70 @@
                   const isNepalifyField = el.classList.contains('nepalify') || el.classList.contains('nepaliDate');
                   
                   if (isNepalifyField) {
-                    // For nepalify fields, set value directly with Devanagari digits
-                    // (the generateAutoFill already sends Devanagari), then simulate
-                    // the complete event lifecycle so the portal's validation runs.
-                    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-                    if (nativeInputValueSetter) {
-                      nativeInputValueSetter.call(el, inst.value);
-                    } else {
-                      el.value = inst.value;
+                    // The nepalify library intercepts keypress events, converts English
+                    // digits to Devanagari, and inserts them into the field.
+                    //
+                    // IMPORTANT: The DoNIDCR portal also auto-inserts hyphens for date
+                    // fields via an `input` event handler (inserts '-' after the 4th and
+                    // 6th digits). If WE also type dashes, they get doubled.
+                    // Fix: For date values on nepalify-only fields, strip dashes and let
+                    // the portal's auto-formatter insert them.
+                    
+                    const nepaliToEnglish = (s) => s.replace(/[०-९]/g, (m) => '०१२३४५६७८९'.indexOf(m).toString());
+                    let englishValue = nepaliToEnglish(inst.value);
+                    
+                    // Detect date pattern (YYYY-MM-DD) on fields that DON'T have nepaliDate class.
+                    // nepaliDate fields use a date picker that handles formatting differently.
+                    // Plain nepalify fields have the portal's auto-dash-inserter on the input event.
+                    const hasNepaliDateClass = el.classList.contains('nepaliDate');
+                    if (!hasNepaliDateClass && /^\d{4}-\d{2}-\d{2}$/.test(englishValue)) {
+                      englishValue = englishValue.replace(/-/g, '');
                     }
                     
-                    // Simulate typing events for the last character to trigger nepalify processing
-                    const lastChar = inst.value.slice(-1) || '';
-                    el.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: lastChar, code: 'Digit0' }));
-                    el.dispatchEvent(new KeyboardEvent('keypress', { bubbles: true, key: lastChar, code: 'Digit0' }));
+                    // Clear the field first
+                    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                    if (nativeInputValueSetter) {
+                      nativeInputValueSetter.call(el, '');
+                    } else {
+                      el.value = '';
+                    }
                     el.dispatchEvent(new Event('input', { bubbles: true }));
-                    el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: lastChar, code: 'Digit0' }));
                     
-                    // Small delay for nepalify processing
-                    await new Promise(r => setTimeout(r, 80));
+                    // Type each character individually
+                    for (let ci = 0; ci < englishValue.length; ci++) {
+                      const char = englishValue[ci];
+                      const keyCode = char.charCodeAt(0);
+                      const eventInit = { bubbles: true, cancelable: true, key: char, code: char >= '0' && char <= '9' ? `Digit${char}` : `Key${char.toUpperCase()}`, keyCode: keyCode, which: keyCode, charCode: keyCode };
+                      
+                      // Capture value BEFORE dispatching events so we can detect
+                      // if nepalify processed the keystroke
+                      const valueBefore = el.value;
+                      
+                      el.dispatchEvent(new KeyboardEvent('keydown', eventInit));
+                      el.dispatchEvent(new KeyboardEvent('keypress', eventInit));
+                      
+                      // Give a micro-tick for nepalify processing
+                      await new Promise(r => setTimeout(r, 15));
+                      
+                      // Only manually insert if nepalify did NOT handle it
+                      if (el.value === valueBefore) {
+                        const newVal = valueBefore + char;
+                        if (nativeInputValueSetter) {
+                          nativeInputValueSetter.call(el, newVal);
+                        } else {
+                          el.value = newVal;
+                        }
+                        el.dispatchEvent(new Event('input', { bubbles: true }));
+                      }
+                      
+                      el.dispatchEvent(new KeyboardEvent('keyup', eventInit));
+                      
+                      // Small delay between characters
+                      await new Promise(r => setTimeout(r, 20));
+                    }
+                    
+                    // Final delay for nepalify to finish validation
+                    await new Promise(r => setTimeout(r, 100));
                   } else {
                     const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
                     if (nativeInputValueSetter) {
