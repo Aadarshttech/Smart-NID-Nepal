@@ -15,8 +15,9 @@ import {
   CASTE_OPTIONS,
   RELIGION_OPTIONS,
   PROVINCE_OPTIONS,
-  DISTRICT_OPTIONS,
 } from "../types/extraction";
+import { getDistrictsForProvince, getLocalLevelsForDistrict } from "../utils/locationHelper";
+import { containsEnglishChars } from "../utils/validation";
 
 /** Bilingual name input (nepali + english side by side) */
 function NameInput({
@@ -45,6 +46,11 @@ function NameInput({
             onChange={(e) => onChange({ ...value, nepali: e.target.value })}
             placeholder={`${labelNp}`}
           />
+          {containsEnglishChars(value.nepali) && (
+            <div style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+              ⚠️ English characters detected!
+            </div>
+          )}
         </div>
         <div className="form-field__input-group">
           <span className="form-field__input-tag">English</span>
@@ -68,13 +74,17 @@ function TextInput({
   value,
   onChange,
   placeholder,
+  validateNepali,
 }: {
   label: string;
   labelNp: string;
   value: string;
   onChange: (val: string) => void;
   placeholder?: string;
+  validateNepali?: boolean;
 }) {
+  const hasError = validateNepali && containsEnglishChars(value);
+
   return (
     <div className="form-field">
       <label className="form-field__label">
@@ -83,10 +93,16 @@ function TextInput({
       <input
         type="text"
         className="form-field__input"
+        style={hasError ? { borderColor: '#ef4444' } : {}}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || label}
       />
+      {hasError && (
+        <div style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+          ⚠️ English characters detected in Nepali field!
+        </div>
+      )}
     </div>
   );
 }
@@ -98,15 +114,17 @@ function SelectInput({
   value,
   onChange,
   options,
+  disabled,
 }: {
   label: string;
   labelNp: string;
   value: string;
   onChange: (val: string) => void;
   options: { val: string; text: string }[];
+  disabled?: boolean;
 }) {
   return (
-    <div className="form-field">
+    <div className={`form-field ${disabled ? 'opacity-50' : ''}`}>
       <label className="form-field__label">
         {labelNp} / {label}
       </label>
@@ -114,6 +132,7 @@ function SelectInput({
         className="form-field__input form-field__select"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
       >
         {options.map((opt) => (
           <option key={opt.val} value={opt.val}>
@@ -134,6 +153,25 @@ export default function PersonalDetailsTab() {
   const handleNameChange = (field: keyof ExtractionResult) => (val: NameField) => {
     updateDraftField(field, val as ExtractionResult[typeof field]);
   };
+
+  const handleTempAddressChange = (field: string, val: string) => {
+    const updatedAddress = { ...additional.temporaryAddress, [field]: val };
+    
+    // Clear district and local level if province changes
+    if (field === "province") {
+      updatedAddress.district = "";
+      updatedAddress.localLevel = "";
+    }
+    // Clear local level if district changes
+    if (field === "district") {
+      updatedAddress.localLevel = "";
+    }
+    
+    updateAdditionalField("temporaryAddress", updatedAddress);
+  };
+
+  const tempDistricts = additional.temporaryAddress.province ? getDistrictsForProvince(additional.temporaryAddress.province) : [];
+  const tempLocalLevels = additional.temporaryAddress.district && additional.temporaryAddress.province ? getLocalLevelsForDistrict(additional.temporaryAddress.province, additional.temporaryAddress.district) : [];
 
   const canProceed =
     draft.firstName.english.trim() !== "" &&
@@ -318,39 +356,43 @@ export default function PersonalDetailsTab() {
               label="Province/State"
               labelNp="प्रदेश"
               value={additional.temporaryAddress.province}
-              onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, province: val })}
+              onChange={(val) => handleTempAddressChange("province", val)}
               options={PROVINCE_OPTIONS}
             />
             <SelectInput
               label="District"
               labelNp="जिल्ला"
               value={additional.temporaryAddress.district}
-              onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, district: val })}
-              options={DISTRICT_OPTIONS}
+              onChange={(val) => handleTempAddressChange("district", val)}
+              options={[{val: "", text: "-- Select / छान्नुहोस् --"}, ...tempDistricts]}
+              disabled={!additional.temporaryAddress.province}
             />
-            <TextInput
+            <SelectInput
               label="Local Level (Municipality)"
               labelNp="गा.पा./न.पा."
               value={additional.temporaryAddress.localLevel}
-              onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, localLevel: val })}
+              onChange={(val) => handleTempAddressChange("localLevel", val)}
+              options={[{val: "", text: "-- Select / छान्नुहोस् --"}, ...tempLocalLevels]}
+              disabled={!additional.temporaryAddress.district}
             />
             <TextInput
               label="Ward No."
               labelNp="वडा नं."
               value={additional.temporaryAddress.wardNo}
-              onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, wardNo: val })}
+              onChange={(val) => handleTempAddressChange("wardNo", val)}
             />
             <TextInput
               label="Village/Tole (Nepali)"
               labelNp="गाउँ/टोल (नेपाली)"
               value={additional.temporaryAddress.villageToleNp}
-              onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, villageToleNp: val })}
+              onChange={(val) => handleTempAddressChange("villageToleNp", val)}
+              validateNepali={true}
             />
             <TextInput
               label="Village/Tole (English)"
               labelNp="गाउँ/टोल (English)"
               value={additional.temporaryAddress.villageToleEn}
-              onChange={(val) => updateAdditionalField("temporaryAddress", { ...additional.temporaryAddress, villageToleEn: val })}
+              onChange={(val) => handleTempAddressChange("villageToleEn", val)}
             />
           </div>
         )}

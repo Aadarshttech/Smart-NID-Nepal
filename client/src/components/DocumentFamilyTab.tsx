@@ -6,7 +6,9 @@
 
 import { useEnrollmentStore } from "../store/enrollmentStore";
 import type { NameField, AddressField, ExtractionResult, AdditionalFields } from "../types/extraction";
-import { PROVINCE_OPTIONS, DISTRICT_OPTIONS } from "../types/extraction";
+import { PROVINCE_OPTIONS } from "../types/extraction";
+import { getDistrictsForProvince, getLocalLevelsForDistrict } from "../utils/locationHelper";
+import { containsEnglishChars } from "../utils/validation";
 
 function NameInput({
   label,
@@ -34,6 +36,11 @@ function NameInput({
             onChange={(e) => onChange({ ...value, nepali: e.target.value })}
             placeholder={labelNp}
           />
+          {containsEnglishChars(value.nepali) && (
+            <div style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+              ⚠️ English characters detected!
+            </div>
+          )}
         </div>
         <div className="form-field__input-group">
           <span className="form-field__input-tag">English</span>
@@ -56,13 +63,17 @@ function TextInput({
   value,
   onChange,
   placeholder,
+  validateNepali,
 }: {
   label: string;
   labelNp: string;
   value: string;
   onChange: (val: string) => void;
   placeholder?: string;
+  validateNepali?: boolean;
 }) {
+  const hasError = validateNepali && containsEnglishChars(value);
+
   return (
     <div className="form-field">
       <label className="form-field__label">
@@ -71,10 +82,16 @@ function TextInput({
       <input
         type="text"
         className="form-field__input"
+        style={hasError ? { borderColor: '#ef4444' } : {}}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || label}
       />
+      {hasError && (
+        <div style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+          ⚠️ English characters detected in Nepali field!
+        </div>
+      )}
     </div>
   );
 }
@@ -85,15 +102,17 @@ function SelectInput({
   value,
   onChange,
   options,
+  disabled,
 }: {
   label: string;
   labelNp: string;
   value: string;
   onChange: (val: string) => void;
   options: { text: string; val: string }[];
+  disabled?: boolean;
 }) {
   return (
-    <div className="form-field">
+    <div className={`form-field ${disabled ? 'opacity-50' : ''}`}>
       <label className="form-field__label">
         {labelNp} / {label}
       </label>
@@ -101,6 +120,7 @@ function SelectInput({
         className="form-field__input form-field__select"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
       >
         {options.map((opt) => (
           <option key={opt.val} value={opt.val}>
@@ -127,18 +147,48 @@ export default function DocumentFamilyTab() {
   };
 
   const handleAddressChange = (subField: keyof AddressField, val: string) => {
-    updateDraftField("permanentAddress", {
+    const updatedAddress = {
       ...draft.permanentAddress,
       [subField]: val,
-    });
+    };
+    
+    // Clear district and local level if province changes
+    if (subField === "province") {
+      updatedAddress.district = "";
+      updatedAddress.localLevel = "";
+    }
+    // Clear local level if district changes
+    if (subField === "district") {
+      updatedAddress.localLevel = "";
+    }
+    
+    updateDraftField("permanentAddress", updatedAddress);
   };
 
   const handleTempAddressChange = (subField: keyof AddressField, val: string) => {
-    updateAdditionalField("temporaryAddress", {
+    const updatedAddress = {
       ...additional.temporaryAddress,
       [subField]: val,
-    });
+    };
+    
+    // Clear district and local level if province changes
+    if (subField === "province") {
+      updatedAddress.district = "";
+      updatedAddress.localLevel = "";
+    }
+    // Clear local level if district changes
+    if (subField === "district") {
+      updatedAddress.localLevel = "";
+    }
+    
+    updateAdditionalField("temporaryAddress", updatedAddress);
   };
+
+  const permDistricts = draft.permanentAddress.province ? getDistrictsForProvince(draft.permanentAddress.province) : [];
+  const permLocalLevels = draft.permanentAddress.district && draft.permanentAddress.province ? getLocalLevelsForDistrict(draft.permanentAddress.province, draft.permanentAddress.district) : [];
+
+  const tempDistricts = additional.temporaryAddress.province ? getDistrictsForProvince(additional.temporaryAddress.province) : [];
+  const tempLocalLevels = additional.temporaryAddress.district && additional.temporaryAddress.province ? getLocalLevelsForDistrict(additional.temporaryAddress.province, additional.temporaryAddress.district) : [];
 
   const canProceed =
     draft.citizenshipNo.trim() !== "" &&
@@ -280,13 +330,16 @@ export default function DocumentFamilyTab() {
             labelNp="जिल्ला"
             value={draft.permanentAddress.district}
             onChange={(val) => handleAddressChange("district", val)}
-            options={DISTRICT_OPTIONS}
+            options={[{val: "", text: "-- Select / छान्नुहोस् --"}, ...permDistricts]}
+            disabled={!draft.permanentAddress.province}
           />
-          <TextInput
+          <SelectInput
             label="Local Level"
             labelNp="स्थानीय तह"
             value={draft.permanentAddress.localLevel}
             onChange={(val) => handleAddressChange("localLevel", val)}
+            options={[{val: "", text: "-- Select / छान्नुहोस् --"}, ...permLocalLevels]}
+            disabled={!draft.permanentAddress.district}
           />
         </div>
 
@@ -302,10 +355,11 @@ export default function DocumentFamilyTab() {
             labelNp="गाउँ/टोल (नेपाली)"
             value={draft.permanentAddress.villageToleNp}
             onChange={(val) => handleAddressChange("villageToleNp", val)}
+            validateNepali={true}
           />
           <TextInput
             label="Village/Tole (English)"
-            labelNp="गाउँ/टोल (अंग्रेजी)"
+            labelNp="गाउँ/टोल (English)"
             value={draft.permanentAddress.villageToleEn}
             onChange={(val) => handleAddressChange("villageToleEn", val)}
           />
@@ -340,17 +394,21 @@ export default function DocumentFamilyTab() {
                 onChange={(val) => handleTempAddressChange("province", val)}
                 options={PROVINCE_OPTIONS}
               />
-              <TextInput
+              <SelectInput
                 label="District"
                 labelNp="जिल्ला"
                 value={additional.temporaryAddress.district}
                 onChange={(val) => handleTempAddressChange("district", val)}
+                options={[{val: "", text: "-- Select / छान्नुहोस् --"}, ...tempDistricts]}
+                disabled={!additional.temporaryAddress.province}
               />
-              <TextInput
+              <SelectInput
                 label="Local Level"
                 labelNp="स्थानीय तह"
                 value={additional.temporaryAddress.localLevel}
                 onChange={(val) => handleTempAddressChange("localLevel", val)}
+                options={[{val: "", text: "-- Select / छान्नुहोस् --"}, ...tempLocalLevels]}
+                disabled={!additional.temporaryAddress.district}
               />
             </div>
             <div className="form-grid form-grid--3col">

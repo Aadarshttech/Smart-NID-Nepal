@@ -324,7 +324,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   const instructions: AutoFillInstruction[] = [];
   
   const pushText = (id: string, value: string | undefined) => {
-    if (value) instructions.push({ id, type: 'text', value });
+    if (value && value.trim()) instructions.push({ id, type: 'text', value: value.trim() });
   };
   const pushSelect = (id: string, value: string | undefined, textValue?: string) => {
     if (value || textValue) instructions.push({ id, type: 'select', value: value || "", textValue });
@@ -368,7 +368,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
 
   pushSelect('birthDistrictPlace', birthDistrictVal);
   pushSelect('ccType', additional.ccType || '1');
-  pushText('ccNumberLoc', data.citizenshipNo);
+  pushText('ccNumberLoc', englishToNepaliDigits(data.citizenshipNo));
   pushSelect('ccIssuingDistrict', issuingDistrictVal);
   pushText('ccIssuingDateLoc', issueDateBS_NP);
   pushSelect('gender', genderVal);
@@ -391,7 +391,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
     pushSelect('permRurMun', "", pLocalLevel);
   }
   
-  pushText('permWardLoc', data.permanentAddress.wardNo);
+  pushText('permWardLoc', englishToNepaliDigits(data.permanentAddress.wardNo));
   pushText('permVillageTolLoc', data.permanentAddress.villageToleNp);
   pushText('permVillageTol', data.permanentAddress.villageToleEn);
 
@@ -406,7 +406,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
       pushSelect('tempRurMun', "", tLocalLevel);
     }
     
-    pushText('tempWardLoc', additional.temporaryAddress.wardNo);
+    pushText('tempWardLoc', englishToNepaliDigits(additional.temporaryAddress.wardNo));
     pushText('tempVillageTolLoc', additional.temporaryAddress.villageToleNp);
     pushText('tempVillageTol', additional.temporaryAddress.villageToleEn);
   }
