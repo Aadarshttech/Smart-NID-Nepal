@@ -12,6 +12,12 @@ export interface NameField {
   english: string;
 }
 
+export interface FamilyMemberDetails {
+  ccNumber: string;
+  nin: string;
+  nationality: string;
+}
+
 export interface AddressField {
   province: string;
   district: string;
@@ -31,9 +37,15 @@ export interface ExtractionResult {
   dobAD: string;
   birthPlace: string;
   gender: "MALE" | "FEMALE" | "OTHER" | "";
-  fatherName: NameField;
-  motherName: NameField;
-  grandfatherName: NameField;
+  fatherFirstName: NameField;
+  fatherMiddleName: NameField;
+  fatherLastName: NameField;
+  motherFirstName: NameField;
+  motherMiddleName: NameField;
+  motherLastName: NameField;
+  grandfatherFirstName: NameField;
+  grandfatherMiddleName: NameField;
+  grandfatherLastName: NameField;
   permanentAddress: AddressField;
   issuingDistrict: string;
   issueDateBS: string;
@@ -50,6 +62,8 @@ export interface AdditionalFields {
   caste: string;                // DoNIDCR: "1"=Other ... "100+"
   religion: string;             // DoNIDCR: "1"=Hindu ... "10"=Other
   ccType: string;               // DoNIDCR: "1"=Descent, "2"=Naturalized, etc.
+  ccPrevNatCountry: string;
+  ccPrevNatRevocationDate: string;
 
   // Contact Details
   phoneNo: string;
@@ -57,13 +71,31 @@ export interface AdditionalFields {
   temporaryAddressSameAsPermanent: boolean;
   temporaryAddress: AddressField;
 
+  // Family — Status and Details
+  fatherStatus: string;         // "1"=Alive, "2"=Death, "3"=Unknown
+  fatherDetails: FamilyMemberDetails;
+  
+  motherStatus: string;         // "1"=Alive, "2"=Death, "3"=Unknown
+  motherDetails: FamilyMemberDetails;
+
+  grandfatherDetails: FamilyMemberDetails;
+
   // Family — Grandmother (not on citizenship)
-  grandmotherName: NameField;
+  grandmotherFirstName: NameField;
+  grandmotherMiddleName: NameField;
+  grandmotherLastName: NameField;
+  grandmotherDetails: FamilyMemberDetails;
 
   // Family — Spouse (if married)
   spouseFirstName: NameField;
   spouseMiddleName: NameField;
   spouseLastName: NameField;
+  spouseDetails: FamilyMemberDetails;
+
+  // Guardian
+  guardianName: NameField;
+  guardianDetails: FamilyMemberDetails;
+  guardianAddress: AddressField;
 }
 
 /** Combined payload: AI-extracted + user-entered */
@@ -86,9 +118,9 @@ export const MANDATORY_FIELDS: (keyof ExtractionResult)[] = [
   "dobAD",
   "birthPlace",
   "gender",
-  "fatherName",
-  "motherName",
-  "grandfatherName",
+  "fatherFirstName",
+  "motherFirstName",
+  "grandfatherFirstName",
   "issuingDistrict",
   "issueDateBS",
 ];
