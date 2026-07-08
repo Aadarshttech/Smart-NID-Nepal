@@ -12,19 +12,29 @@ import type {
 /** Steps in the enrollment wizard */
 export const ENROLLMENT_STEPS = [
   { label: "Upload", labelNp: "अपलोड" },
-  { label: "Personal Info", labelNp: "व्यक्तिगत विवरण" },
-  { label: "Family Info", labelNp: "पारिवारिक विवरण" },
+  { label: "Applicant Data", labelNp: "मुख्य आवेदकको विवरण" },
+  { label: "Contact Details", labelNp: "सम्पर्क विवरण" },
+  { label: "Family Details", labelNp: "पारिवारिक विवरण" },
   { label: "Export", labelNp: "निर्यात" },
 ] as const;
 
 /** Default values for user-entered additional fields */
-const DEFAULT_ADDITIONAL: AdditionalFields = {
+const DEFAULT_FAMILY_DETAILS = {
+  ccNumber: "",
+  nin: "",
+  nationality: ""
+};
+
+const DEFAULT_ADDITIONAL_FIELDS = {
   maritalStatus: "",
   educationLevel: "",
   profession: "",
   caste: "",
   religion: "",
-  ccType: "1", // Default: Citizenship by Descent (most common)
+  ccType: "",
+  ccPrevNatCountry: "",
+  ccPrevNatRevocationDate: "",
+
   phoneNo: "",
   mobileNo: "",
   temporaryAddressSameAsPermanent: true,
@@ -36,10 +46,35 @@ const DEFAULT_ADDITIONAL: AdditionalFields = {
     villageToleNp: "",
     villageToleEn: "",
   },
-  grandmotherName: { nepali: "", english: "" },
+
+  fatherStatus: "1", // Default to Alive
+  fatherDetails: { ...DEFAULT_FAMILY_DETAILS },
+  
+  motherStatus: "1", // Default to Alive
+  motherDetails: { ...DEFAULT_FAMILY_DETAILS },
+
+  grandfatherDetails: { ...DEFAULT_FAMILY_DETAILS },
+
+  grandmotherFirstName: { nepali: "", english: "" },
+  grandmotherMiddleName: { nepali: "", english: "" },
+  grandmotherLastName: { nepali: "", english: "" },
+  grandmotherDetails: { ...DEFAULT_FAMILY_DETAILS },
+
   spouseFirstName: { nepali: "", english: "" },
   spouseMiddleName: { nepali: "", english: "" },
   spouseLastName: { nepali: "", english: "" },
+  spouseDetails: { ...DEFAULT_FAMILY_DETAILS },
+
+  guardianName: { nepali: "", english: "" },
+  guardianDetails: { ...DEFAULT_FAMILY_DETAILS },
+  guardianAddress: {
+    province: "",
+    district: "",
+    localLevel: "",
+    wardNo: "",
+    villageToleNp: "",
+    villageToleEn: "",
+  },
 };
 
 interface EnrollmentState {
@@ -90,7 +125,7 @@ interface EnrollmentState {
 const initialState = {
   extractedData: null,
   draft: null,
-  additional: { ...DEFAULT_ADDITIONAL },
+  additional: { ...DEFAULT_ADDITIONAL_FIELDS },
   currentStep: 0,
   isExtracting: false,
   extractionError: null,
