@@ -98,4 +98,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true;
   }
+
+  if (message.type === "NID_LOG_ERROR") {
+    fetch('http://localhost:3001/api/log-error', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: message.payload })
+    }).catch(err => console.error("Smart NID: Failed to log to local server", err));
+    sendResponse({ status: "success" });
+    return true;
+  }
 });
