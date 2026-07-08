@@ -27,19 +27,7 @@ app.use((_req, res, next) => {
 });
 
 // ── CORS ──────────────────────────────────────────────────────
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173", 
-      "http://localhost:5174", 
-      "http://localhost:5175", 
-      "http://localhost:5176", 
-      "http://localhost:3000"
-    ],
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
-  })
-);
+app.use(cors());
 
 // ── Body parsing ──────────────────────────────────────────────
 app.use(express.json());
@@ -50,6 +38,23 @@ app.use("/api", extractRouter);
 // ── Health check ──────────────────────────────────────────────
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "smart-nid-server" });
+});
+
+// ── Error Logger (For debugging DoNIDCR portal) ───────────────
+import fs from 'fs';
+import path from 'path';
+
+app.post("/api/log-error", (req, res) => {
+  try {
+    const errorFilePath = path.join(process.cwd(), '..', 'error-payload.json');
+    // Save to the root of the nid auto folder (one level up from server if cwd is server)
+    fs.writeFileSync(errorFilePath, JSON.stringify(req.body, null, 2), 'utf-8');
+    console.log(`[server] ✅ Saved rejected payload to: ${errorFilePath}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(`[server] ❌ Failed to save error payload:`, err);
+    res.status(500).json({ success: false });
+  }
 });
 
 // ── Error handler ─────────────────────────────────────────────
