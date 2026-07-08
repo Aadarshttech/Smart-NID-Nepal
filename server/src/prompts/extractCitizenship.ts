@@ -17,7 +17,8 @@ Rules:
 - **Gender**: Map "लिङ्ग" (पुरुष -> MALE, महिला -> FEMALE).
 - **Birth Place**: Combine "जन्म स्थान" details (District, RM/Municipality, Ward).
 - **Permanent Address**: Extract "स्थायी बासस्थान" details into exact fields: district (जिल्ला), localLevel (गा.पा./न.पा.), and wardNo (वडा नं.).
-- **Parents**: Extract "बाबुको नाम थर" (Father) and "आमाको नाम थर" (Mother). Transliterate to English if English version is missing on the back.
+- **Parents**: Extract "बाबुको नाम थर" (Father) and "आमाको नाम थर" (Mother). Transliterate to English if English version is missing on the back. Split their names into firstName, middleName (if any), and lastName.
+- **Grandfather**: Extract "बाजेको नाम थर" (Grandfather). Transliterate to English if missing. Split into firstName, middleName (if any), and lastName.
 - **Issuing Details**: Extract District from the top header (e.g. "जिल्ला प्रशासन कार्यालय काठमाडौँ" -> Kathmandu). Extract Issue Date (जारी मिति) as YYYY-MM-DD. Extract Issuing Authority Name (प्रमाण पत्र जारी गर्ने अधिकारीको नाम थर).
 - If a field is blank/missing (e.g., grandfather name), leave as empty string "".
 
@@ -31,9 +32,15 @@ Required JSON schema (all values must be strings except confidence which is a nu
   "dobAD": "",
   "birthPlace": "",
   "gender": "",
-  "fatherName": { "nepali": "", "english": "" },
-  "motherName": { "nepali": "", "english": "" },
-  "grandfatherName": { "nepali": "", "english": "" },
+  "fatherFirstName": { "nepali": "", "english": "" },
+  "fatherMiddleName": { "nepali": "", "english": "" },
+  "fatherLastName": { "nepali": "", "english": "" },
+  "motherFirstName": { "nepali": "", "english": "" },
+  "motherMiddleName": { "nepali": "", "english": "" },
+  "motherLastName": { "nepali": "", "english": "" },
+  "grandfatherFirstName": { "nepali": "", "english": "" },
+  "grandfatherMiddleName": { "nepali": "", "english": "" },
+  "grandfatherLastName": { "nepali": "", "english": "" },
   "permanentAddress": {
     "district": "",
     "localLevel": "",
