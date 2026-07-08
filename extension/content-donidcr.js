@@ -15,6 +15,67 @@
 (function () {
   "use strict";
 
+  // ── Network Interceptor (Injected into Page Context) ──
+  // This helps us debug what the server is rejecting without needing the Network Tab
+  const interceptorScript = document.createElement('script');
+  interceptorScript.textContent = `
+    (function() {
+      const originalFetch = window.fetch;
+      window.fetch = async function(...args) {
+        const url = args[0];
+        const options = args[1];
+        if (options && options.body && options.method !== 'GET') {
+           const bodyStr = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
+           if (bodyStr.includes('{')) {
+             window.postMessage({ type: 'NID_INTERCEPTED_ERROR', payload: bodyStr }, '*');
+           }
+        }
+        return originalFetch.apply(this, args);
+      };
+
+      const originalXhrOpen = XMLHttpRequest.prototype.open;
+      const originalXhrSend = XMLHttpRequest.prototype.send;
+      XMLHttpRequest.prototype.open = function(method, url) {
+        this._url = url;
+        this._method = method;
+        return originalXhrOpen.apply(this, arguments);
+      };
+      XMLHttpRequest.prototype.send = function(body) {
+        if (body && this._method !== 'GET') {
+           const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
+           if (bodyStr.includes('{')) {
+             window.postMessage({ type: 'NID_INTERCEPTED_ERROR', payload: bodyStr }, '*');
+           }
+        }
+        return originalXhrSend.apply(this, arguments);
+      };
+    })();
+  `;
+  (document.head || document.documentElement).appendChild(interceptorScript);
+  interceptorScript.remove();
+
+  // Listen for intercepted errors from the main world script
+  window.addEventListener("message", (event) => {
+    if (event.source !== window || !event.data || event.data.type !== 'NID_INTERCEPTED_ERROR') return;
+    
+    // Forward to background script which can securely reach localhost
+    chrome.runtime.sendMessage({ 
+      type: 'NID_LOG_ERROR', 
+      payload: event.data.payload 
+    }, () => {
+      // Optional: Give the user visual feedback that the error was logged
+      const btn = document.getElementById("smart-nid-autofill-btn");
+      if (btn) {
+        btn.innerHTML = "❌ Error Logged";
+        btn.style.backgroundColor = "#dc3545";
+        setTimeout(() => {
+          btn.innerHTML = `✅ <span>Auto-Fill Form</span>`;
+          btn.style.backgroundColor = "#28a745";
+        }, 3000);
+      }
+    });
+  });
+
   // ── Guard: Don't run on error pages ──
   function isErrorPage() {
     const bodyText = (document.body && document.body.innerText) || "";
@@ -253,21 +314,50 @@
                 }
 
                 if (inst.type === 'text' || inst.type === 'date') {
+                  el.focus();
                   el.dispatchEvent(new Event('focus', { bubbles: true }));
                   
+                  // Micro-delay to let React/nepalify process focus
+                  await new Promise(r => setTimeout(r, 50));
+                  
+                  let injectVal = inst.value;
+
+                  // Foolproof fallback: Force Uppercase for all English text fields
+                  // This guarantees it works even if the React app wasn't hard-refreshed
+                  const englishFields = [
+                    'firstName', 'middleName', 'lastName',
+                    'permVillageTol', 'tempVillageTol',
+                    'fatherFirstName', 'fatherMiddleName', 'fatherLastName',
+                    'motherFirstName', 'motherMiddleName', 'motherLastName',
+                    'grandFatherFirstName', 'grandFatherMiddleName', 'grandFatherLastName',
+                    'grandMotherFirstName', 'grandMotherMiddleName', 'grandMotherLastName',
+                    'spouseFirstName', 'spouseMiddleName', 'spouseLastName'
+                  ];
+                  if (inst.id && englishFields.includes(inst.id) && typeof injectVal === 'string') {
+                    injectVal = injectVal.toUpperCase();
+                  }
+
                   // Use native React value setter to bypass custom UI library keypress listeners
                   const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
                   if (nativeInputValueSetter) {
-                    nativeInputValueSetter.call(el, inst.value);
+                    nativeInputValueSetter.call(el, injectVal);
                   } else {
-                    el.value = inst.value;
+                    el.value = injectVal;
                   }
-                  el.dispatchEvent(new Event('input', { bubbles: true }));
-                  // Optional: trigger keyup for any listeners that specifically bind to key events
-                  el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter', code: 'Enter' }));
                   
+                  // Dispatch core React events
+                  el.dispatchEvent(new Event('input', { bubbles: true }));
                   el.dispatchEvent(new Event('change', { bubbles: true }));
+                  
+                  // Dispatch Keyboard events for interceptor scripts (nepalify)
+                  el.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter', code: 'Enter', keyCode: 13 }));
+                  el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter', code: 'Enter', keyCode: 13 }));
+                  
+                  // Micro-delay before blur
+                  await new Promise(r => setTimeout(r, 50));
+                  
                   el.dispatchEvent(new Event('blur', { bubbles: true }));
+                  el.blur();
                   filledCount++;
                 } else if (inst.type === 'checkbox') {
                   const shouldBeChecked = inst.value === 'true';
