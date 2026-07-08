@@ -22,9 +22,15 @@ export interface ExtractionResult {
   dobAD: string;          // "YYYY-MM-DD" in AD (converted from BS)
   birthPlace: string;
   gender: "MALE" | "FEMALE" | "OTHER" | "";
-  fatherName: NameField;
-  motherName: NameField;
-  grandfatherName: NameField;
+  fatherFirstName: NameField;
+  fatherMiddleName: NameField;
+  fatherLastName: NameField;
+  motherFirstName: NameField;
+  motherMiddleName: NameField;
+  motherLastName: NameField;
+  grandfatherFirstName: NameField;
+  grandfatherMiddleName: NameField;
+  grandfatherLastName: NameField;
   permanentAddress: AddressField;
   issuingDistrict: string;
   issueDateBS: string;    // "YYYY-MM-DD" in BS
