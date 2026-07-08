@@ -44,32 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         
         div.onclick = () => {
-          chrome.storage.local.set({ activeProfileId: p.id }, () => {
-            // Provide visual feedback
-            const originalHTML = div.innerHTML;
-            div.style.backgroundColor = '#eff6ff';
-            div.style.borderColor = '#2563eb';
-            div.innerHTML = `
-              <div style="display:flex; align-items:center; justify-content:center; height:100%; font-weight:700; color:#2563eb; padding: 10px 0;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Profile Selected
-              </div>
-            `;
-            
-            setTimeout(() => {
-              // Automatically navigate or switch to the Gov Portal tab
-              chrome.tabs.query({ url: "*://enrollment.donidcr.gov.np/*" }, (tabs) => {
-                if (tabs.length > 0) {
-                  // Switch to the first existing tab
-                  chrome.tabs.update(tabs[0].id, { active: true });
-                  chrome.windows.update(tabs[0].windowId, { focused: true });
-                } else {
-                  // Open a new tab
-                  chrome.tabs.create({ url: 'https://enrollment.donidcr.gov.np/' });
-                }
-              });
-            }, 600);
-          });
+          chrome.storage.local.set({ activeProfileId: p.id });
         };
         
         div.onmouseover = () => {
