@@ -3,52 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <title>Smart NID Helper</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #003893;
-      --primary-hover: #00286b;
-      --secondary: #dc143c;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --secondary: #f1f5f9;
+      --secondary-hover: #e2e8f0;
+      --success: #10b981;
+      --success-light: #d1fae5;
       --bg: #f8fafc;
-      --text: #1e293b;
+      --text: #0f172a;
       --text-light: #64748b;
+      --border: #e2e8f0;
     }
     
     body {
-      width: 320px;
+      width: 340px;
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Inter', -apple-system, sans-serif;
       background-color: var(--bg);
       color: var(--text);
+      overflow-x: hidden;
     }
 
     .header {
-      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-      padding: 24px 20px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      padding: 30px 20px 24px;
       text-align: center;
       color: white;
-      border-bottom-left-radius: 20px;
-      border-bottom-right-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0, 56, 147, 0.15);
+      border-bottom-left-radius: 24px;
+      border-bottom-right-radius: 24px;
+      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+      animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 1;
     }
 
     .header img {
-      width: 56px;
-      height: 56px;
+      width: 64px;
+      height: 64px;
       margin-bottom: 12px;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.25));
+      border: 3px solid rgba(255,255,255,0.2);
+      border-radius: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .header img:hover {
+      transform: scale(1.05) rotate(-5deg);
     }
 
     .header h1 {
       margin: 0;
-      font-size: 1.25rem;
+      font-size: 1.4rem;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: -0.5px;
     }
 
     .header p {
       margin: 6px 0 0 0;
       font-size: 0.85rem;
-      opacity: 0.9;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
     }
 
     .content {
@@ -56,139 +94,214 @@
     }
 
     .status-card {
-      background: white;
-      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
       padding: 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      gap: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
       margin-bottom: 24px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .status-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
     }
 
     .status-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      font-size: 1.5rem;
+      flex-shrink: 0;
     }
 
     .status-info h3 {
       margin: 0 0 4px 0;
-      font-size: 0.95rem;
+      font-size: 1rem;
       color: var(--text);
+      font-weight: 600;
     }
 
     .status-info p {
       margin: 0;
       font-size: 0.8rem;
       color: var(--text-light);
+      line-height: 1.4;
     }
 
     .ready .status-icon {
-      background: #dcfce7;
-      color: #16a34a;
+      background: var(--success-light);
+      color: var(--success);
+      box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.2);
     }
 
     .waiting .status-icon {
-      background: #f1f5f9;
-      color: #64748b;
+      background: var(--secondary);
+      color: var(--text-light);
+      box-shadow: inset 0 0 0 1px rgba(100, 116, 139, 0.2);
+    }
+
+    #savedDataContainer {
+      display: none;
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    #savedDataContainer h4 {
+      margin: 0 0 16px 0;
+      font-size: 0.9rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    #profilesList {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
     .action-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       width: 100%;
       padding: 14px;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       margin-bottom: 12px;
       text-decoration: none;
       box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%) scale(0);
+      border-radius: 50%;
+      transition: transform 0.4s ease-out;
+    }
+
+    .action-btn:active::after {
+      transform: translate(-50%, -50%) scale(2);
+      opacity: 0;
     }
 
     .btn-primary {
-      background-color: var(--primary);
+      background: linear-gradient(135deg, var(--primary), #3b82f6);
       color: white;
-      box-shadow: 0 4px 12px rgba(0, 56, 147, 0.2);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
     }
 
     .btn-primary:hover {
-      background-color: var(--primary-hover);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(0, 56, 147, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.35);
     }
 
     .btn-secondary {
       background-color: white;
       color: var(--text);
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
     .btn-secondary:hover {
-      background-color: #f8fafc;
-      border-color: #94a3b8;
+      background-color: var(--secondary);
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
     }
 
     .footer {
       text-align: center;
-      padding: 0 20px 20px;
+      padding: 0 20px 24px;
       font-size: 0.75rem;
-      color: #94a3b8;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <img src="icons/icon.png" alt="Logo">
-    <h1>Smart NID Helper</h1>
-    <p>1-Click DoNIDCR Data Transfer</p>
+    <div class="header-content">
+      <img src="icons/icon.png" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'64\' height=\'64\' fill=\'white\' viewBox=\'0 0 24 24\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z\'/></svg>'" alt="Logo">
+      <h1>Smart NID</h1>
+      <p>Seamless Data Transfer</p>
+    </div>
   </div>
 
   <div class="content">
     <div id="statusContainer" class="status-card waiting">
-      <div class="status-icon" id="statusIcon">⚪</div>
+      <div class="status-icon" id="statusIcon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      </div>
       <div class="status-info">
-        <h3 id="statusTitle">Waiting for Data</h3>
-        <p id="statusDesc">No data stored in extension yet.</p>
+        <h3 id="statusTitle">Awaiting Data</h3>
+        <p id="statusDesc">Please extract your NID data first.</p>
       </div>
     </div>
 
     <!-- Saved Data Summary Box -->
-    <div id="savedDataContainer" style="display: none; background: white; border-radius: 12px; padding: 16px; margin-bottom: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-      <h4 style="margin: 0 0 12px 0; font-size: 0.9rem; color: #1e293b; display: flex; align-items: center; gap: 6px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-        Saved Data Checkpoints
+    <div id="savedDataContainer">
+      <h4>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        Saved Checkpoints
       </h4>
-      <div id="profilesList" style="display: flex; flex-direction: column; gap: 8px;">
+      <div id="profilesList">
         <!-- Populated dynamically via popup.js -->
       </div>
     </div>
 
     <button id="btnOpenApp" class="action-btn btn-primary">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-      Open Web Dashboard
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+      Web Dashboard
     </button>
     
     <button id="btnOpenGov" class="action-btn btn-secondary">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-      Open DoNIDCR Portal
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+      DoNIDCR Portal
     </button>
   </div>
 
   <div class="footer">
-    Version 1.1 • Built for Nepal
+    Smart NID Helper v1.2 • Nepal
   </div>
 
   <script src="popup.js"></script>
