@@ -247,44 +247,40 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   // ── Tab 3: Family Details ──
   lines.push(`  // ── Tab 3: Family Details ──`);
   // Father
-  const fatherNpParts = splitName(data.fatherName.nepali);
-  const fatherEnParts = splitName(data.fatherName.english);
-  lines.push(`  setText('fatherFirstNameLoc', ${JSON.stringify(fatherNpParts.first)});`);
-  lines.push(`  setText('fatherMiddleNameLoc', ${JSON.stringify(fatherNpParts.middle)});`);
-  lines.push(`  setText('fatherLastNameLoc', ${JSON.stringify(fatherNpParts.last)});`);
-  lines.push(`  setText('fatherFirstName', ${JSON.stringify(fatherEnParts.first)});`);
-  lines.push(`  setText('fatherMiddleName', ${JSON.stringify(fatherEnParts.middle)});`);
-  lines.push(`  setText('fatherLastName', ${JSON.stringify(fatherEnParts.last)});`);
+  lines.push(`  setText('fatherFirstNameLoc', ${JSON.stringify(data.fatherFirstName?.nepali || "")});`);
+  lines.push(`  setText('fatherMiddleNameLoc', ${JSON.stringify(data.fatherMiddleName?.nepali || "")});`);
+  lines.push(`  setText('fatherLastNameLoc', ${JSON.stringify(data.fatherLastName?.nepali || "")});`);
+  lines.push(`  setText('fatherFirstName', ${JSON.stringify(data.fatherFirstName?.english || "")});`);
+  lines.push(`  setText('fatherMiddleName', ${JSON.stringify(data.fatherMiddleName?.english || "")});`);
+  lines.push(`  setText('fatherLastName', ${JSON.stringify(data.fatherLastName?.english || "")});`);
+  lines.push(`  setText('fatherNinLoc', ${JSON.stringify(additional.fatherDetails?.nin || "")});`);
 
   // Mother
-  const motherNpParts = splitName(data.motherName.nepali);
-  const motherEnParts = splitName(data.motherName.english);
-  lines.push(`  setText('motherFirstNameLoc', ${JSON.stringify(motherNpParts.first)});`);
-  lines.push(`  setText('motherMiddleNameLoc', ${JSON.stringify(motherNpParts.middle)});`);
-  lines.push(`  setText('motherLastNameLoc', ${JSON.stringify(motherNpParts.last)});`);
-  lines.push(`  setText('motherFirstName', ${JSON.stringify(motherEnParts.first)});`);
-  lines.push(`  setText('motherMiddleName', ${JSON.stringify(motherEnParts.middle)});`);
-  lines.push(`  setText('motherLastName', ${JSON.stringify(motherEnParts.last)});`);
+  lines.push(`  setText('motherFirstNameLoc', ${JSON.stringify(data.motherFirstName?.nepali || "")});`);
+  lines.push(`  setText('motherMiddleNameLoc', ${JSON.stringify(data.motherMiddleName?.nepali || "")});`);
+  lines.push(`  setText('motherLastNameLoc', ${JSON.stringify(data.motherLastName?.nepali || "")});`);
+  lines.push(`  setText('motherFirstName', ${JSON.stringify(data.motherFirstName?.english || "")});`);
+  lines.push(`  setText('motherMiddleName', ${JSON.stringify(data.motherMiddleName?.english || "")});`);
+  lines.push(`  setText('motherLastName', ${JSON.stringify(data.motherLastName?.english || "")});`);
+  lines.push(`  setText('motherNinLoc', ${JSON.stringify(additional.motherDetails?.nin || "")});`);
 
   // Grandfather
-  const gfNpParts = splitName(data.grandfatherName.nepali);
-  const gfEnParts = splitName(data.grandfatherName.english);
-  lines.push(`  setText('grandFatherFirstNameLoc', ${JSON.stringify(gfNpParts.first)});`);
-  lines.push(`  setText('grandFatherMiddleNameLoc', ${JSON.stringify(gfNpParts.middle)});`);
-  lines.push(`  setText('grandFatherLastNameLoc', ${JSON.stringify(gfNpParts.last)});`);
-  lines.push(`  setText('grandFatherFirstName', ${JSON.stringify(gfEnParts.first)});`);
-  lines.push(`  setText('grandFatherMiddleName', ${JSON.stringify(gfEnParts.middle)});`);
-  lines.push(`  setText('grandFatherLastName', ${JSON.stringify(gfEnParts.last)});`);
+  lines.push(`  setText('grandFatherFirstNameLoc', ${JSON.stringify(data.grandfatherFirstName?.nepali || "")});`);
+  lines.push(`  setText('grandFatherMiddleNameLoc', ${JSON.stringify(data.grandfatherMiddleName?.nepali || "")});`);
+  lines.push(`  setText('grandFatherLastNameLoc', ${JSON.stringify(data.grandfatherLastName?.nepali || "")});`);
+  lines.push(`  setText('grandFatherFirstName', ${JSON.stringify(data.grandfatherFirstName?.english || "")});`);
+  lines.push(`  setText('grandFatherMiddleName', ${JSON.stringify(data.grandfatherMiddleName?.english || "")});`);
+  lines.push(`  setText('grandFatherLastName', ${JSON.stringify(data.grandfatherLastName?.english || "")});`);
+  lines.push(`  setText('grandFatherNinLoc', ${JSON.stringify(additional.grandfatherDetails?.nin || "")});`);
 
   // Grandmother
-  const gmNpParts = splitName(additional.grandmotherName.nepali);
-  const gmEnParts = splitName(additional.grandmotherName.english);
-  lines.push(`  setText('grandMotherFirstNameLoc', ${JSON.stringify(gmNpParts.first)});`);
-  lines.push(`  setText('grandMotherMiddleNameLoc', ${JSON.stringify(gmNpParts.middle)});`);
-  lines.push(`  setText('grandMotherLastNameLoc', ${JSON.stringify(gmNpParts.last)});`);
-  lines.push(`  setText('grandMotherFirstName', ${JSON.stringify(gmEnParts.first)});`);
-  lines.push(`  setText('grandMotherMiddleName', ${JSON.stringify(gmEnParts.middle)});`);
-  lines.push(`  setText('grandMotherLastName', ${JSON.stringify(gmEnParts.last)});`);
+  lines.push(`  setText('grandMotherFirstNameLoc', ${JSON.stringify(additional.grandmotherFirstName?.nepali || "")});`);
+  lines.push(`  setText('grandMotherMiddleNameLoc', ${JSON.stringify(additional.grandmotherMiddleName?.nepali || "")});`);
+  lines.push(`  setText('grandMotherLastNameLoc', ${JSON.stringify(additional.grandmotherLastName?.nepali || "")});`);
+  lines.push(`  setText('grandMotherFirstName', ${JSON.stringify(additional.grandmotherFirstName?.english || "")});`);
+  lines.push(`  setText('grandMotherMiddleName', ${JSON.stringify(additional.grandmotherMiddleName?.english || "")});`);
+  lines.push(`  setText('grandMotherLastName', ${JSON.stringify(additional.grandmotherLastName?.english || "")});`);
+  lines.push(`  setText('grandMotherNinLoc', ${JSON.stringify(additional.grandmotherDetails?.nin || "")});`);
 
   // Spouse (if married)
   if (additional.maritalStatus === "1") {
@@ -304,21 +300,7 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   return lines.join("\n");
 }
 
-/**
- * Split a full name string into first/middle/last parts.
- */
-function splitName(fullName: string): { first: string; middle: string; last: string } {
-  if (!fullName) return { first: "", middle: "", last: "" };
-  const parts = fullName.trim().split(/\s+/);
-  if (parts.length === 0) return { first: "", middle: "", last: "" };
-  if (parts.length === 1) return { first: parts[0], middle: "", last: "" };
-  if (parts.length === 2) return { first: parts[0], middle: "", last: parts[1] };
-  return {
-    first: parts[0],
-    middle: parts.slice(1, -1).join(" "),
-    last: parts[parts.length - 1],
-  };
-}
+
 
 export function generateAutoFillInstructions(data: ExtractionResult, additional: AdditionalFields): AutoFillInstruction[] {
   const instructions: AutoFillInstruction[] = [];
@@ -358,16 +340,22 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   const issueDateBS_NP = englishToNepaliDigits(formatDateForInput(nepaliToEnglishDigits(data.issueDateBS)));
 
   pushText('firstNameLoc', data.firstName.nepali);
-  pushText('firstName', data.firstName.english);
+  pushText('firstName', data.firstName.english?.toUpperCase());
   pushText('middleNameLoc', data.middleName.nepali);
-  pushText('middleName', data.middleName.english);
+  pushText('middleName', data.middleName.english?.toUpperCase());
   pushText('lastNameLoc', data.lastName.nepali);
-  pushText('lastName', data.lastName.english);
+  pushText('lastName', data.lastName.english?.toUpperCase());
   pushText('dobLoc', dobBS_NP);
   pushDate('dob', dobAD);
 
   pushSelect('birthDistrictPlace', birthDistrictVal);
   pushSelect('ccType', additional.ccType || '1');
+  
+  if (additional.ccType === "2" || additional.ccType === "3") {
+    pushText('ccPrevNatCountry', additional.ccPrevNatCountry);
+    pushText('ccPrevNatRevocationDate', additional.ccPrevNatRevocationDate);
+  }
+  
   pushText('ccNumberLoc', englishToNepaliDigits(data.citizenshipNo));
   pushSelect('ccIssuingDistrict', issuingDistrictVal);
   pushText('ccIssuingDateLoc', issueDateBS_NP);
@@ -378,7 +366,6 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushSelect('profession', additional.profession);
   pushSelect('caste', additional.caste);
   pushSelect('religion', additional.religion);
-  pushSelect('fatherStatus', '1');
 
   pushText('mobilePhone', additional.mobileNo);
   pushText('telephone', additional.phoneNo);
@@ -393,7 +380,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   
   pushText('permWardLoc', englishToNepaliDigits(data.permanentAddress.wardNo));
   pushText('permVillageTolLoc', data.permanentAddress.villageToleNp);
-  pushText('permVillageTol', data.permanentAddress.villageToleEn);
+  pushText('permVillageTol', data.permanentAddress.villageToleEn?.toUpperCase());
 
   if (additional.temporaryAddressSameAsPermanent) {
     instructions.push({ id: 'tempAddressCopy', type: 'checkbox', value: 'true' });
@@ -408,52 +395,56 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
     
     pushText('tempWardLoc', englishToNepaliDigits(additional.temporaryAddress.wardNo));
     pushText('tempVillageTolLoc', additional.temporaryAddress.villageToleNp);
-    pushText('tempVillageTol', additional.temporaryAddress.villageToleEn);
+    pushText('tempVillageTol', additional.temporaryAddress.villageToleEn?.toUpperCase());
   }
 
-  const fatherNpParts = splitName(data.fatherName.nepali);
-  const fatherEnParts = splitName(data.fatherName.english);
-  pushText('fatherFirstNameLoc', fatherNpParts.first);
-  pushText('fatherMiddleNameLoc', fatherNpParts.middle);
-  pushText('fatherLastNameLoc', fatherNpParts.last);
-  pushText('fatherFirstName', fatherEnParts.first);
-  pushText('fatherMiddleName', fatherEnParts.middle);
-  pushText('fatherLastName', fatherEnParts.last);
+  // Set default family address copy checks (matches gov website logic for copying applicant perm address)
+  instructions.push({ id: 'fatherAddressCopy', type: 'checkbox', value: 'true' });
+  instructions.push({ id: 'motherAddressCopy', type: 'checkbox', value: 'true' });
+  instructions.push({ id: 'grandFatherAddressCopy', type: 'checkbox', value: 'true' });
+  instructions.push({ id: 'grandMotherAddressCopy', type: 'checkbox', value: 'true' });
 
-  const motherNpParts = splitName(data.motherName.nepali);
-  const motherEnParts = splitName(data.motherName.english);
-  pushText('motherFirstNameLoc', motherNpParts.first);
-  pushText('motherMiddleNameLoc', motherNpParts.middle);
-  pushText('motherLastNameLoc', motherNpParts.last);
-  pushText('motherFirstName', motherEnParts.first);
-  pushText('motherMiddleName', motherEnParts.middle);
-  pushText('motherLastName', motherEnParts.last);
+  pushText('fatherFirstNameLoc', data.fatherFirstName?.nepali);
+  pushText('fatherMiddleNameLoc', data.fatherMiddleName?.nepali);
+  pushText('fatherLastNameLoc', data.fatherLastName?.nepali);
+  pushText('fatherFirstName', data.fatherFirstName?.english?.toUpperCase());
+  pushText('fatherMiddleName', data.fatherMiddleName?.english?.toUpperCase());
+  pushText('fatherLastName', data.fatherLastName?.english?.toUpperCase());
+  pushText('fatherNinLoc', additional.fatherDetails?.nin);
 
-  const gfNpParts = splitName(data.grandfatherName.nepali);
-  const gfEnParts = splitName(data.grandfatherName.english);
-  pushText('grandFatherFirstNameLoc', gfNpParts.first);
-  pushText('grandFatherMiddleNameLoc', gfNpParts.middle);
-  pushText('grandFatherLastNameLoc', gfNpParts.last);
-  pushText('grandFatherFirstName', gfEnParts.first);
-  pushText('grandFatherMiddleName', gfEnParts.middle);
-  pushText('grandFatherLastName', gfEnParts.last);
+  pushText('motherFirstNameLoc', data.motherFirstName?.nepali);
+  pushText('motherMiddleNameLoc', data.motherMiddleName?.nepali);
+  pushText('motherLastNameLoc', data.motherLastName?.nepali);
+  pushText('motherFirstName', data.motherFirstName?.english?.toUpperCase());
+  pushText('motherMiddleName', data.motherMiddleName?.english?.toUpperCase());
+  pushText('motherLastName', data.motherLastName?.english?.toUpperCase());
+  pushText('motherNinLoc', additional.motherDetails?.nin);
 
-  const gmNpParts = splitName(additional.grandmotherName.nepali);
-  const gmEnParts = splitName(additional.grandmotherName.english);
-  pushText('grandMotherFirstNameLoc', gmNpParts.first);
-  pushText('grandMotherMiddleNameLoc', gmNpParts.middle);
-  pushText('grandMotherLastNameLoc', gmNpParts.last);
-  pushText('grandMotherFirstName', gmEnParts.first);
-  pushText('grandMotherMiddleName', gmEnParts.middle);
-  pushText('grandMotherLastName', gmEnParts.last);
+  pushText('grandFatherFirstNameLoc', data.grandfatherFirstName?.nepali);
+  pushText('grandFatherMiddleNameLoc', data.grandfatherMiddleName?.nepali);
+  pushText('grandFatherLastNameLoc', data.grandfatherLastName?.nepali);
+  pushText('grandFatherFirstName', data.grandfatherFirstName?.english?.toUpperCase());
+  pushText('grandFatherMiddleName', data.grandfatherMiddleName?.english?.toUpperCase());
+  pushText('grandFatherLastName', data.grandfatherLastName?.english?.toUpperCase());
+  pushText('grandFatherNinLoc', additional.grandfatherDetails?.nin);
+
+  pushText('grandMotherFirstNameLoc', additional.grandmotherFirstName?.nepali);
+  pushText('grandMotherMiddleNameLoc', additional.grandmotherMiddleName?.nepali);
+  pushText('grandMotherLastNameLoc', additional.grandmotherLastName?.nepali);
+  pushText('grandMotherFirstName', additional.grandmotherFirstName?.english?.toUpperCase());
+  pushText('grandMotherMiddleName', additional.grandmotherMiddleName?.english?.toUpperCase());
+  pushText('grandMotherLastName', additional.grandmotherLastName?.english?.toUpperCase());
+  pushText('grandMotherNinLoc', additional.grandmotherDetails?.nin);
 
   if (additional.maritalStatus === "1") {
     pushText('spouseFirstNameLoc', additional.spouseFirstName.nepali);
     pushText('spouseMiddleNameLoc', additional.spouseMiddleName.nepali);
     pushText('spouseLastNameLoc', additional.spouseLastName.nepali);
-    pushText('spouseFirstName', additional.spouseFirstName.english);
-    pushText('spouseMiddleName', additional.spouseMiddleName.english);
-    pushText('spouseLastName', additional.spouseLastName.english);
+    pushText('spouseFirstName', additional.spouseFirstName.english?.toUpperCase());
+    pushText('spouseMiddleName', additional.spouseMiddleName.english?.toUpperCase());
+    pushText('spouseLastName', additional.spouseLastName.english?.toUpperCase());
+    pushText('spouseNinLoc', additional.spouseDetails?.nin);
+    instructions.push({ id: 'spouseAddressCopy', type: 'checkbox', value: 'true' });
   }
 
   return instructions;
