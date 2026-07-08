@@ -236,22 +236,22 @@ export default function JsonViewer({ data }: JsonViewerProps) {
         </h3>
         <div className="json-section__grid">
           <NameFieldDisplay
-            label="Father's Name"
-            labelNp="बाबुको नाम"
-            value={data.fatherName}
-            status={getFieldStatus("fatherName", data.fatherName, c)}
+            label="Father's First Name"
+            labelNp="बाबुको पहिलो नाम"
+            value={data.fatherFirstName}
+            status={getFieldStatus("fatherFirstName", data.fatherFirstName, c)}
           />
           <NameFieldDisplay
-            label="Mother's Name"
-            labelNp="आमाको नाम"
-            value={data.motherName}
-            status={getFieldStatus("motherName", data.motherName, c)}
+            label="Mother's First Name"
+            labelNp="आमाको पहिलो नाम"
+            value={data.motherFirstName}
+            status={getFieldStatus("motherFirstName", data.motherFirstName, c)}
           />
           <NameFieldDisplay
-            label="Grandfather's Name"
-            labelNp="बाजेको नाम"
-            value={data.grandfatherName}
-            status={getFieldStatus("grandfatherName", data.grandfatherName, c)}
+            label="Grandfather's First Name"
+            labelNp="बाजेको पहिलो नाम"
+            value={data.grandfatherFirstName}
+            status={getFieldStatus("grandfatherFirstName", data.grandfatherFirstName, c)}
           />
         </div>
       </div>
