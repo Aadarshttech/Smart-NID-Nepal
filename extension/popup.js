@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${p.citNo || 'N/A'}
           </div>
           <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;">Saved: ${p.timestamp}</div>
-          ${isActive ? \`<div style="position: absolute; top: 14px; right: 14px; background: #2563eb; color: white; font-size: 0.65rem; font-weight: 700; padding: 4px 8px; border-radius: 20px; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">ACTIVE</div>\` : ''}
+          ${isActive ? '<div style="position: absolute; top: 14px; right: 14px; background: #2563eb; color: white; font-size: 0.65rem; font-weight: 700; padding: 4px 8px; border-radius: 20px; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">ACTIVE</div>' : ''}
         `;
         
         div.onclick = () => {
