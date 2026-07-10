@@ -60,17 +60,17 @@ function NameFieldDisplay({
         </span>
       </div>
       <div className="json-field__values">
-        {value.nepali && (
+        {value?.nepali && (
           <span className="json-field__value json-field__value--np">
             {value.nepali}
           </span>
         )}
-        {value.english && (
+        {value?.english && (
           <span className="json-field__value json-field__value--en">
             {value.english}
           </span>
         )}
-        {!value.nepali && !value.english && (
+        {!value?.nepali && !value?.english && (
           <span className="json-field__value json-field__value--empty">
             Not detected
           </span>
