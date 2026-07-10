@@ -16,6 +16,8 @@ export interface FamilyMemberDetails {
   ccNumber: string;
   nin: string;
   nationality: string;
+  addressSameAsApplicant?: boolean;
+  address?: AddressField;
 }
 
 export interface AddressField {
