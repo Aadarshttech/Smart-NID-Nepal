@@ -672,19 +672,13 @@
         }
 
         if (isAppointmentTab) {
-          // Attempt to click the Search button to fetch slots and then focus the date box
+          // Focus the date box to open the calendar automatically
           setTimeout(() => {
-            const btns = Array.from(document.querySelectorAll('button'));
-            const searchBtn = btns.find(b => b.innerText && b.innerText.trim().toLowerCase() === 'search');
-            if (searchBtn) searchBtn.click();
-            
-            setTimeout(() => {
-              const dateBox = document.getElementById('appointmentDate');
-              if (dateBox) {
-                dateBox.focus();
-                dateBox.click();
-              }
-            }, 800); // Wait 800ms for search to process before opening calendar
+            const dateBox = document.getElementById('appointmentDate');
+            if (dateBox) {
+              dateBox.focus();
+              dateBox.click();
+            }
           }, 300);
 
           statusBadge.innerHTML = "Location selected! 📍<br/>I've opened the calendar for you. Please select your <b>Appointment Date</b> and <b>Time Slot</b>!";
