@@ -489,31 +489,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
 
   // Appointment Location
   if (additional.appointmentLocation) {
-    // Map legacy string values to precise DoNIDCR IDs to ensure backward compatibility for old saved profiles
-    const locationMapping: Record<string, string> = {
-      "Narayanmiti Durbar(Old Department of Passport)/नारायणहिटी दरबार (पुरानो राहदानी विभाग)": "335000C",
-      "DAO Lalitpur/जिल्ला प्रशासन कार्यालय ललितपुर": "334000A",
-      "DAO Jhapa/जिल्ला प्रशासन कार्यालय झापा": "112000A",
-      "DAO Morang/जिल्ला प्रशासन कार्यालय मोरङ": "113000A",
-      "DAO Sunsari/जिल्ला प्रशासन कार्यालय सुनसरी": "114000A",
-      "DAO Dharan/ईलाका प्रशासन कार्यालय धरान": "114000B",
-      "DAO Chitwan/जिल्ला प्रशासन कार्यालय चितवन": "331000A",
-      "DAO Makawanpur/जिल्ला प्रशासन कार्यालय मकवानपुर": "332000A",
-      "DAO Nuwakot/जिल्ला प्रशासन कार्यालय नुवाकोट": "329000A",
-      "DAO Gorkha/जिल्ला प्रशासन कार्यालय गोरखा": "436000A",
-      "AAO Urlabari/ईलाका प्रशासन कार्यालय उर्लाबारी": "113116A",
-      "DAO Parsa/जिल्ला प्रशासन कार्यालय पर्सा": "222000A",
-      "DAO Siraha/जिल्ला प्रशासन कार्यालय सिराहा": "216000A",
-      "AAO Lahan/ईलाका प्रशासन कार्यालय लहान": "216000B",
-      "DAO Kavrepalanchock/जिल्ला प्रशासन कार्यालय काभ्रेपलाञ्चोक": "326000A",
-      "DAO Tanahun/जिल्ला प्रशासन कार्यालय तनहुँ": "438000A",
-      "Others/अन्य": "335000D"
-    };
-    
-    // If it's a known legacy string, convert it to ID. Otherwise, pass it as-is (in case they already re-saved with the new ID).
-    const mappedValue = locationMapping[additional.appointmentLocation] || additional.appointmentLocation;
-
-    instructions.push({ id: 'appointmentLocation', type: 'select', value: mappedValue, textValue: additional.appointmentLocation });
+    instructions.push({ id: 'appointmentLocation', type: 'select', value: '', textValue: additional.appointmentLocation });
   }
 
   return instructions;

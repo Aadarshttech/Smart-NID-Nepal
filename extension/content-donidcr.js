@@ -106,13 +106,7 @@
 
     // Fallback: check if there are a reasonable number of input fields
     const inputs = document.querySelectorAll("input[type='text'], select, input[type='date']");
-    if (inputs.length >= 5) return true;
-
-    // Check for Appointment Tab specifically
-    const hasBiometricLabel = Array.from(document.querySelectorAll('label, span, div, p')).some(l => l.innerText && l.innerText.includes('बायोमेट्रिक'));
-    if (hasBiometricLabel) return true;
-
-    return false;
+    return inputs.length >= 5;
   }
 
   // ── Main: Check storage and inject button ──
@@ -308,7 +302,6 @@
     dot2.id = "smart-nid-cloud-dot-2";
 
     let bubbleVisibilityTimeout = null;
-    let statusRevertTimeout = null;
     let isShowingFeedback = false;
 
     const setBubbleVisible = (visible) => {
@@ -370,8 +363,6 @@
 
 
     actionBtn.onclick = () => {
-      if (statusRevertTimeout) clearTimeout(statusRevertTimeout);
-      if (bubbleVisibilityTimeout) clearTimeout(bubbleVisibilityTimeout);
       isShowingFeedback = true;
       setBubbleVisible(true);
       if (!hasFormFields()) {
@@ -457,18 +448,10 @@
 
                 // Fallback for Appointment Location
                 if (!el && inst.id === 'appointmentLocation') {
-                  const labels = Array.from(document.querySelectorAll('label, span, div, p'));
-                  const locLabel = labels.find(l => l.innerText && l.innerText.includes('बायोमेट्रिक'));
-                  if (locLabel) {
-                    const container = locLabel.closest('.row, .form-group, .col-md-6, .col-sm-12') || locLabel.parentElement;
-                    if (container) {
-                      el = container.querySelector('select') || container.parentElement?.querySelector('select');
-                    }
-                  }
-                  // Ultimate fallback: first visible select that has "location" or is empty
-                  if (!el) {
-                    const visibleSelects = Array.from(document.querySelectorAll('select')).filter(s => s.offsetParent !== null);
-                    if (visibleSelects.length > 0) el = visibleSelects[0];
+                  // The location dropdown is the first (and usually only) select on the final Appointment tab.
+                  const visibleSelects = Array.from(document.querySelectorAll('select')).filter(s => s.offsetParent !== null);
+                  if (visibleSelects.length > 0) {
+                    el = visibleSelects[0];
                   }
                 }
 
@@ -532,7 +515,7 @@
                   const targetVal = inst.value ? String(inst.value) : "";
                   const targetText = inst.textValue ? String(inst.textValue).toLowerCase().replace(/[\s\/]/g, '') : "";
 
-                  while (!hasOption && attempts < 100) { // Max 10s wait for very slow government APIs
+                  while (!hasOption && attempts < 15) { // Max 1.5s wait to prevent long delays
                     const options = Array.from(el.options);
                     hasOption = options.some(opt => {
                       if (targetVal && opt.value === targetVal) return true;
@@ -596,18 +579,13 @@
                       } else {
                         el.value = fuzzyMatch.value;
                       }
-                      el.selectedIndex = fuzzyMatch.index;
                       matched = true;
                     }
                   }
                   
-                  if (matched) {
-                    el.dispatchEvent(new Event('input', { bubbles: true }));
-                    el.dispatchEvent(new Event('change', { bubbles: true }));
-                    filledCount++;
-                  } else {
-                    skippedCount++;
-                  }
+                  el.dispatchEvent(new Event('input', { bubbles: true }));
+                  el.dispatchEvent(new Event('change', { bubbles: true }));
+                  filledCount++;
                 }
               }
 
@@ -671,9 +649,7 @@
         const filled = (typeof result === 'object' && result) ? result.filledCount : 0;
         const skipped = (typeof result === 'object' && result) ? result.skippedCount : 0;
         
-        const isAppointmentTab = Array.from(document.querySelectorAll('label, span, div, p')).some(l => l.innerText && l.innerText.includes('बायोमेट्रिक'));
-
-        if (filled > 0 && !isAppointmentTab) {
+        if (filled > 0) {
           // Always try to click Next to proceed through the wizard to Appointment section
           setTimeout(async () => {
             const nextBtn = document.getElementById("nextBtn") || Array.from(document.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().toLowerCase() === 'next');
@@ -688,19 +664,9 @@
               }
             }
           }, 50);
-        } else if (filled > 0 && isAppointmentTab) {
-          // On Appointment tab, click the Search button to load dates!
-          setTimeout(() => {
-            const searchBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().toLowerCase() === 'search');
-            if (searchBtn) searchBtn.click();
-          }, 500);
         }
 
-        if (isAppointmentTab) {
-          statusBadge.innerHTML = "Location selected! 📍<br/>Please click <b>Search</b> (if I didn't) and pick your <b>Appointment Date</b> from the calendar!";
-          statusBadge.style.backgroundColor = "#f0fff4";
-          statusBadge.style.color = "#22543d";
-        } else if (filled > 0 && skipped > 0) {
+        if (filled > 0 && skipped > 0) {
           statusBadge.innerHTML = `Yay! I filled <b>${filled} fields</b> for you! Moving to the next section... \u{1F389}`;
           statusBadge.style.backgroundColor = "#f0fff4";
           statusBadge.style.color = "#22543d";
@@ -715,26 +681,15 @@
           sessionStorage.removeItem('smart_nid_autorun');
         }
         
-        // Revert back to ready state after 4 seconds (only if not completely finished)
-        const isFinalTab = filled > 0 && skipped === 0;
-        
-        statusRevertTimeout = setTimeout(() => {
+        // Revert back to ready state after 3 seconds
+        setTimeout(() => {
           isShowingFeedback = false;
-          if (!isFinalTab) {
-            btn.innerHTML = originalHtml;
-            statusBadge.style.backgroundColor = "white";
-            statusBadge.style.color = "#1e293b";
-            const newEnrollBtn = document.getElementById("newEnrollment");
-            if (isReady) {
-              statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form.<br/>Please press the <b>Auto-Fill</b> button at my side!";
-            } else if (newEnrollBtn) {
-              statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! Please press the <b>Auto-Fill</b> button at my side to start a New Enrollment and fill everything!";
-            } else {
-              statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste!<br/><br/>I don't see a form here! Open a form and I'll help you fill it.";
-            }
-          }
+          btn.innerHTML = originalHtml;
+          statusBadge.style.backgroundColor = "white";
+          statusBadge.style.color = "#1e293b";
+          statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form for you.<br/><b>Just click me!</b>";
           setBubbleVisible(false);
-        }, 4000);
+        }, 3000);
       } catch (err) {
           console.error("Smart NID: Script injection error \u2014", err);
           sessionStorage.removeItem('smart_nid_autorun');
@@ -742,19 +697,12 @@
           statusBadge.style.backgroundColor = "#fff5f5";
           statusBadge.style.color = "#c53030";
 
-          statusRevertTimeout = setTimeout(() => {
+          setTimeout(() => {
             isShowingFeedback = false;
             btn.innerHTML = `${logoSvg}`;
             statusBadge.style.backgroundColor = "white";
             statusBadge.style.color = "#1e293b";
-            const newEnrollBtn = document.getElementById("newEnrollment");
-            if (isReady) {
-              statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form.<br/>Please press the <b>Auto-Fill</b> button at my side!";
-            } else if (newEnrollBtn) {
-              statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! Please press the <b>Auto-Fill</b> button at my side to start a New Enrollment and fill everything!";
-            } else {
-              statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste!<br/><br/>I don't see a form here! Open a form and I'll help you fill it.";
-            }
+            statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form for you.<br/><b>Just click me!</b>";
             setBubbleVisible(false);
           }, 3000);
         }
