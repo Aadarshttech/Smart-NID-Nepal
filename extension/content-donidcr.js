@@ -106,7 +106,13 @@
 
     // Fallback: check if there are a reasonable number of input fields
     const inputs = document.querySelectorAll("input[type='text'], select, input[type='date']");
-    return inputs.length >= 5;
+    if (inputs.length >= 5) return true;
+
+    // Check for Appointment Tab specifically
+    const hasBiometricLabel = Array.from(document.querySelectorAll('label, span, div, p')).some(l => l.innerText && l.innerText.includes('बायोमेट्रिक'));
+    if (hasBiometricLabel) return true;
+
+    return false;
   }
 
   // ── Main: Check storage and inject button ──
@@ -660,7 +666,9 @@
         const filled = (typeof result === 'object' && result) ? result.filledCount : 0;
         const skipped = (typeof result === 'object' && result) ? result.skippedCount : 0;
         
-        if (filled > 0) {
+        const isAppointmentTab = Array.from(document.querySelectorAll('label, span, div, p')).some(l => l.innerText && l.innerText.includes('बायोमेट्रिक'));
+
+        if (filled > 0 && !isAppointmentTab) {
           // Always try to click Next to proceed through the wizard to Appointment section
           setTimeout(async () => {
             const nextBtn = document.getElementById("nextBtn") || Array.from(document.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().toLowerCase() === 'next');
@@ -675,9 +683,19 @@
               }
             }
           }, 50);
+        } else if (filled > 0 && isAppointmentTab) {
+          // On Appointment tab, click the Search button to load dates!
+          setTimeout(() => {
+            const searchBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().toLowerCase() === 'search');
+            if (searchBtn) searchBtn.click();
+          }, 500);
         }
 
-        if (filled > 0 && skipped > 0) {
+        if (isAppointmentTab) {
+          statusBadge.innerHTML = "Location selected! 📍<br/>Please click <b>Search</b> (if I didn't) and pick your <b>Appointment Date</b> from the calendar!";
+          statusBadge.style.backgroundColor = "#f0fff4";
+          statusBadge.style.color = "#22543d";
+        } else if (filled > 0 && skipped > 0) {
           statusBadge.innerHTML = `Yay! I filled <b>${filled} fields</b> for you! Moving to the next section... \u{1F389}`;
           statusBadge.style.backgroundColor = "#f0fff4";
           statusBadge.style.color = "#22543d";
