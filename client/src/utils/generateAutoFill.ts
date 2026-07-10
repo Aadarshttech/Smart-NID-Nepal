@@ -49,44 +49,75 @@ function englishToNepaliDigits(str: string): string {
 
 /**
  * Format a date string to strictly YYYY-MM-DD (Used for BS Dates which expect YYYY-MM-DD).
- * Converts from DD-MM-YYYY if necessary.
+ * Converts from DD-MM-YYYY or handles 2-digit years.
  */
 function formatDateForInput(dateStr: string): string {
   if (!dateStr) return "";
   
-  // Clean separators
   let cleanDate = dateStr.replace(/[\/\.]/g, '-');
-  
   const parts = cleanDate.split('-');
+  
   if (parts.length === 3) {
-    if (parts[2].length === 4) {
-      // DD-MM-YYYY -> YYYY-MM-DD
-      return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-    } else if (parts[0].length === 4) {
-      // YYYY-MM-DD
-      return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+    let year = parts[0];
+    let month = parts[1].padStart(2, '0');
+    let day = parts[2];
+    
+    // Identify year vs day based on length or value
+    if (parts[2].length === 4 || (parts[2].length === 2 && parseInt(parts[2]) > 32)) {
+      year = parts[2];
+      day = parts[0];
+    } else if (parts[0].length === 4 || (parts[0].length === 2 && parseInt(parts[0]) > 32)) {
+      year = parts[0];
+      day = parts[2];
+    } else {
+      // Ambiguous fallback: assume YYYY-MM-DD format was intended but typed as YY-MM-DD
+      year = parts[0];
+      day = parts[2];
     }
+
+    // Fix 2-digit BS years (assume 20XX since 1999 BS is 100+ years old)
+    if (year.length === 2) {
+      year = parseInt(year) > 95 ? `19${year}` : `20${year}`; // 1996+ is ~100 years old
+    }
+    
+    return `${year}-${month}-${day.padStart(2, '0')}`;
   }
   return cleanDate;
 }
 
 /**
  * Format a date string strictly to DD/MM/YYYY for DoNIDCR AD date inputs.
+ * Converts 2-digit AD years automatically based on current century.
  */
 function formatADDateForInput(dateStr: string): string {
   if (!dateStr) return "";
   
   let cleanDate = dateStr.replace(/[\/\.-]/g, '/');
-  
   const parts = cleanDate.split('/');
+  
   if (parts.length === 3) {
-    if (parts[0].length === 4) {
-      // YYYY/MM/DD -> DD/MM/YYYY
-      return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
-    } else if (parts[2].length === 4) {
-      // DD/MM/YYYY
-      return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
+    let year = parts[0];
+    let month = parts[1].padStart(2, '0');
+    let day = parts[2];
+    
+    if (parts[2].length === 4 || (parts[2].length === 2 && parseInt(parts[2]) > 31)) {
+      year = parts[2];
+      day = parts[0];
+    } else if (parts[0].length === 4 || (parts[0].length === 2 && parseInt(parts[0]) > 31)) {
+      year = parts[0];
+      day = parts[2];
+    } else {
+      // Ambiguous fallback: assume DD/MM/YYYY for AD dates
+      year = parts[2];
+      day = parts[0];
     }
+
+    if (year.length === 2) {
+      const currentYY = new Date().getFullYear() % 100;
+      year = parseInt(year) > currentYY ? `19${year}` : `20${year}`;
+    }
+    
+    return `${day.padStart(2, '0')}/${month}/${year}`;
   }
   return cleanDate;
 }
