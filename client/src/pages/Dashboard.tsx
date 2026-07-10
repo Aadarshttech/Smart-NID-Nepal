@@ -43,7 +43,51 @@ export default function Dashboard({ onNewEnrollment, onEditProfile }: { onNewEnr
     // Ensure both draftData and additionalData exist (backward compatibility for old profiles)
     const draft = profile.draftData || {};
     
-    // Check if web app has a backup of the additional data for this CIT No (in case extension is outdated)
+    // Migration: split old full names into first/middle/last if needed
+    const splitName = (nameObj: any) => {
+      if (!nameObj || (!nameObj.english && !nameObj.nepali)) {
+        return { 
+          first: { english: "", nepali: "" }, 
+          middle: { english: "", nepali: "" }, 
+          last: { english: "", nepali: "" } 
+        };
+      }
+      
+      const enParts = (nameObj.english || "").trim().split(/\s+/);
+      const npParts = (nameObj.nepali || "").trim().split(/\s+/);
+      
+      return {
+        first: { english: enParts[0] || "", nepali: npParts[0] || "" },
+        last: { 
+          english: enParts.length > 1 ? enParts[enParts.length - 1] : "", 
+          nepali: npParts.length > 1 ? npParts[npParts.length - 1] : "" 
+        },
+        middle: { 
+          english: enParts.length > 2 ? enParts.slice(1, -1).join(" ") : "", 
+          nepali: npParts.length > 2 ? npParts.slice(1, -1).join(" ") : "" 
+        }
+      };
+    };
+
+    if (draft.fatherName && !draft.fatherFirstName) {
+      const parts = splitName(draft.fatherName);
+      draft.fatherFirstName = parts.first;
+      draft.fatherMiddleName = parts.middle;
+      draft.fatherLastName = parts.last;
+    }
+    if (draft.motherName && !draft.motherFirstName) {
+      const parts = splitName(draft.motherName);
+      draft.motherFirstName = parts.first;
+      draft.motherMiddleName = parts.middle;
+      draft.motherLastName = parts.last;
+    }
+    if (draft.grandfatherName && !draft.grandfatherFirstName) {
+      const parts = splitName(draft.grandfatherName);
+      draft.grandfatherFirstName = parts.first;
+      draft.grandfatherMiddleName = parts.middle;
+      draft.grandfatherLastName = parts.last;
+    }
+    
     const backupStr = localStorage.getItem(`smart_nid_backup_${draft.citizenshipNo}`);
     let backupAdditional = null;
     if (backupStr) {
@@ -59,13 +103,23 @@ export default function Dashboard({ onNewEnrollment, onEditProfile }: { onNewEnr
       ccType: "1",
       phoneNo: "",
       mobileNo: "",
-      temporaryAddressSameAsPermanent: true,
+      temporaryAddressSameAsPermanent: false,
       temporaryAddress: { province: "", district: "", localLevel: "", wardNo: "", villageToleNp: "", villageToleEn: "" },
-      grandmotherName: { nepali: "", english: "" },
-      spouseFirstName: { nepali: "", english: "" },
-      spouseMiddleName: { nepali: "", english: "" },
-      spouseLastName: { nepali: "", english: "" },
     };
+
+    if (additional.grandmotherName && !additional.grandmotherFirstName) {
+      const parts = splitName(additional.grandmotherName);
+      additional.grandmotherFirstName = parts.first;
+      additional.grandmotherMiddleName = parts.middle;
+      additional.grandmotherLastName = parts.last;
+    }
+    if (additional.spouseName && !additional.spouseFirstName) {
+      const parts = splitName(additional.spouseName);
+      additional.spouseFirstName = parts.first;
+      additional.spouseMiddleName = parts.middle;
+      additional.spouseLastName = parts.last;
+    }
+
     loadProfile(draft, additional);
     onEditProfile(); // Switch view to UploadPage without wiping state
   };
