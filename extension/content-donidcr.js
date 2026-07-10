@@ -508,15 +508,20 @@
         const skipped = (typeof result === 'object' && result) ? result.skippedCount : 0;
         
         if (filled > 0) {
-          // Always try to click Next to proceed through the wizard
-          setTimeout(() => {
-            const buttons = Array.from(document.querySelectorAll('button'));
-            const nextBtn = buttons.find(b => b.innerText && b.innerText.trim().toLowerCase() === 'next');
+          // Always try to click Next to proceed through the wizard to Appointment section
+          setTimeout(async () => {
+            const nextBtn = document.getElementById("nextBtn") || Array.from(document.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().toLowerCase() === 'next');
             if (nextBtn) {
               sessionStorage.setItem('smart_nid_autorun', 'true');
-              nextBtn.click();
+              // Click Next up to 3 times for the 3 tabs (Contact Details, Family Details, Appointment)
+              for (let i = 0; i < 3; i++) {
+                if (nextBtn.innerText.trim().toLowerCase() === 'next') {
+                  nextBtn.click();
+                  await new Promise(r => setTimeout(r, 200)); // Delay to allow validation and tab switch
+                }
+              }
             }
-          }, 1000);
+          }, 100);
         }
 
         if (filled > 0 && skipped > 0) {
