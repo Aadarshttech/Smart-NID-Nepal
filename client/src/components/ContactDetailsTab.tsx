@@ -3,6 +3,7 @@
  * phone/mobile, permanent address, and temporary address.
  */
 
+import { useState } from "react";
 import { useEnrollmentStore } from "../store/enrollmentStore";
 import type { AddressField } from "../types/extraction";
 import { PROVINCE_OPTIONS } from "../types/extraction";
@@ -85,6 +86,8 @@ function SelectInput({
 }
 
 export default function ContactDetailsTab() {
+  const [showErrors, setShowErrors] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
   const { draft, additional, updateDraftField, updateAdditionalField, nextStep, prevStep } =
     useEnrollmentStore();
 
@@ -138,7 +141,24 @@ export default function ContactDetailsTab() {
     additional.mobileNo.trim() !== "" &&
     draft.permanentAddress.province.trim() !== "" &&
     draft.permanentAddress.district.trim() !== "" &&
-    draft.permanentAddress.localLevel.trim() !== "";
+    draft.permanentAddress.localLevel.trim() !== "" &&
+    draft.permanentAddress.wardNo.trim() !== "" &&
+    (additional.temporaryAddressSameAsPermanent || (
+      additional.temporaryAddress.province.trim() !== "" &&
+      additional.temporaryAddress.district.trim() !== "" &&
+      additional.temporaryAddress.localLevel.trim() !== "" &&
+      additional.temporaryAddress.wardNo.trim() !== ""
+    ));
+
+  const handleNextClick = () => {
+    if (!canProceed) {
+      setShowErrors(true);
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 600);
+    } else {
+      nextStep();
+    }
+  };
 
   return (
     <div className="form-tab-panel fade-in">
@@ -156,8 +176,8 @@ export default function ContactDetailsTab() {
             onChange={(val) => updateAdditionalField("phoneNo", val)}
           />
           <TextInput
-            label="Mobile No."
-            labelNp="मोबाईल नं."
+            label="Mobile No.*"
+            labelNp="मोबाईल नं.*"
             value={additional.mobileNo}
             onChange={(val) => updateAdditionalField("mobileNo", val)}
           />
@@ -172,23 +192,23 @@ export default function ContactDetailsTab() {
 
         <div className="form-grid form-grid--3col">
           <SelectInput
-            label="Province"
-            labelNp="प्रदेश"
+            label="Province*"
+            labelNp="प्रदेश*"
             value={draft.permanentAddress.province}
             onChange={(val) => handleAddressChange("province", val)}
             options={PROVINCE_OPTIONS}
           />
           <SelectInput
-            label="District"
-            labelNp="जिल्ला"
+            label="District*"
+            labelNp="जिल्ला*"
             value={draft.permanentAddress.district}
             onChange={(val) => handleAddressChange("district", val)}
             options={[{val: "", text: "-- Select / छान्नुहोस् --"}, ...permDistricts]}
             disabled={!draft.permanentAddress.province}
           />
           <SelectInput
-            label="Local Level"
-            labelNp="स्थानीय तह"
+            label="Local Level*"
+            labelNp="स्थानीय तह*"
             value={draft.permanentAddress.localLevel}
             onChange={(val) => handleAddressChange("localLevel", val)}
             options={[{val: "", text: "-- Select / छान्नुहोस् --"}, ...permLocalLevels]}
@@ -198,8 +218,8 @@ export default function ContactDetailsTab() {
 
         <div className="form-grid form-grid--3col">
           <TextInput
-            label="Ward No."
-            labelNp="वडा नं."
+            label="Ward No.*"
+            labelNp="वडा नं.*"
             value={draft.permanentAddress.wardNo}
             onChange={(val) => handleAddressChange("wardNo", val)}
           />
@@ -295,18 +315,18 @@ export default function ContactDetailsTab() {
           ← Back
         </button>
         <button
-          className="btn btn--primary"
-          onClick={nextStep}
-          disabled={!canProceed}
+          className={`btn btn--primary ${isShaking ? 'shake' : ''}`}
+          onClick={handleNextClick}
         >
           Next: Family Details →
         </button>
       </div>
 
-      {!canProceed && (
-        <p className="form-nav__hint">
-          Please fill in Mobile No. and Permanent Address (Province, District, Local Level) to continue.
-        </p>
+      {showErrors && !canProceed && (
+        <div className="form-error-banner bounce-in">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span>Please fill in your Mobile No. and complete all Address fields (*) to continue.</span>
+        </div>
       )}
     </div>
   );
