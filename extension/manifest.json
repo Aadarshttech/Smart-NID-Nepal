@@ -46,5 +46,11 @@
       "js": ["content-donidcr.js"],
       "run_at": "document_idle"
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/guide.png"],
+      "matches": ["*://enrollment.donidcr.gov.np/*"]
+    }
   ]
 }

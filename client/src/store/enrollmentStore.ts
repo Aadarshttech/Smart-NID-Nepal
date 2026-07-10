@@ -15,6 +15,7 @@ export const ENROLLMENT_STEPS = [
   { label: "Applicant Data", labelNp: "मुख्य आवेदकको विवरण" },
   { label: "Contact Details", labelNp: "सम्पर्क विवरण" },
   { label: "Family Details", labelNp: "पारिवारिक विवरण" },
+  { label: "Appointment", labelNp: "बायोमेट्रिक दिने स्थान" },
   { label: "Export", labelNp: "निर्यात" },
 ] as const;
 
@@ -34,8 +35,9 @@ const DEFAULT_FAMILY_DETAILS = {
   }
 };
 
-const DEFAULT_ADDITIONAL_FIELDS = {
-  maritalStatus: "",
+const DEFAULT_ADDITIONAL_FIELDS: AdditionalFields = {
+  appointmentLocation: "",
+  maritalStatus: "2", // Unmarried by default
   educationLevel: "",
   profession: "",
   caste: "",

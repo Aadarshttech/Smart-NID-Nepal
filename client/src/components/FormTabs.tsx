@@ -8,6 +8,7 @@ import { useEnrollmentStore } from "../store/enrollmentStore";
 import ApplicantDataTab from "./ApplicantDataTab";
 import ContactDetailsTab from "./ContactDetailsTab";
 import FamilyDetailsTab from "./FamilyDetailsTab";
+import AppointmentTab from "./AppointmentTab";
 import ExportTab from "./ExportTab";
 
 export default function FormTabs() {
@@ -23,6 +24,8 @@ export default function FormTabs() {
       case 3:
         return <FamilyDetailsTab />;
       case 4:
+        return <AppointmentTab />;
+      case 5:
         return <ExportTab />;
       default:
         return <ApplicantDataTab />;

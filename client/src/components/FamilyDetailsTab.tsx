@@ -148,7 +148,7 @@ function AddressForm({
     : [];
 
   return (
-    <div style={{ marginTop: "1rem", padding: "1rem", border: "1px dashed #cbd5e1", borderRadius: "8px", backgroundColor: "#f8fafc" }}>
+    <div style={{ marginTop: "1rem", marginBottom: "2rem", padding: "1rem", border: "1px dashed #cbd5e1", borderRadius: "8px", backgroundColor: "#f8fafc" }}>
       <h5 style={{ margin: "0 0 1rem 0", fontSize: "0.9rem", color: "#475569" }}>{titleNp} / {title}</h5>
       
       <div style={{ marginBottom: "1rem" }}>
@@ -210,28 +210,45 @@ function ExpandableOtherDetails({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
+    <div style={{ marginTop: "1.5rem", marginBottom: "1.5rem", border: "1px solid #e2e8f0", borderRadius: "8px", overflow: "hidden", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.02)" }}>
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
         style={{
-          background: "none",
+          width: "100%",
+          background: expanded ? "var(--nepal-blue)" : "#f8fafc",
           border: "none",
-          color: "#3b82f6",
+          color: expanded ? "#fff" : "#334155",
           fontWeight: 600,
-          fontSize: "0.9rem",
+          fontSize: "0.95rem",
           cursor: "pointer",
-          padding: 0,
+          padding: "1rem 1.25rem",
           display: "flex",
+          justifyContent: "space-between",
           alignItems: "center",
-          gap: "0.25rem",
+          transition: "all 0.3s ease"
         }}
       >
-        {expanded ? "− Hide Additional Info" : "➕ Add Additional Info (Citizenship, NIN, Nationality)"}
+        <span style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+             <polyline points="14 2 14 8 20 8"></polyline>
+             <line x1="16" y1="13" x2="8" y2="13"></line>
+             <line x1="16" y1="17" x2="8" y2="17"></line>
+             <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          {expanded ? "Additional Information" : "Add Additional Information (Citizenship, NIN, Nationality)"}
+        </span>
+        <svg 
+          width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s ease" }}
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
       </button>
       
       {expanded && (
-        <div className="form-grid form-grid--3col fade-in" style={{ marginTop: "1rem", padding: "1rem", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px dashed #cbd5e1", alignItems: "flex-end" }}>
+        <div className="form-grid form-grid--3col fade-in" style={{ padding: "1.5rem", backgroundColor: "#fff", alignItems: "flex-end" }}>
           <TextInput
             label="Citizenship No."
             labelNp="नागरिकता प्र. नं."
@@ -324,14 +341,13 @@ export default function FamilyDetailsTab() {
       {/* Family Details (AI-Extracted) */}
       <div className="form-section">
         <h3 className="form-section__title">
-          👨‍👩‍👧 पारिवारिक विवरण / Family Details
+          पारिवारिक विवरण / Family Details
         </h3>
 
         {/* Father */}
-        <div className="family-member-card">
-          <h4 className="family-member-card__header">
-            👨 बाबुको विवरण / Father's Details
-          </h4>
+        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1.25rem", fontWeight: 700, color: "var(--nepal-blue)", borderBottom: "2px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+          बाबुको विवरण / Father's Details
+        </h4>
         <div className="form-grid">
           <NameInput
             label="Father First Name*"
@@ -365,13 +381,10 @@ export default function FamilyDetailsTab() {
           onAddressChange={(subField, val) => handleAddressChange("fatherDetails", subField, val)}
         />
 
-        </div>
-
         {/* Mother */}
-        <div className="family-member-card">
-          <h4 className="family-member-card__header">
-            👩 आमाको विवरण / Mother's Details
-          </h4>
+        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1.25rem", fontWeight: 700, color: "var(--nepal-blue)", borderBottom: "2px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+          आमाको विवरण / Mother's Details
+        </h4>
         <div className="form-grid">
           <NameInput
             label="Mother First Name*"
@@ -404,24 +417,20 @@ export default function FamilyDetailsTab() {
           onSameAsApplicantChange={(val) => handleDetailsChange("motherDetails", "addressSameAsApplicant", val)}
           onAddressChange={(subField, val) => handleAddressChange("motherDetails", subField, val)}
         />
-
-        </div>
       </div>
 
-      {/* Family Details (User-Entered) */}
+        {/* Grandfather */}
       <div className="form-section">
         <h3 className="form-section__title">
-          ➕ थप पारिवारिक विवरण / Additional Family Details
+          थप पारिवारिक विवरण / Additional Family Details
         </h3>
         <p className="form-section__hint" style={{ color: "var(--crimson)", fontWeight: 500 }}>
-          ⚠️ यी क्षेत्रहरू नागरिकतामा छैनन् — कृपया आफैं भर्नुहोस्। (These fields are NOT on your citizenship.)
+          यी क्षेत्रहरू नागरिकतामा छैनन् — कृपया आफैं भर्नुहोस्। (These fields are NOT on your citizenship.)
         </p>
 
-        {/* Grandfather */}
-        <div className="family-member-card">
-          <h4 className="family-member-card__header">
-            👴 बाजेको विवरण / Grandfather's Details
-          </h4>
+        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1.25rem", fontWeight: 700, color: "var(--nepal-blue)", borderBottom: "2px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+          बाजेको विवरण / Grandfather's Details
+        </h4>
         <div className="form-grid">
           <NameInput
             label="Grandfather First Name"
@@ -447,13 +456,10 @@ export default function FamilyDetailsTab() {
           onChange={(subField, val) => handleDetailsChange("grandfatherDetails", subField, val)}
         />
 
-        </div>
-
         {/* Grandmother */}
-        <div className="family-member-card">
-          <h4 className="family-member-card__header">
-            👵 बज्यैको विवरण / Grandmother's Details
-          </h4>
+        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1.25rem", fontWeight: 700, color: "var(--nepal-blue)", borderBottom: "2px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+          बज्यैको विवरण / Grandmother's Details
+        </h4>
         <div className="form-grid">
           <NameInput
             label="Grandmother First Name"
@@ -478,14 +484,12 @@ export default function FamilyDetailsTab() {
           details={additional.grandmotherDetails || {}}
           onChange={(subField, val) => handleDetailsChange("grandmotherDetails", subField, val)}
         />
-        </div>
-
         {/* Spouse fields */}
         {additional.maritalStatus === "1" && (
-          <div className="family-member-card">
-          <h4 className="family-member-card__header">
-            💍 पति/पत्नीको विवरण / Spouse's Details
-          </h4>
+          <>
+            <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1.25rem", fontWeight: 700, color: "var(--nepal-blue)", borderBottom: "2px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+              पति/पत्नीको विवरण / Spouse's Details
+            </h4>
             <div className="form-grid">
               <NameInput
                 label="Spouse First Name"
@@ -518,7 +522,7 @@ export default function FamilyDetailsTab() {
               onSameAsApplicantChange={(val) => handleDetailsChange("spouseDetails", "addressSameAsApplicant", val)}
               onAddressChange={(subField, val) => handleAddressChange("spouseDetails", subField, val)}
             />
-          </div>
+          </>
         )}
       </div>
 

@@ -190,7 +190,7 @@ export default function ApplicantDataTab() {
       {/* ── AI-Extracted Personal Info ── */}
       <div className="form-section">
         <h3 className="form-section__title">
-          👤 व्यक्तिगत विवरण / Personal Information
+          व्यक्तिगत विवरण / Personal Information
         </h3>
         <p className="form-section__hint">
           AI ले तपाईंको नागरिकताबाट निकालेको डाटा तल देखाइएको छ। कृपया जाँच गर्नुहोस् र आवश्यक भएमा सम्पादन गर्नुहोस्।
@@ -265,10 +265,10 @@ export default function ApplicantDataTab() {
       {/* ── Additional Information (User-entered, NOT on citizenship) ── */}
       <div className="form-section">
         <h3 className="form-section__title">
-          📋 थप जानकारी / Additional Information
+          थप जानकारी / Additional Information
         </h3>
         <p className="form-section__hint" style={{ color: "var(--crimson)", fontWeight: 500 }}>
-          ⚠️ यी क्षेत्रहरू नागरिकतामा छैनन् — कृपया आफैं भर्नुहोस्। (These fields are NOT on your citizenship — please fill them manually.)
+          यी क्षेत्रहरू नागरिकतामा छैनन् — कृपया आफैं भर्नुहोस्। (These fields are NOT on your citizenship.)
         </p>
 
         <div className="form-grid form-grid--3col">

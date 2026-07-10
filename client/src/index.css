@@ -168,7 +168,7 @@ body::before {
 /* ── Main Content ────────────────────────────────────────── */
 .upload-main {
   width: 100%;
-  max-width: 1000px;
+  max-width: 1200px;
   flex: 1;
 }
 
@@ -778,7 +778,7 @@ body::before {
   padding: 2rem;
   border-top: 1px solid var(--border-subtle);
   width: 100%;
-  max-width: 1000px;
+  max-width: 1200px;
 }
 
 .upload-footer p {
@@ -992,26 +992,6 @@ details[open] > .form-sidebar__summary::before {
   padding: 0.75rem 1rem;
   border-radius: var(--radius-md);
   border-left: 3px solid var(--nepal-blue);
-}
-
-.family-member-card {
-  background: #fdfdfd;
-  border: 1px solid #f1f5f9;
-  border-left: 4px solid var(--nepal-blue-light);
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-top: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-}
-
-.family-member-card__header {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
 }
 
 /* ── Form Grid ───────────────────────────────────────────── */

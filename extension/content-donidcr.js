@@ -117,6 +117,12 @@
       return;
     }
 
+    // Auto-close the 'attention' modal on new enrollment
+    const closeBtns = Array.from(document.querySelectorAll('button')).filter(b => b.textContent.trim() === 'Close' && b.offsetParent !== null);
+    if (closeBtns.length > 0 && document.querySelector('.modal, .modal-dialog, .modal-content')) {
+      closeBtns[0].click();
+    }
+
     chrome.storage.local.get(["savedProfiles", "activeProfileId"], (result) => {
       if (chrome.runtime.lastError) {
         console.warn("Smart NID: Storage access error —", chrome.runtime.lastError.message);
@@ -135,7 +141,7 @@
   // ── Inject the floating auto-fill button ──
   function injectFloatingButton(instructions, fallbackScript) {
     // Prevent multiple injections
-    if (document.getElementById("smart-nid-autofill-btn")) return;
+    if (document.getElementById("smart-nid-avatar")) return;
 
     // Wait for document.body to exist
     if (!document.body) {
@@ -149,104 +155,236 @@
 
     const isReady = hasFormFields();
 
-    const btn = document.createElement("button");
-    btn.id = "smart-nid-autofill-btn";
+    const btn = document.createElement("div"); // Use div to prevent button focus outline
+    btn.id = "smart-nid-avatar";
 
-    // Nepal Flag / Smart NID Logo SVG
+    // Guide Avatar Image
+    const avatarUrl = chrome.runtime.getURL("icons/guide.png");
     const logoSvg = `
-      <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Flag_of_Nepal.svg" alt="Nepal Flag" style="width: 24px; height: 28px; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.2)); flex-shrink: 0; margin-right: ${isReady ? '8px' : '0'}; object-fit: contain;">
+      <img src="${avatarUrl}" alt="Guide" style="width: auto; height: 160px; object-fit: contain; filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.25)); flex-shrink: 0; pointer-events: none; margin-bottom: -15px;">
     `;
 
-    // Styling the floating button (Initial Logo State vs Ready State)
+    // Styling the floating avatar
     Object.assign(btn.style, {
       position: "fixed",
-      bottom: "40px",
-      right: "40px",
+      bottom: "20px",
+      right: "20px",
       display: "flex",
-      alignItems: "center",
+      alignItems: "flex-end",
       justifyContent: "center",
-      padding: isReady ? "14px 28px" : "18px",
-      backgroundColor: isReady ? "#28a745" : "#003893",
-      color: "white",
-      border: isReady ? "2px solid #fff" : "3px solid #fff",
-      borderRadius: "50px",
-      fontSize: "17px",
-      fontWeight: "bold",
-      cursor: "pointer",
-      boxShadow: isReady ? "0 10px 30px rgba(40, 167, 69, 0.4)" : "0 10px 25px rgba(0, 56, 147, 0.4)",
+      padding: "0",
+      backgroundColor: "transparent",
+      color: "#1e293b",
+      border: "none",
+      outline: "none", // Ensure no focus ring
+      borderRadius: "0",
+      cursor: "default", // It's no longer clickable
+      boxShadow: "none",
       zIndex: "999999",
-      transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-      fontFamily: "sans-serif",
-      whiteSpace: "nowrap",
-      overflow: "hidden"
+      transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
     });
 
-    btn.innerHTML = isReady 
-      ? `${logoSvg} <span>Auto-Fill Form</span>`
-      : `${logoSvg}`;
+    btn.innerHTML = `${logoSvg}`;
+
+    // Create the dedicated Auto-Fill Action Button
+    const actionBtn = document.createElement("button");
+    actionBtn.id = "smart-nid-action-btn";
+    actionBtn.innerHTML = "<span style='font-size:16px; margin-right:6px;'>✨</span> Auto-Fill";
+    Object.assign(actionBtn.style, {
+      position: "fixed",
+      bottom: "45px", // Aligned with her waist/torso
+      right: "130px", // Snug next to her left side
+      padding: "12px 26px",
+      background: "linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)", // Rich red gradient
+      color: "white",
+      border: "2px solid rgba(255,255,255,0.9)", // Elegant white border
+      borderRadius: "30px",
+      fontSize: "15px",
+      fontWeight: "700",
+      letterSpacing: "0.5px",
+      cursor: "pointer",
+      boxShadow: "0 8px 25px rgba(185, 28, 28, 0.35), 0 0 0 1px rgba(0,0,0,0.05)",
+      zIndex: "999999",
+      transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)", // Bouncy hover
+      fontFamily: "'Segoe UI', system-ui, sans-serif",
+      display: "flex",
+      alignItems: "center"
+    });
 
     if (!isReady) {
-      // Add a subtle pulse animation when waiting (using standard DOM animate)
+      // Add a subtle bounce animation to the avatar when waiting
       try {
         btn.animate([
-          { transform: 'scale(1)', boxShadow: '0 10px 25px rgba(0, 56, 147, 0.4)' },
-          { transform: 'scale(1.08)', boxShadow: '0 15px 35px rgba(0, 56, 147, 0.6)' },
-          { transform: 'scale(1)', boxShadow: '0 10px 25px rgba(0, 56, 147, 0.4)' }
-        ], { duration: 2500, iterations: Infinity });
+          { transform: 'translateY(0)', filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.2))' },
+          { transform: 'translateY(-8px)', filter: 'drop-shadow(0 15px 25px rgba(0,0,0,0.3))' },
+          { transform: 'translateY(0)', filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.2))' }
+        ], { duration: 2500, iterations: Infinity, easing: 'ease-in-out' });
       } catch (e) { /* fallback for older browsers */ }
     }
 
-    // Tooltip/Status Badge
+    // Chat Bubble (Status Badge)
     const statusBadge = document.createElement("div");
     statusBadge.id = "smart-nid-status";
     Object.assign(statusBadge.style, {
       position: "fixed",
-      bottom: "100px",
-      right: "40px",
-      padding: "12px 20px",
-      backgroundColor: "#1e293b",
-      color: "white",
-      borderRadius: "12px",
+      bottom: "185px",
+      right: "20px",
+      padding: "18px 22px",
+      backgroundColor: "white",
+      color: "#1e293b",
+      borderRadius: "30px",
       fontSize: "14px",
-      fontWeight: "600",
+      fontWeight: "500",
       zIndex: "999998",
-      fontFamily: "sans-serif",
-      boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-      transition: "all 0.3s ease",
-      opacity: "0",
-      transform: "translateY(10px)",
+      fontFamily: "'Segoe UI', system-ui, sans-serif",
+      border: "none",
+      boxShadow: "0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)",
+      transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+      opacity: "1",
+      transform: "translateY(0) scale(1)",
+      transformOrigin: "bottom right",
       pointerEvents: "none",
-      maxWidth: "280px",
-      lineHeight: "1.4"
+      maxWidth: "260px",
+      lineHeight: "1.55",
+      letterSpacing: "0.01em"
     });
     
+    // Add cloud bubble tail — two small circles trailing down toward the girl
+    const styleEl = document.createElement("style");
+    styleEl.textContent = `
+      #smart-nid-status {
+        position: relative;
+      }
+      #smart-nid-cloud-dot-1 {
+        position: fixed;
+        bottom: 178px;
+        right: 55px;
+        width: 18px;
+        height: 18px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+        z-index: 999997;
+        pointer-events: none;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 1;
+        transform: scale(1);
+      }
+      #smart-nid-cloud-dot-2 {
+        position: fixed;
+        bottom: 170px;
+        right: 65px;
+        width: 10px;
+        height: 10px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);
+        z-index: 999997;
+        pointer-events: none;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 1;
+        transform: scale(1);
+      }
+      @keyframes smartNidCloudFloat {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-4px) scale(1); }
+      }
+      #smart-nid-status.is-floating {
+        animation: smartNidCloudFloat 3s ease-in-out infinite;
+      }
+    `;
+    document.head.appendChild(styleEl);
+
+    // Create the trailing thought-cloud dots
+    const dot1 = document.createElement("div");
+    dot1.id = "smart-nid-cloud-dot-1";
+    const dot2 = document.createElement("div");
+    dot2.id = "smart-nid-cloud-dot-2";
+
+    let bubbleVisibilityTimeout = null;
+    let isShowingFeedback = false;
+
+    const setBubbleVisible = (visible) => {
+      if (visible) {
+        statusBadge.style.opacity = "1";
+        statusBadge.classList.add('is-floating');
+        dot1.style.opacity = "1";
+        dot1.style.transform = "scale(1)";
+        dot2.style.opacity = "1";
+        dot2.style.transform = "scale(1)";
+      } else {
+        statusBadge.style.opacity = "0";
+        statusBadge.classList.remove('is-floating');
+        dot1.style.opacity = "0";
+        dot1.style.transform = "scale(0.8) translateY(5px)";
+        dot2.style.opacity = "0";
+        dot2.style.transform = "scale(0.8) translateY(5px)";
+      }
+    };
+
     // Set initial text for tooltip
     if (isReady) {
-      statusBadge.innerHTML = "✅ <b>Ready!</b> Click to auto-fill your form.";
-      statusBadge.style.backgroundColor = "#28a745";
+      statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form.<br/>Please press the <b>Auto-Fill</b> button at my side!";
     } else {
-      statusBadge.innerHTML = "⏳ <b>Action Required:</b> Complete OTP and click <i>New Enrollment</i> to unlock Auto-Fill.";
-      statusBadge.style.backgroundColor = "#1e293b";
+      const newEnrollBtn = document.getElementById("newEnrollment");
+      if (newEnrollBtn) {
+        statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! Please press the <b>Auto-Fill</b> button at my side to start a New Enrollment and fill everything!";
+      } else {
+        statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste!<br/><br/>I don't see a form here! Open a form and I'll help you fill it.";
+      }
     }
+
+    setBubbleVisible(true);
+    bubbleVisibilityTimeout = setTimeout(() => {
+      if (!isShowingFeedback) setBubbleVisible(false);
+    }, 5000);
 
     btn.onmouseover = () => {
       btn.style.transform = "scale(1.08) translateY(-5px)";
-      statusBadge.style.opacity = "1";
-      statusBadge.style.transform = "translateY(0)";
+      clearTimeout(bubbleVisibilityTimeout);
+      setBubbleVisible(true);
     };
     btn.onmouseout = () => {
       btn.style.transform = "scale(1) translateY(0)";
-      statusBadge.style.opacity = "0";
-      statusBadge.style.transform = "translateY(10px)";
+      if (!isShowingFeedback) setBubbleVisible(false);
+    };
+    
+    actionBtn.onmouseover = () => {
+      actionBtn.style.transform = "translateY(-4px) scale(1.05)";
+      actionBtn.style.boxShadow = "0 12px 30px rgba(185, 28, 28, 0.45), 0 0 0 1px rgba(0,0,0,0.05)";
+      clearTimeout(bubbleVisibilityTimeout);
+      setBubbleVisible(true);
+    };
+    actionBtn.onmouseout = () => {
+      actionBtn.style.transform = "translateY(0) scale(1)";
+      actionBtn.style.boxShadow = "0 8px 25px rgba(185, 28, 28, 0.35), 0 0 0 1px rgba(0,0,0,0.05)";
+      if (!isShowingFeedback) setBubbleVisible(false);
     };
 
-    btn.onclick = () => {
+
+    actionBtn.onclick = () => {
+      isShowingFeedback = true;
+      setBubbleVisible(true);
       if (!hasFormFields()) {
-        // User clicked the logo before reaching the form
-        statusBadge.style.opacity = "1";
-        statusBadge.style.transform = "translateY(0)";
-        statusBadge.innerHTML = "⚠️ <b>Not on form page!</b> Navigate to <i>New Enrollment</i> first.";
-        statusBadge.style.backgroundColor = "#dc3545";
+        const newEnrollmentBtn = document.getElementById("newEnrollment");
+        
+        if (newEnrollmentBtn) {
+          statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F680}</span> Starting New Enrollment! I'll auto-fill everything...";
+          statusBadge.style.backgroundColor = "#f0fff4";
+          statusBadge.style.color = "#22543d";
+          sessionStorage.setItem('smart_nid_autorun', 'true');
+          
+          setTimeout(() => {
+            newEnrollmentBtn.click();
+          }, 600);
+          return;
+        }
+
+        // User clicked the avatar before reaching the form and no new enrollment btn
+        statusBadge.innerHTML = "Oops! You're not on the form page yet. Please click <b>New Enrollment</b> first! \u{1F60A}";
+        statusBadge.style.backgroundColor = "#fff5f5";
+        statusBadge.style.color = "#c53030";
+        statusBadge.style.boxShadow = "0 4px 20px rgba(197,48,48,0.1), 0 0 0 1px rgba(197,48,48,0.1)";
         
         // Shake animation
         try {
@@ -261,11 +399,12 @@
         } catch(e){}
 
         setTimeout(() => {
-          statusBadge.style.opacity = "0";
-          setTimeout(() => {
-            statusBadge.innerHTML = "⏳ <b>Action Required:</b> Complete OTP and click <i>New Enrollment</i> to unlock Auto-Fill.";
-            statusBadge.style.backgroundColor = "#1e293b";
-          }, 300);
+          isShowingFeedback = false;
+          statusBadge.style.backgroundColor = "white";
+          statusBadge.style.color = "#1e293b";
+          statusBadge.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)";
+          statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste!<br/><br/>I don't see a form here! Open a form and I'll help you fill it.";
+          setBubbleVisible(false);
         }, 3000);
         return;
       }
@@ -307,6 +446,15 @@
                   if (!el) el = document.querySelector('input[type="checkbox"]');
                 }
 
+                // Fallback for Appointment Location
+                if (!el && inst.id === 'appointmentLocation') {
+                  // The location dropdown is the first (and usually only) select on the final Appointment tab.
+                  const visibleSelects = Array.from(document.querySelectorAll('select')).filter(s => s.offsetParent !== null);
+                  if (visibleSelects.length > 0) {
+                    el = visibleSelects[0];
+                  }
+                }
+
                 if (!el) {
                   skippedCount++;
                   console.warn('Smart NID: Field not found (likely on another tab):', inst.id);
@@ -316,9 +464,6 @@
                 if (inst.type === 'text' || inst.type === 'date') {
                   el.focus();
                   el.dispatchEvent(new Event('focus', { bubbles: true }));
-                  
-                  // Micro-delay to let React/nepalify process focus
-                  await new Promise(r => setTimeout(r, 50));
                   
                   let injectVal = inst.value;
 
@@ -353,9 +498,6 @@
                   el.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter', code: 'Enter', keyCode: 13 }));
                   el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter', code: 'Enter', keyCode: 13 }));
                   
-                  // Micro-delay before blur
-                  await new Promise(r => setTimeout(r, 50));
-                  
                   el.dispatchEvent(new Event('blur', { bubbles: true }));
                   el.blur();
                   filledCount++;
@@ -370,15 +512,19 @@
                   let attempts = 0;
                   let hasOption = false;
                   
-                  const targetVal = inst.value ? inst.value.toString() : "";
-                  const targetText = inst.textValue ? inst.textValue.toString().toLowerCase() : "";
+                  const targetVal = inst.value ? String(inst.value) : "";
+                  const targetText = inst.textValue ? String(inst.textValue).toLowerCase().replace(/[\s\/]/g, '') : "";
 
-                  while (!hasOption && attempts < 50) {
+                  while (!hasOption && attempts < 15) { // Max 1.5s wait to prevent long delays
                     const options = Array.from(el.options);
-                    hasOption = options.some(opt => 
-                      (targetVal && opt.value === targetVal) || 
-                      (targetText && (opt.text.toLowerCase() === targetText || opt.text.toLowerCase().includes(targetText)))
-                    );
+                    hasOption = options.some(opt => {
+                      if (targetVal && opt.value === targetVal) return true;
+                      if (targetText) {
+                        const optText = opt.text.toLowerCase().replace(/[\s\/]/g, '');
+                        return optText === targetText || optText.includes(targetText);
+                      }
+                      return false;
+                    });
                     
                     if (!hasOption) {
                       await new Promise(r => setTimeout(r, 100));
@@ -405,11 +551,12 @@
                   
                   // If not matched by value, try to match by text content
                   if (!matched && inst.textValue) {
-                    const lowerVal = inst.textValue.toLowerCase();
+                    const cleanTarget = String(inst.textValue).toLowerCase().replace(/[\s\/]/g, '');
                     let fuzzyMatch = null;
                     // 1. Exact text match
                     for (let i = 0; i < el.options.length; i++) {
-                      if (el.options[i].text.toLowerCase() === lowerVal) {
+                      const cleanOpt = el.options[i].text.toLowerCase().replace(/[\s\/]/g, '');
+                      if (cleanOpt === cleanTarget) {
                         fuzzyMatch = el.options[i];
                         break;
                       }
@@ -417,7 +564,8 @@
                     // 2. Contains match
                     if (!fuzzyMatch) {
                       for (let i = 0; i < el.options.length; i++) {
-                        if (el.options[i].text.toLowerCase().includes(lowerVal)) {
+                        const cleanOpt = el.options[i].text.toLowerCase().replace(/[\s\/]/g, '');
+                        if (cleanOpt.includes(cleanTarget) || cleanTarget.includes(cleanOpt)) {
                           fuzzyMatch = el.options[i];
                           break;
                         }
@@ -439,9 +587,6 @@
                   el.dispatchEvent(new Event('change', { bubbles: true }));
                   filledCount++;
                 }
-
-                // Small delay to allow framework state updates before next field
-                await new Promise(r => setTimeout(r, 50));
               }
 
               // Dynamically inject missing province data for old profiles
@@ -499,9 +644,6 @@
 
         // Update button to success state momentarily
         const originalHtml = btn.innerHTML;
-        btn.style.backgroundColor = "#28a745";
-        btn.style.border = "2px solid #fff";
-        btn.style.boxShadow = "0 10px 25px rgba(40, 167, 69, 0.4)";
         
         // Update status badge with contextual message based on fill results
         const filled = (typeof result === 'object' && result) ? result.filledCount : 0;
@@ -517,96 +659,82 @@
               for (let i = 0; i < 3; i++) {
                 if (nextBtn.innerText.trim().toLowerCase() === 'next') {
                   nextBtn.click();
-                  await new Promise(r => setTimeout(r, 200)); // Delay to allow validation and tab switch
+                  await new Promise(r => setTimeout(r, 50)); // Fast delay to allow validation and tab switch
                 }
               }
             }
-          }, 100);
+          }, 50);
         }
 
         if (filled > 0 && skipped > 0) {
-          btn.innerHTML = `✅ Filled ${filled} fields!`;
-          statusBadge.innerHTML = `✅ <b>${filled} fields filled!</b> Navigating to next tab...`;
+          statusBadge.innerHTML = `Yay! I filled <b>${filled} fields</b> for you! Moving to the next section... \u{1F389}`;
+          statusBadge.style.backgroundColor = "#f0fff4";
+          statusBadge.style.color = "#22543d";
         } else if (filled > 0) {
-          btn.innerHTML = "✅ All Filled!";
-          statusBadge.innerHTML = "✅ <b>All fields filled!</b> Navigating or Review and submit.";
+          statusBadge.innerHTML = "All done! Every field is filled! \u{2728}<br/>Moving forward or review and submit.";
+          statusBadge.style.backgroundColor = "#f0fff4";
+          statusBadge.style.color = "#22543d";
         } else {
-          btn.innerHTML = "⚠️ No Fields Found";
-          statusBadge.innerHTML = "⚠️ No fillable fields found on this tab.";
-          statusBadge.style.backgroundColor = "#f59e0b";
+          statusBadge.innerHTML = "Hmm, I couldn't find any fields to fill on this tab. \u{1F914}";
+          statusBadge.style.backgroundColor = "#fffbeb";
+          statusBadge.style.color = "#92400e";
           sessionStorage.removeItem('smart_nid_autorun');
         }
         
-        if (filled > 0) statusBadge.style.backgroundColor = "#28a745";
-        statusBadge.style.opacity = "1";
-        statusBadge.style.transform = "translateY(0)";
-
         // Revert back to ready state after 3 seconds
         setTimeout(() => {
+          isShowingFeedback = false;
           btn.innerHTML = originalHtml;
-          statusBadge.style.opacity = "0";
+          statusBadge.style.backgroundColor = "white";
+          statusBadge.style.color = "#1e293b";
+          statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form for you.<br/><b>Just click me!</b>";
+          setBubbleVisible(false);
         }, 3000);
       } catch (err) {
-          console.error("Smart NID: Script injection error —", err);
+          console.error("Smart NID: Script injection error \u2014", err);
           sessionStorage.removeItem('smart_nid_autorun');
-          btn.innerHTML = "❌ Error";
-          btn.style.backgroundColor = "#dc3545";
-          statusBadge.innerHTML = "❌ Injection failed. Try refreshing the page.";
-          statusBadge.style.backgroundColor = "#dc3545";
-          statusBadge.style.opacity = "1";
-          statusBadge.style.transform = "translateY(0)";
+          statusBadge.innerHTML = "Oh no, something went wrong! \u{1F625}<br/>Try refreshing the page and clicking me again.";
+          statusBadge.style.backgroundColor = "#fff5f5";
+          statusBadge.style.color = "#c53030";
 
           setTimeout(() => {
-            btn.innerHTML = `${logoSvg} <span>Auto-Fill Form</span>`;
-            btn.style.backgroundColor = "#28a745";
-            statusBadge.style.opacity = "0";
+            isShowingFeedback = false;
+            btn.innerHTML = `${logoSvg}`;
+            statusBadge.style.backgroundColor = "white";
+            statusBadge.style.color = "#1e293b";
+            statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form for you.<br/><b>Just click me!</b>";
+            setBubbleVisible(false);
           }, 3000);
         }
       });
     };
 
     container.appendChild(statusBadge);
+    container.appendChild(dot1);
+    container.appendChild(dot2);
+    container.appendChild(actionBtn);
     container.appendChild(btn);
     document.body.appendChild(container);
 
-    // Periodically check if the user navigated to the form page via SPA navigation
+    // Periodically check for Auto-run flag
     const statusInterval = setInterval(() => {
-      const currentBtn = document.getElementById("smart-nid-autofill-btn");
-      if (!currentBtn) {
+      const currentActionBtn = document.getElementById("smart-nid-action-btn");
+      if (!currentActionBtn && !document.getElementById("smart-nid-avatar")) {
         clearInterval(statusInterval);
         return;
       }
       
       const formReady = hasFormFields();
-      
-      if (formReady && currentBtn.style.backgroundColor !== "rgb(40, 167, 69)") { // #28a745
-        // Transition to Ready state
-        currentBtn.style.backgroundColor = "#28a745";
-        currentBtn.style.border = "2px solid #fff";
-        currentBtn.style.padding = "14px 28px";
-        currentBtn.style.boxShadow = "0 10px 30px rgba(40, 167, 69, 0.4)";
-        
-        // Re-inject SVG with margin
-        const svgReady = `
-          <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Flag_of_Nepal.svg" alt="Nepal Flag" style="width: 24px; height: 28px; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.2)); flex-shrink: 0; margin-right: 8px; object-fit: contain;">
-        `;
-        currentBtn.innerHTML = `${svgReady} <span>Auto-Fill Form</span>`;
-        
-        statusBadge.innerHTML = "✅ <b>Ready!</b> Click to auto-fill your form.";
-        statusBadge.style.backgroundColor = "#28a745";
-        
-        // Cancel pulse animation
-        currentBtn.getAnimations().forEach(anim => anim.cancel());
-        
+      if (formReady && currentActionBtn) {
         // 🚀 Auto-Run feature for multi-tab wizard
         if (sessionStorage.getItem('smart_nid_autorun') === 'true') {
           sessionStorage.removeItem('smart_nid_autorun'); // Prevent infinite loops
           setTimeout(() => {
-            currentBtn.click();
-          }, 500); // Small delay to let React fully mount the fields
+            currentActionBtn.click();
+          }, 50); // Very rapid auto-run after React mount
         }
       }
-    }, 1500);
+    }, 500);
   }
 
   // ── Run ──

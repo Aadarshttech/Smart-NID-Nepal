@@ -13,6 +13,12 @@ export interface AddressField {
   wardNo: string;
 }
 
+export interface AdditionalFields {
+  // Applicant Data - Additional Information
+  appointmentLocation: string;
+  maritalStatus: string;        // DoNIDCR: "1"=Married, "2"=Single, etc.;
+}
+
 export interface ExtractionResult {
   citizenshipNo: string;
   firstName: NameField;

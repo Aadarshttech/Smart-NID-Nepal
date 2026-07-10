@@ -63,23 +63,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           }
 
           if (tabs && tabs.length > 0) {
-            // Focus the existing tab and re-inject the content script
+            // Re-inject the content script if it's already open, but DO NOT focus it
             const existingTab = tabs[0];
-            chrome.tabs.update(existingTab.id, { active: true }, () => {
-              if (chrome.runtime.lastError) {
-                 console.warn("Smart NID: Tab update error —", chrome.runtime.lastError.message);
-                 // Ignore error, proceed
-              }
-
-              if (chrome.scripting && chrome.scripting.executeScript) {
-                chrome.scripting.executeScript({
-                  target: { tabId: existingTab.id },
-                  files: ["content-donidcr.js"],
-                }).catch((err) => {
-                  console.warn("Smart NID: Script injection warning —", err);
-                });
-              }
-            });
+            if (chrome.scripting && chrome.scripting.executeScript) {
+              chrome.scripting.executeScript({
+                target: { tabId: existingTab.id },
+                files: ["content-donidcr.js"],
+              }).catch((err) => {
+                console.warn("Smart NID: Script injection warning —", err);
+              });
+            }
           }
           // If no tab is open, do NOT open one — user will navigate manually
           // The ExportTab in the React app will show instructions

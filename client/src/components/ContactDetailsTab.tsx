@@ -166,7 +166,7 @@ export default function ContactDetailsTab() {
       {/* ── Contact Details (Phone) ── */}
       <div className="form-section">
         <h3 className="form-section__title">
-          📞 सम्पर्क नम्बर / Phone Details
+          सम्पर्क नम्बर / Phone Details
         </h3>
         <div className="form-grid form-grid--2col">
           <TextInput
@@ -187,7 +187,7 @@ export default function ContactDetailsTab() {
       {/* Permanent Address */}
       <div className="form-section">
         <h3 className="form-section__title">
-          📍 स्थायी ठेगाना / Permanent Address
+          स्थायी ठेगाना / Permanent Address
         </h3>
 
         <div className="form-grid form-grid--3col">
@@ -242,7 +242,7 @@ export default function ContactDetailsTab() {
       {/* Temporary Address */}
       <div className="form-section">
         <h3 className="form-section__title">
-          🏠 अस्थायी ठेगाना / Temporary Address
+          अस्थायी ठेगाना / Temporary Address
         </h3>
 
         <div className="form-field" style={{ marginBottom: "1rem" }}>

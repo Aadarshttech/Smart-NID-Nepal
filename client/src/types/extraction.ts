@@ -58,6 +58,7 @@ export interface ExtractionResult {
 /** ── User-Entered Fields (NOT on citizenship certificate) ── */
 export interface AdditionalFields {
   // Applicant Data — Additional Information
+  appointmentLocation: string;
   maritalStatus: string;        // DoNIDCR: "1"=Married, "2"=Single, etc.
   educationLevel: string;       // DoNIDCR: "1"=Primary ... "9"=PhD
   profession: string;           // DoNIDCR: "1"=Other ... "16"=Social Worker

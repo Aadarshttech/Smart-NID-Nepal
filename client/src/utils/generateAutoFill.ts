@@ -487,5 +487,10 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
     }
   }
 
+  // Appointment Location
+  if (additional.appointmentLocation) {
+    instructions.push({ id: 'appointmentLocation', type: 'select', value: '', textValue: additional.appointmentLocation });
+  }
+
   return instructions;
 }
