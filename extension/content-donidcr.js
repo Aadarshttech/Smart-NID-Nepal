@@ -302,6 +302,7 @@
     dot2.id = "smart-nid-cloud-dot-2";
 
     let bubbleVisibilityTimeout = null;
+    let statusRevertTimeout = null;
     let isShowingFeedback = false;
 
     const setBubbleVisible = (visible) => {
@@ -363,6 +364,8 @@
 
 
     actionBtn.onclick = () => {
+      if (statusRevertTimeout) clearTimeout(statusRevertTimeout);
+      if (bubbleVisibilityTimeout) clearTimeout(bubbleVisibilityTimeout);
       isShowingFeedback = true;
       setBubbleVisible(true);
       if (!hasFormFields()) {
@@ -448,10 +451,18 @@
 
                 // Fallback for Appointment Location
                 if (!el && inst.id === 'appointmentLocation') {
-                  // The location dropdown is the first (and usually only) select on the final Appointment tab.
-                  const visibleSelects = Array.from(document.querySelectorAll('select')).filter(s => s.offsetParent !== null);
-                  if (visibleSelects.length > 0) {
-                    el = visibleSelects[0];
+                  const labels = Array.from(document.querySelectorAll('label, span, div, p'));
+                  const locLabel = labels.find(l => l.innerText && l.innerText.includes('बायोमेट्रिक'));
+                  if (locLabel) {
+                    const container = locLabel.closest('.row, .form-group, .col-md-6, .col-sm-12') || locLabel.parentElement;
+                    if (container) {
+                      el = container.querySelector('select') || container.parentElement?.querySelector('select');
+                    }
+                  }
+                  // Ultimate fallback: first visible select that has "location" or is empty
+                  if (!el) {
+                    const visibleSelects = Array.from(document.querySelectorAll('select')).filter(s => s.offsetParent !== null);
+                    if (visibleSelects.length > 0) el = visibleSelects[0];
                   }
                 }
 
@@ -515,7 +526,7 @@
                   const targetVal = inst.value ? String(inst.value) : "";
                   const targetText = inst.textValue ? String(inst.textValue).toLowerCase().replace(/[\s\/]/g, '') : "";
 
-                  while (!hasOption && attempts < 15) { // Max 1.5s wait to prevent long delays
+                  while (!hasOption && attempts < 30) { // Max 3s wait (was 1.5s) for slow government APIs
                     const options = Array.from(el.options);
                     hasOption = options.some(opt => {
                       if (targetVal && opt.value === targetVal) return true;
@@ -681,15 +692,26 @@
           sessionStorage.removeItem('smart_nid_autorun');
         }
         
-        // Revert back to ready state after 3 seconds
-        setTimeout(() => {
+        // Revert back to ready state after 4 seconds (only if not completely finished)
+        const isFinalTab = filled > 0 && skipped === 0;
+        
+        statusRevertTimeout = setTimeout(() => {
           isShowingFeedback = false;
-          btn.innerHTML = originalHtml;
-          statusBadge.style.backgroundColor = "white";
-          statusBadge.style.color = "#1e293b";
-          statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form for you.<br/><b>Just click me!</b>";
+          if (!isFinalTab) {
+            btn.innerHTML = originalHtml;
+            statusBadge.style.backgroundColor = "white";
+            statusBadge.style.color = "#1e293b";
+            const newEnrollBtn = document.getElementById("newEnrollment");
+            if (isReady) {
+              statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form.<br/>Please press the <b>Auto-Fill</b> button at my side!";
+            } else if (newEnrollBtn) {
+              statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! Please press the <b>Auto-Fill</b> button at my side to start a New Enrollment and fill everything!";
+            } else {
+              statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste!<br/><br/>I don't see a form here! Open a form and I'll help you fill it.";
+            }
+          }
           setBubbleVisible(false);
-        }, 3000);
+        }, 4000);
       } catch (err) {
           console.error("Smart NID: Script injection error \u2014", err);
           sessionStorage.removeItem('smart_nid_autorun');
@@ -697,12 +719,19 @@
           statusBadge.style.backgroundColor = "#fff5f5";
           statusBadge.style.color = "#c53030";
 
-          setTimeout(() => {
+          statusRevertTimeout = setTimeout(() => {
             isShowingFeedback = false;
             btn.innerHTML = `${logoSvg}`;
             statusBadge.style.backgroundColor = "white";
             statusBadge.style.color = "#1e293b";
-            statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form for you.<br/><b>Just click me!</b>";
+            const newEnrollBtn = document.getElementById("newEnrollment");
+            if (isReady) {
+              statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form.<br/>Please press the <b>Auto-Fill</b> button at my side!";
+            } else if (newEnrollBtn) {
+              statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! Please press the <b>Auto-Fill</b> button at my side to start a New Enrollment and fill everything!";
+            } else {
+              statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste!<br/><br/>I don't see a form here! Open a form and I'll help you fill it.";
+            }
             setBubbleVisible(false);
           }, 3000);
         }
