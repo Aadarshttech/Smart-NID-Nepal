@@ -398,9 +398,29 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
     pushText('tempVillageTol', additional.temporaryAddress.villageToleEn?.toUpperCase());
   }
 
-  // Set default family address copy checks (matches gov website logic for copying applicant perm address)
-  instructions.push({ id: 'fatherAddressCopy', type: 'checkbox', value: 'true' });
-  instructions.push({ id: 'motherAddressCopy', type: 'checkbox', value: 'true' });
+  // Father Address
+  const fatherCopy = additional.fatherDetails?.addressSameAsApplicant ?? true;
+  instructions.push({ id: 'fatherAddressCopy', type: 'checkbox', value: fatherCopy.toString() });
+  if (!fatherCopy) {
+    pushText('fatherState', additional.fatherDetails?.address?.province);
+    pushText('fatherDistrict', additional.fatherDetails?.address?.district);
+    pushText('fatherRurMun', additional.fatherDetails?.address?.localLevel);
+    pushText('fatherWardLoc', additional.fatherDetails?.address?.wardNo);
+    pushText('fatherVillageTolLoc', additional.fatherDetails?.address?.villageToleNp);
+  }
+
+  // Mother Address
+  const motherCopy = additional.motherDetails?.addressSameAsApplicant ?? true;
+  instructions.push({ id: 'motherAddressCopy', type: 'checkbox', value: motherCopy.toString() });
+  if (!motherCopy) {
+    pushText('motherState', additional.motherDetails?.address?.province);
+    pushText('motherDistrict', additional.motherDetails?.address?.district);
+    pushText('motherRurMun', additional.motherDetails?.address?.localLevel);
+    pushText('motherWardLoc', additional.motherDetails?.address?.wardNo);
+    pushText('motherVillageTolLoc', additional.motherDetails?.address?.villageToleNp);
+  }
+
+  // Grandparents default to true
   instructions.push({ id: 'grandFatherAddressCopy', type: 'checkbox', value: 'true' });
   instructions.push({ id: 'grandMotherAddressCopy', type: 'checkbox', value: 'true' });
 
@@ -411,6 +431,8 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('fatherMiddleName', data.fatherMiddleName?.english?.toUpperCase());
   pushText('fatherLastName', data.fatherLastName?.english?.toUpperCase());
   pushText('fatherNinLoc', additional.fatherDetails?.nin);
+  pushText('fatherNationalityLoc', additional.fatherDetails?.nationality === 'NEPALESE' ? 'नेपाली' : additional.fatherDetails?.nationality);
+  pushText('fatherNationality', additional.fatherDetails?.nationality || 'NEPALESE');
 
   pushText('motherFirstNameLoc', data.motherFirstName?.nepali);
   pushText('motherMiddleNameLoc', data.motherMiddleName?.nepali);
@@ -419,6 +441,8 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('motherMiddleName', data.motherMiddleName?.english?.toUpperCase());
   pushText('motherLastName', data.motherLastName?.english?.toUpperCase());
   pushText('motherNinLoc', additional.motherDetails?.nin);
+  pushText('motherNationalityLoc', additional.motherDetails?.nationality === 'NEPALESE' ? 'नेपाली' : additional.motherDetails?.nationality);
+  pushText('motherNationality', additional.motherDetails?.nationality || 'NEPALESE');
 
   pushText('grandFatherFirstNameLoc', data.grandfatherFirstName?.nepali);
   pushText('grandFatherMiddleNameLoc', data.grandfatherMiddleName?.nepali);
@@ -427,6 +451,8 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('grandFatherMiddleName', data.grandfatherMiddleName?.english?.toUpperCase());
   pushText('grandFatherLastName', data.grandfatherLastName?.english?.toUpperCase());
   pushText('grandFatherNinLoc', additional.grandfatherDetails?.nin);
+  pushText('grandFatherNationalityLoc', additional.grandfatherDetails?.nationality === 'NEPALESE' ? 'नेपाली' : additional.grandfatherDetails?.nationality);
+  pushText('grandFatherNationality', additional.grandfatherDetails?.nationality || 'NEPALESE');
 
   pushText('grandMotherFirstNameLoc', additional.grandmotherFirstName?.nepali);
   pushText('grandMotherMiddleNameLoc', additional.grandmotherMiddleName?.nepali);
@@ -435,6 +461,8 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('grandMotherMiddleName', additional.grandmotherMiddleName?.english?.toUpperCase());
   pushText('grandMotherLastName', additional.grandmotherLastName?.english?.toUpperCase());
   pushText('grandMotherNinLoc', additional.grandmotherDetails?.nin);
+  pushText('grandMotherNationalityLoc', additional.grandmotherDetails?.nationality === 'NEPALESE' ? 'नेपाली' : additional.grandmotherDetails?.nationality);
+  pushText('grandMotherNationality', additional.grandmotherDetails?.nationality || 'NEPALESE');
 
   if (additional.maritalStatus === "1") {
     pushText('spouseFirstNameLoc', additional.spouseFirstName.nepali);
@@ -444,7 +472,19 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
     pushText('spouseMiddleName', additional.spouseMiddleName.english?.toUpperCase());
     pushText('spouseLastName', additional.spouseLastName.english?.toUpperCase());
     pushText('spouseNinLoc', additional.spouseDetails?.nin);
-    instructions.push({ id: 'spouseAddressCopy', type: 'checkbox', value: 'true' });
+    pushText('spouseNationalityLoc', additional.spouseDetails?.nationality === 'NEPALESE' ? 'नेपाली' : additional.spouseDetails?.nationality);
+    pushText('spouseNationality', additional.spouseDetails?.nationality || 'NEPALESE');
+    
+    // Spouse Address
+    const spouseCopy = additional.spouseDetails?.addressSameAsApplicant ?? true;
+    instructions.push({ id: 'spouseAddressCopy', type: 'checkbox', value: spouseCopy.toString() });
+    if (!spouseCopy) {
+      pushText('spouseState', additional.spouseDetails?.address?.province);
+      pushText('spouseDistrict', additional.spouseDetails?.address?.district);
+      pushText('spouseRurMun', additional.spouseDetails?.address?.localLevel);
+      pushText('spouseWardLoc', additional.spouseDetails?.address?.wardNo);
+      pushText('spouseVillageTolLoc', additional.spouseDetails?.address?.villageToleNp);
+    }
   }
 
   return instructions;
