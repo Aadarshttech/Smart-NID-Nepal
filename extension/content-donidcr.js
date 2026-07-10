@@ -649,7 +649,9 @@
         const filled = (typeof result === 'object' && result) ? result.filledCount : 0;
         const skipped = (typeof result === 'object' && result) ? result.skippedCount : 0;
         
-        if (filled > 0) {
+        const isAppointmentTab = document.body.innerText.includes('बायोमेट्रिक दिने स्थान') || document.body.innerText.includes('Appointment Details');
+
+        if (filled > 0 && !isAppointmentTab) {
           // Always try to click Next to proceed through the wizard to Appointment section
           setTimeout(async () => {
             const nextBtn = document.getElementById("nextBtn") || Array.from(document.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().toLowerCase() === 'next');
@@ -664,9 +666,16 @@
               }
             }
           }, 50);
+        } else if (filled > 0 && isAppointmentTab) {
+           // On Appointment tab, don't click next. Auto-run is done!
+           sessionStorage.removeItem('smart_nid_autorun');
         }
 
-        if (filled > 0 && skipped > 0) {
+        if (isAppointmentTab) {
+          statusBadge.innerHTML = "Location selected! 📍<br/>Please click <b>Search</b> (if I didn't) and pick your <b>Appointment Date</b> from the calendar!";
+          statusBadge.style.backgroundColor = "#f0fff4";
+          statusBadge.style.color = "#22543d";
+        } else if (filled > 0 && skipped > 0) {
           statusBadge.innerHTML = `Yay! I filled <b>${filled} fields</b> for you! Moving to the next section... \u{1F389}`;
           statusBadge.style.backgroundColor = "#f0fff4";
           statusBadge.style.color = "#22543d";
@@ -681,15 +690,18 @@
           sessionStorage.removeItem('smart_nid_autorun');
         }
         
-        // Revert back to ready state after 3 seconds
+        // Only revert back to ready state after 4 seconds if we are NOT on the final tab (with successful fill)
+        // This prevents the message from flashing or hiding when we want the user to read it
         setTimeout(() => {
-          isShowingFeedback = false;
-          btn.innerHTML = originalHtml;
-          statusBadge.style.backgroundColor = "white";
-          statusBadge.style.color = "#1e293b";
-          statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form for you.<br/><b>Just click me!</b>";
-          setBubbleVisible(false);
-        }, 3000);
+          if (!(isAppointmentTab && filled > 0)) {
+            isShowingFeedback = false;
+            btn.innerHTML = originalHtml;
+            statusBadge.style.backgroundColor = "white";
+            statusBadge.style.color = "#1e293b";
+            statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form.<br/>Please press the <b>Auto-Fill</b> button at my side!";
+            setBubbleVisible(false);
+          }
+        }, 4000);
       } catch (err) {
           console.error("Smart NID: Script injection error \u2014", err);
           sessionStorage.removeItem('smart_nid_autorun');
