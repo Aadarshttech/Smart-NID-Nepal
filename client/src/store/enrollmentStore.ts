@@ -22,7 +22,16 @@ export const ENROLLMENT_STEPS = [
 const DEFAULT_FAMILY_DETAILS = {
   ccNumber: "",
   nin: "",
-  nationality: ""
+  nationality: "",
+  addressSameAsApplicant: false,
+  address: {
+    province: "",
+    district: "",
+    localLevel: "",
+    wardNo: "",
+    villageToleNp: "",
+    villageToleEn: "",
+  }
 };
 
 const DEFAULT_ADDITIONAL_FIELDS = {
