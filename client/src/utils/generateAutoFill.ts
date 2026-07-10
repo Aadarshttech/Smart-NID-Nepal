@@ -49,7 +49,7 @@ function englishToNepaliDigits(str: string): string {
 
 /**
  * Format a date string to strictly YYYY-MM-DD (Used for BS Dates which expect YYYY-MM-DD).
- * Converts from DD-MM-YYYY or handles 2-digit years.
+ * Converts from DD-MM-YYYY or handles 2-digit/3-digit years like '062' -> '2062'.
  */
 function formatDateForInput(dateStr: string): string {
   if (!dateStr) return "";
@@ -63,21 +63,22 @@ function formatDateForInput(dateStr: string): string {
     let day = parts[2];
     
     // Identify year vs day based on length or value
-    if (parts[2].length === 4 || (parts[2].length === 2 && parseInt(parts[2]) > 32)) {
+    if (parts[2].length === 4 || (parts[2].length <= 3 && parseInt(parts[2], 10) > 32)) {
       year = parts[2];
       day = parts[0];
-    } else if (parts[0].length === 4 || (parts[0].length === 2 && parseInt(parts[0]) > 32)) {
+    } else if (parts[0].length === 4 || (parts[0].length <= 3 && parseInt(parts[0], 10) > 32)) {
       year = parts[0];
       day = parts[2];
     } else {
-      // Ambiguous fallback: assume YYYY-MM-DD format was intended but typed as YY-MM-DD
+      // Ambiguous fallback: assume YYYY-MM-DD format was intended
       year = parts[0];
       day = parts[2];
     }
 
-    // Fix 2-digit BS years (assume 20XX since 1999 BS is 100+ years old)
-    if (year.length === 2) {
-      year = parseInt(year) > 95 ? `19${year}` : `20${year}`; // 1996+ is ~100 years old
+    // Fix <4 digit BS years (e.g. 62, 062). Assume 20XX since 1999 BS is 100+ years old
+    let yNum = parseInt(year, 10);
+    if (yNum < 100) {
+      year = yNum > 95 ? `19${yNum.toString().padStart(2, '0')}` : `20${yNum.toString().padStart(2, '0')}`;
     }
     
     return `${year}-${month}-${day.padStart(2, '0')}`;
@@ -87,7 +88,7 @@ function formatDateForInput(dateStr: string): string {
 
 /**
  * Format a date string strictly to DD/MM/YYYY for DoNIDCR AD date inputs.
- * Converts 2-digit AD years automatically based on current century.
+ * Converts <4 digit AD years automatically based on current century.
  */
 function formatADDateForInput(dateStr: string): string {
   if (!dateStr) return "";
@@ -100,10 +101,10 @@ function formatADDateForInput(dateStr: string): string {
     let month = parts[1].padStart(2, '0');
     let day = parts[2];
     
-    if (parts[2].length === 4 || (parts[2].length === 2 && parseInt(parts[2]) > 31)) {
+    if (parts[2].length === 4 || (parts[2].length <= 3 && parseInt(parts[2], 10) > 31)) {
       year = parts[2];
       day = parts[0];
-    } else if (parts[0].length === 4 || (parts[0].length === 2 && parseInt(parts[0]) > 31)) {
+    } else if (parts[0].length === 4 || (parts[0].length <= 3 && parseInt(parts[0], 10) > 31)) {
       year = parts[0];
       day = parts[2];
     } else {
@@ -112,9 +113,10 @@ function formatADDateForInput(dateStr: string): string {
       day = parts[0];
     }
 
-    if (year.length === 2) {
+    let yNum = parseInt(year, 10);
+    if (yNum < 100) {
       const currentYY = new Date().getFullYear() % 100;
-      year = parseInt(year) > currentYY ? `19${year}` : `20${year}`;
+      year = yNum > currentYY ? `19${yNum.toString().padStart(2, '0')}` : `20${yNum.toString().padStart(2, '0')}`;
     }
     
     return `${day.padStart(2, '0')}/${month}/${year}`;
