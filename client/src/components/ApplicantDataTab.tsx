@@ -5,6 +5,7 @@
  * not present on the citizenship certificate but required by DoNIDCR.
  */
 
+import { useState, useEffect } from "react";
 import { useEnrollmentStore } from "../store/enrollmentStore";
 import type { NameField, ExtractionResult } from "../types/extraction";
 import {
@@ -143,6 +144,8 @@ function SelectInput({
 }
 
 export default function ApplicantDataTab() {
+  const [showErrors, setShowErrors] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
   const { draft, additional, updateDraftField, updateAdditionalField, nextStep } =
     useEnrollmentStore();
 
@@ -154,10 +157,33 @@ export default function ApplicantDataTab() {
 
 
   const canProceed =
+    draft.firstName.nepali.trim() !== "" &&
     draft.firstName.english.trim() !== "" &&
+    draft.lastName.nepali.trim() !== "" &&
     draft.lastName.english.trim() !== "" &&
     draft.dobBS.trim() !== "" &&
-    draft.gender !== "";
+    draft.dobAD.trim() !== "" &&
+    draft.gender !== "" &&
+    draft.birthPlace.trim() !== "" &&
+    draft.citizenshipNo.trim() !== "" &&
+    draft.issuingDistrict.trim() !== "" &&
+    draft.issueDateBS.trim() !== "" &&
+    additional.ccType.trim() !== "" &&
+    additional.maritalStatus.trim() !== "" &&
+    additional.religion.trim() !== "" &&
+    additional.educationLevel.trim() !== "" &&
+    additional.profession.trim() !== "" &&
+    additional.caste.trim() !== "";
+
+  const handleNextClick = () => {
+    if (!canProceed) {
+      setShowErrors(true);
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 600); // Remove shake class after animation
+    } else {
+      nextStep();
+    }
+  };
 
   return (
     <div className="form-tab-panel fade-in">
@@ -172,8 +198,8 @@ export default function ApplicantDataTab() {
 
         <div className="form-grid">
           <NameInput
-            label="First Name"
-            labelNp="पहिलो नाम"
+            label="First Name*"
+            labelNp="पहिलो नाम*"
             value={draft.firstName}
             onChange={handleNameChange("firstName")}
           />
@@ -184,8 +210,8 @@ export default function ApplicantDataTab() {
             onChange={handleNameChange("middleName")}
           />
           <NameInput
-            label="Last Name"
-            labelNp="थर"
+            label="Last Name*"
+            labelNp="थर*"
             value={draft.lastName}
             onChange={handleNameChange("lastName")}
           />
@@ -193,21 +219,21 @@ export default function ApplicantDataTab() {
 
         <div className="form-grid form-grid--3col">
           <TextInput
-            label="Date of Birth (BS)"
-            labelNp="जन्म मिति"
+            label="Date of Birth (BS)*"
+            labelNp="जन्म मिति*"
             value={draft.dobBS}
             onChange={(val) => updateDraftField("dobBS", val)}
             placeholder="YYYY-MM-DD"
           />
           <TextInput
-            label="Date of Birth (AD)"
-            labelNp="जन्म मिति (ईस्वी)"
+            label="Date of Birth (AD)*"
+            labelNp="जन्म मिति (ईस्वी)*"
             value={draft.dobAD}
             onChange={(val) => updateDraftField("dobAD", val)}
             placeholder="YYYY-MM-DD"
           />
           <div className="form-field">
-            <label className="form-field__label">लिङ्ग / Gender</label>
+            <label className="form-field__label">लिङ्ग* / Gender*</label>
             <select
               className="form-field__input form-field__select"
               value={draft.gender}
@@ -228,8 +254,8 @@ export default function ApplicantDataTab() {
 
         <div className="form-grid form-grid--1col">
           <TextInput
-            label="Birth Place"
-            labelNp="जन्म स्थान"
+            label="Birth Place*"
+            labelNp="जन्म स्थान*"
             value={draft.birthPlace}
             onChange={(val) => updateDraftField("birthPlace", val)}
           />
@@ -247,22 +273,22 @@ export default function ApplicantDataTab() {
 
         <div className="form-grid form-grid--3col">
           <SelectInput
-            label="CC Type"
-            labelNp="नागरिकताको किसिम"
+            label="CC Type*"
+            labelNp="नागरिकताको किसिम*"
             value={additional.ccType}
             onChange={(val) => updateAdditionalField("ccType", val)}
             options={CC_TYPE_OPTIONS}
           />
           <SelectInput
-            label="Marital Status"
-            labelNp="वैवाहिक स्थिति"
+            label="Marital Status*"
+            labelNp="वैवाहिक स्थिति*"
             value={additional.maritalStatus}
             onChange={(val) => updateAdditionalField("maritalStatus", val)}
             options={MARITAL_STATUS_OPTIONS}
           />
           <SelectInput
-            label="Religion"
-            labelNp="धर्म"
+            label="Religion*"
+            labelNp="धर्म*"
             value={additional.religion}
             onChange={(val) => updateAdditionalField("religion", val)}
             options={RELIGION_OPTIONS}
@@ -290,22 +316,22 @@ export default function ApplicantDataTab() {
 
         <div className="form-grid form-grid--3col">
           <SelectInput
-            label="Education"
-            labelNp="शैक्षिक योग्यता"
+            label="Education*"
+            labelNp="शैक्षिक योग्यता*"
             value={additional.educationLevel}
             onChange={(val) => updateAdditionalField("educationLevel", val)}
             options={EDUCATION_OPTIONS}
           />
           <SelectInput
-            label="Profession"
-            labelNp="व्यवसाय"
+            label="Profession*"
+            labelNp="व्यवसाय*"
             value={additional.profession}
             onChange={(val) => updateAdditionalField("profession", val)}
             options={PROFESSION_OPTIONS}
           />
           <SelectInput
-            label="Caste"
-            labelNp="जात जाति"
+            label="Caste*"
+            labelNp="जात जाति*"
             value={additional.caste}
             onChange={(val) => updateAdditionalField("caste", val)}
             options={CASTE_OPTIONS}
@@ -322,20 +348,20 @@ export default function ApplicantDataTab() {
 
         <div className="form-grid form-grid--3col">
           <TextInput
-            label="Citizenship No."
-            labelNp="नागरिकता नं."
+            label="Citizenship No.*"
+            labelNp="नागरिकता नं.*"
             value={draft.citizenshipNo}
             onChange={(val) => updateDraftField("citizenshipNo", val)}
           />
           <TextInput
-            label="Issuing District"
-            labelNp="जारी जिल्ला"
+            label="Issuing District*"
+            labelNp="जारी जिल्ला*"
             value={draft.issuingDistrict}
             onChange={(val) => updateDraftField("issuingDistrict", val)}
           />
           <TextInput
-            label="Issue Date (BS)"
-            labelNp="जारी मिति"
+            label="Issue Date (BS)*"
+            labelNp="जारी मिति*"
             value={draft.issueDateBS}
             onChange={(val) => updateDraftField("issueDateBS", val)}
             placeholder="YYYY-MM-DD"
@@ -347,18 +373,18 @@ export default function ApplicantDataTab() {
       <div className="form-nav">
         <div /> {/* Spacer — no back button on first tab */}
         <button
-          className="btn btn--primary"
-          onClick={nextStep}
-          disabled={!canProceed}
+          className={`btn btn--primary ${isShaking ? 'shake' : ''}`}
+          onClick={handleNextClick}
         >
           Next: Contact Details →
         </button>
       </div>
 
-      {!canProceed && (
-        <p className="form-nav__hint">
-          Please fill in First Name, Last Name, Date of Birth, and Gender to continue.
-        </p>
+      {showErrors && !canProceed && (
+        <div className="form-error-banner bounce-in">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span>Please fill in all required personal and additional details (*) to continue.</span>
+        </div>
       )}
     </div>
   );
