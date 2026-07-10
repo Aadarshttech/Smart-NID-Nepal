@@ -48,7 +48,7 @@ function englishToNepaliDigits(str: string): string {
 }
 
 /**
- * Format a date string to strictly YYYY-MM-DD.
+ * Format a date string to strictly YYYY-MM-DD (Used for BS Dates which expect YYYY-MM-DD).
  * Converts from DD-MM-YYYY if necessary.
  */
 function formatDateForInput(dateStr: string): string {
@@ -71,6 +71,27 @@ function formatDateForInput(dateStr: string): string {
 }
 
 /**
+ * Format a date string strictly to DD/MM/YYYY for DoNIDCR AD date inputs.
+ */
+function formatADDateForInput(dateStr: string): string {
+  if (!dateStr) return "";
+  
+  let cleanDate = dateStr.replace(/[\/\.-]/g, '/');
+  
+  const parts = cleanDate.split('/');
+  if (parts.length === 3) {
+    if (parts[0].length === 4) {
+      // YYYY/MM/DD -> DD/MM/YYYY
+      return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
+    } else if (parts[2].length === 4) {
+      // DD/MM/YYYY
+      return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
+    }
+  }
+  return cleanDate;
+}
+
+/**
  * Generate the auto-fill JavaScript snippet for DoNIDCR.
  *
  * @param data - The extracted (or user-edited draft) citizenship data
@@ -86,8 +107,8 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
     : findDistrictValue(additional.temporaryAddress.district);
   
   const genderVal = mapGender(data.gender);
-  const dobAD = formatDateForInput(data.dobAD);
-  // BS date fields have `nepalify` class — must use Devanagari digits
+  const dobAD = formatADDateForInput(data.dobAD);
+  // BS date fields have `nepalify` class — must use Devanagari digits in YYYY-MM-DD
   const dobBS_NP = englishToNepaliDigits(formatDateForInput(nepaliToEnglishDigits(data.dobBS)));
   const issueDateBS_NP = englishToNepaliDigits(formatDateForInput(nepaliToEnglishDigits(data.issueDateBS)));
 
@@ -334,7 +355,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
     : additional.temporaryAddress.localLevel;
   
   const genderVal = mapGender(data.gender);
-  const dobAD = formatDateForInput(data.dobAD);
+  const dobAD = formatADDateForInput(data.dobAD);
   // BS date fields have `nepalify` class — must use Devanagari digits
   const dobBS_NP = englishToNepaliDigits(formatDateForInput(nepaliToEnglishDigits(data.dobBS)));
   const issueDateBS_NP = englishToNepaliDigits(formatDateForInput(nepaliToEnglishDigits(data.issueDateBS)));
@@ -346,7 +367,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('lastNameLoc', data.lastName.nepali);
   pushText('lastName', data.lastName.english?.toUpperCase());
   pushText('dobLoc', dobBS_NP);
-  pushDate('dob', dobAD);
+  pushText('dob', dobAD); // Note: pushText allows string DD/MM/YYYY without native browser date picker overriding it
 
   pushSelect('birthDistrictPlace', birthDistrictVal);
   pushSelect('ccType', additional.ccType || '1');
@@ -356,7 +377,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
     pushText('ccPrevNatRevocationDate', additional.ccPrevNatRevocationDate);
   }
   
-  pushText('ccNumberLoc', englishToNepaliDigits(data.citizenshipNo));
+  pushText('ccNumberLoc', data.citizenshipNo);
   pushSelect('ccIssuingDistrict', issuingDistrictVal);
   pushText('ccIssuingDateLoc', issueDateBS_NP);
   pushSelect('gender', genderVal);
@@ -378,7 +399,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
     pushSelect('permRurMun', "", pLocalLevel);
   }
   
-  pushText('permWardLoc', englishToNepaliDigits(data.permanentAddress.wardNo));
+  pushText('permWardLoc', data.permanentAddress.wardNo);
   pushText('permVillageTolLoc', data.permanentAddress.villageToleNp);
   pushText('permVillageTol', data.permanentAddress.villageToleEn?.toUpperCase());
 
@@ -393,7 +414,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
       pushSelect('tempRurMun', "", tLocalLevel);
     }
     
-    pushText('tempWardLoc', englishToNepaliDigits(additional.temporaryAddress.wardNo));
+    pushText('tempWardLoc', additional.temporaryAddress.wardNo);
     pushText('tempVillageTolLoc', additional.temporaryAddress.villageToleNp);
     pushText('tempVillageTol', additional.temporaryAddress.villageToleEn?.toUpperCase());
   }
