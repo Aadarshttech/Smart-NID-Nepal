@@ -672,16 +672,7 @@
         }
 
         if (isAppointmentTab) {
-          // Focus the date box to open the calendar automatically
-          setTimeout(() => {
-            const dateBox = document.getElementById('appointmentDate');
-            if (dateBox) {
-              dateBox.focus();
-              dateBox.click();
-            }
-          }, 300);
-
-          statusBadge.innerHTML = "Location selected! 📍<br/>I've opened the calendar for you. Please select your <b>Appointment Date</b> and <b>Time Slot</b>!";
+          statusBadge.innerHTML = "Location selected! 📍<br/>Please click the <b>मिति (Date)</b> box to open the calendar, then search for a slot.";
           statusBadge.style.backgroundColor = "#f0fff4";
           statusBadge.style.color = "#22543d";
         } else if (filled > 0 && skipped > 0) {
