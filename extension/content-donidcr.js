@@ -532,7 +532,7 @@
                   const targetVal = inst.value ? String(inst.value) : "";
                   const targetText = inst.textValue ? String(inst.textValue).toLowerCase().replace(/[\s\/]/g, '') : "";
 
-                  while (!hasOption && attempts < 30) { // Max 3s wait (was 1.5s) for slow government APIs
+                  while (!hasOption && attempts < 100) { // Max 10s wait for very slow government APIs
                     const options = Array.from(el.options);
                     hasOption = options.some(opt => {
                       if (targetVal && opt.value === targetVal) return true;
@@ -596,13 +596,18 @@
                       } else {
                         el.value = fuzzyMatch.value;
                       }
+                      el.selectedIndex = fuzzyMatch.index;
                       matched = true;
                     }
                   }
                   
-                  el.dispatchEvent(new Event('input', { bubbles: true }));
-                  el.dispatchEvent(new Event('change', { bubbles: true }));
-                  filledCount++;
+                  if (matched) {
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                    filledCount++;
+                  } else {
+                    skippedCount++;
+                  }
                 }
               }
 
