@@ -37,8 +37,6 @@ const DEFAULT_FAMILY_DETAILS = {
 
 const DEFAULT_ADDITIONAL_FIELDS: AdditionalFields = {
   appointmentLocation: "",
-  appointmentDate: "",
-  appointmentTimeSlot: "Any",
   maritalStatus: "2", // Unmarried by default
   educationLevel: "",
   profession: "",

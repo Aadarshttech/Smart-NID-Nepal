@@ -669,76 +669,25 @@
         } else if (filled > 0 && isAppointmentTab) {
            // On Appointment tab, don't click next. Auto-run is done!
            sessionStorage.removeItem('smart_nid_autorun');
-           
-           // Fetch preferred date & slot from instructions
-           const prefDateInst = instructions.find(i => i.id === 'prefAppointmentDate');
-           const prefSlotInst = instructions.find(i => i.id === 'prefAppointmentTimeSlot');
-           
-           if (prefDateInst && prefDateInst.value) {
-             // 1. Set Date
-             const mitiBox = document.getElementById('appointmentDate');
-             if (mitiBox) {
-               // Use native setter to bypass React/Vue traps if any
-               const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
-               if (nativeInputValueSetter) {
-                 nativeInputValueSetter.call(mitiBox, prefDateInst.value);
-               } else {
-                 mitiBox.value = prefDateInst.value;
-               }
-               mitiBox.dispatchEvent(new Event('input', { bubbles: true }));
-               
-               // 2. Trigger dateChange
-               if (typeof window.dateChange === 'function') {
-                 window.dateChange(prefDateInst.value);
-               } else {
-                 const searchBtn = document.getElementById('appointmentbtn') || Array.from(document.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim() === 'Search');
-                 if (searchBtn) searchBtn.click();
-               }
-
-               // 3. Wait for table & select slot
-               setTimeout(() => {
-                 const selectButtons = Array.from(document.querySelectorAll('button')).filter(b => b.innerText && b.innerText.trim() === 'Select');
-                 
-                 if (selectButtons.length > 0) {
-                   if (!prefSlotInst || !prefSlotInst.value || prefSlotInst.value === 'Any') {
-                     // Click first available
-                     selectButtons[0].click();
-                   } else {
-                     // Find row matching slot
-                     let found = false;
-                     for (const btn of selectButtons) {
-                       const row = btn.closest('tr');
-                       if (row && row.innerText.includes(prefSlotInst.value)) {
-                         btn.click();
-                         found = true;
-                         break;
-                       }
-                     }
-                     // Fallback to first if preferred slot not found
-                     if (!found) selectButtons[0].click();
-                   }
-                 }
-               }, 1200); // 1.2s delay to let network request fetch dates and populate table
-             }
-           } else {
-             // No preferred date? Just click the date box to open the calendar for the user
-             setTimeout(() => {
-               const mitiBox = document.getElementById('appointmentDate');
-               if (mitiBox) {
-                 mitiBox.click();
-                 mitiBox.focus();
-               }
-             }, 500);
-           }
         }
 
         if (isAppointmentTab) {
-          const prefDateInst = instructions.find(i => i.id === 'prefAppointmentDate');
-          if (prefDateInst && prefDateInst.value) {
-            statusBadge.innerHTML = "Location & Date locked in! 📍<br/><b>I just auto-selected your preferred time slot!</b>";
-          } else {
-            statusBadge.innerHTML = "Location selected! 📍<br/><b>Please pick your Date from the calendar and select a Time Slot!</b>";
-          }
+          // Attempt to click the Search button to fetch slots and then focus the date box
+          setTimeout(() => {
+            const btns = Array.from(document.querySelectorAll('button'));
+            const searchBtn = btns.find(b => b.innerText && b.innerText.trim().toLowerCase() === 'search');
+            if (searchBtn) searchBtn.click();
+            
+            setTimeout(() => {
+              const dateBox = document.getElementById('appointmentDate');
+              if (dateBox) {
+                dateBox.focus();
+                dateBox.click();
+              }
+            }, 800); // Wait 800ms for search to process before opening calendar
+          }, 300);
+
+          statusBadge.innerHTML = "Location selected! 📍<br/>I've opened the calendar for you. Please select your <b>Appointment Date</b> and <b>Time Slot</b>!";
           statusBadge.style.backgroundColor = "#f0fff4";
           statusBadge.style.color = "#22543d";
         } else if (filled > 0 && skipped > 0) {
