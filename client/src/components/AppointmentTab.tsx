@@ -86,6 +86,38 @@ export default function AppointmentTab() {
             options={APPOINTMENT_LOCATIONS}
             required
           />
+
+          <div className="form-field">
+            <label className="form-field__label">
+              मिति / Preferred Date (YYYY-MM-DD)
+            </label>
+            <input
+              type="text"
+              className="form-field__input"
+              value={additional.appointmentDate || ""}
+              onChange={(e) => updateAdditionalField("appointmentDate", e.target.value)}
+              placeholder="e.g. २०८३-०३-२९"
+            />
+            <small style={{color: "#6b7280", marginTop: "4px", display: "block"}}>Leave blank to pick manually on the portal.</small>
+          </div>
+
+          <SelectInput
+            label="Time Slot"
+            labelNp="समय"
+            value={additional.appointmentTimeSlot || "Any"}
+            onChange={(val) => updateAdditionalField("appointmentTimeSlot", val)}
+            options={[
+              { value: "Any", label: "Any Available Slot" },
+              { value: "09:00-10:00", label: "09:00-10:00" },
+              { value: "10:00-11:00", label: "10:00-11:00" },
+              { value: "11:00-12:00", label: "11:00-12:00" },
+              { value: "12:00-01:00", label: "12:00-01:00" },
+              { value: "01:00-02:00", label: "01:00-02:00" },
+              { value: "02:00-03:00", label: "02:00-03:00" },
+              { value: "03:00-04:00", label: "03:00-04:00" },
+              { value: "04:00-05:00", label: "04:00-05:00" },
+            ]}
+          />
         </div>
       </div>
 

@@ -59,6 +59,8 @@ export interface ExtractionResult {
 export interface AdditionalFields {
   // Applicant Data — Additional Information
   appointmentLocation: string;
+  appointmentDate: string;
+  appointmentTimeSlot: string;
   maritalStatus: string;        // DoNIDCR: "1"=Married, "2"=Single, etc.
   educationLevel: string;       // DoNIDCR: "1"=Primary ... "9"=PhD
   profession: string;           // DoNIDCR: "1"=Other ... "16"=Social Worker

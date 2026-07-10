@@ -508,9 +508,15 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
     }
   }
 
-  // Appointment Location
+  // Appointment Preferences
   if (additional.appointmentLocation) {
     instructions.push({ id: 'appointmentLocation', type: 'select', value: additional.appointmentLocation });
+  }
+  if (additional.appointmentDate) {
+    instructions.push({ id: 'prefAppointmentDate', type: 'text', value: additional.appointmentDate });
+  }
+  if (additional.appointmentTimeSlot) {
+    instructions.push({ id: 'prefAppointmentTimeSlot', type: 'text', value: additional.appointmentTimeSlot });
   }
 
   return instructions;
