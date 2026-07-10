@@ -669,10 +669,24 @@
         } else if (filled > 0 && isAppointmentTab) {
            // On Appointment tab, don't click next. Auto-run is done!
            sessionStorage.removeItem('smart_nid_autorun');
+           
+           // Auto-click the Search button, then the miti box (Date picker) to open calendar
+           setTimeout(() => {
+             const searchBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim() === 'Search');
+             if (searchBtn) searchBtn.click();
+             
+             setTimeout(() => {
+               const mitiBox = document.getElementById('appointmentDate');
+               if (mitiBox) {
+                 mitiBox.click();
+                 mitiBox.focus();
+               }
+             }, 800); // Small delay to let network request fetch dates
+           }, 300); 
         }
 
         if (isAppointmentTab) {
-          statusBadge.innerHTML = "Location selected! 📍<br/>Please click <b>Search</b> (if I didn't) and pick your <b>Appointment Date</b> from the calendar!";
+          statusBadge.innerHTML = "Location selected! 📍<br/><b>Please pick your Date from the calendar and select a Time Slot!</b>";
           statusBadge.style.backgroundColor = "#f0fff4";
           statusBadge.style.color = "#22543d";
         } else if (filled > 0 && skipped > 0) {
