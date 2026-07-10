@@ -42,22 +42,24 @@ function SelectInput({
 }
 
 const APPOINTMENT_LOCATIONS = [
-  { value: "Narayanmiti Durbar(Old Department of Passport)/नारायणहिटी दरबार (पुरानो राहदानी विभाग)", label: "Narayanmiti Durbar(Old Department of Passport)" },
-  { value: "DAO Lalitpur/जिल्ला प्रशासन कार्यालय ललितपुर", label: "DAO Lalitpur/जिल्ला प्रशासन कार्यालय ललितपुर" },
-  { value: "DAO Jhapa/जिल्ला प्रशासन कार्यालय झापा", label: "DAO Jhapa/जिल्ला प्रशासन कार्यालय झापा" },
-  { value: "DAO Morang/जिल्ला प्रशासन कार्यालय मोरङ", label: "DAO Morang/जिल्ला प्रशासन कार्यालय मोरङ" },
-  { value: "DAO Sunsari/जिल्ला प्रशासन कार्यालय सुनसरी", label: "DAO Sunsari/जिल्ला प्रशासन कार्यालय सुनसरी" },
-  { value: "DAO Dharan/ईलाका प्रशासन कार्यालय धरान", label: "DAO Dharan/ईलाका प्रशासन कार्यालय धरान" },
-  { value: "DAO Chitwan/जिल्ला प्रशासन कार्यालय चितवन", label: "DAO Chitwan/जिल्ला प्रशासन कार्यालय चितवन" },
-  { value: "DAO Makawanpur/जिल्ला प्रशासन कार्यालय मकवानपुर", label: "DAO Makawanpur/जिल्ला प्रशासन कार्यालय मकवानपुर" },
-  { value: "DAO Nuwakot/जिल्ला प्रशासन कार्यालय नुवाकोट", label: "DAO Nuwakot/जिल्ला प्रशासन कार्यालय नुवाकोट" },
-  { value: "DAO Gorkha/जिल्ला प्रशासन कार्यालय गोरखा", label: "DAO Gorkha/जिल्ला प्रशासन कार्यालय गोरखा" },
-  { value: "AAO Urlabari/ईलाका प्रशासन कार्यालय उर्लाबारी", label: "AAO Urlabari/ईलाका प्रशासन कार्यालय उर्लाबारी" },
-  { value: "DAO Parsa/जिल्ला प्रशासन कार्यालय पर्सा", label: "DAO Parsa/जिल्ला प्रशासन कार्यालय पर्सा" },
-  { value: "DAO Siraha/जिल्ला प्रशासन कार्यालय सिराहा", label: "DAO Siraha/जिल्ला प्रशासन कार्यालय सिराहा" },
-  { value: "AAO Lahan/ईलाका प्रशासन कार्यालय लहान", label: "AAO Lahan/ईलाका प्रशासन कार्यालय लहान" },
-  { value: "DAO Kavrepalanchock/जिल्ला प्रशासन कार्यालय काभ्रेपलाञ्चोक", label: "DAO Kavrepalanchock/जिल्ला प्रशासन कार्यालय काभ्रेपलाञ्चोक" },
-  { value: "DAO Tanahun/जिल्ला प्रशासन कार्यालय तनहुँ", label: "DAO Tanahun/जिल्ला प्रशासन कार्यालय तनहुँ" }
+  { value: "335000A", label: "DAO Kathmandu/जिल्ला प्रशासन कार्यालय काठमाडौं" },
+  { value: "335000C", label: "Narayanhiti Durbar(Old Departmet of Passport)/नारायणहिटी दरबार (पूरानो राहदानी विभाग)" },
+  { value: "334000A", label: "DAO Lalitpur/जिल्ला प्रशासन कार्यालय ललितपुर" },
+  { value: "112000A", label: "DAO Jhapa/जिल्ला प्रशासन कार्यालय झापा" },
+  { value: "113000A", label: "DAO Morang/जिल्ला प्रशासन कार्यालय मोरङ" },
+  { value: "114000A", label: "DAO Sunsari/जिल्ला प्रशासन कार्यालय सुनसरी" },
+  { value: "114000B", label: "DAO Dharan/ईलाका प्रशासन कार्यालय धरान" },
+  { value: "331000A", label: "DAO Chitwan/जिल्ला प्रशासन कार्यालय चितवन" },
+  { value: "332000A", label: "DAO Makawanpur/जिल्ला प्रशासन कार्यालय मकवानपुर" },
+  { value: "329000A", label: "DAO Nuwakot/जिल्ला प्रशासन कार्यालय नुवाकोट" },
+  { value: "436000A", label: "DAO Gorkha/जिल्ला प्रशासन कार्यालय गोरखा" },
+  { value: "113116A", label: "AAO Urlabari/ईलाका प्रशासन कार्यालय उर्लाबारी" },
+  { value: "222000A", label: "DAO Parsa/जिल्ला प्रशासन कार्यालय पर्सा" },
+  { value: "216000A", label: "DAO Siraha/जिल्ला प्रशासन कार्यालय सिराहा" },
+  { value: "216000B", label: "AAO Lahan/ईलाका प्रशासन कार्यालय लहान" },
+  { value: "326000A", label: "DAO Kavrepalanchock/जिल्ला प्रशासन कार्यालय काभ्रेपलाञ्चोक" },
+  { value: "438000A", label: "DAO Tanahun/जिल्ला प्रशासन कार्यालय तनहुँ" },
+  { value: "335000D", label: "Others/अन्य" }
 ];
 
 export default function AppointmentTab() {
