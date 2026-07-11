@@ -5,19 +5,13 @@
   "description": "Seamlessly transfer data from Smart NID to the official DoNIDCR portal.",
   "offline_enabled": false,
   "icons": {
-    "16": "icons/icon.png",
-    "32": "icons/icon.png",
-    "48": "icons/icon.png",
-    "128": "icons/icon.png"
+    "128": "icons/icon128.png"
   },
   "action": {
     "default_title": "Smart NID Helper",
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "icons/icon.png",
-      "32": "icons/icon.png",
-      "48": "icons/icon.png",
-      "128": "icons/icon.png"
+      "128": "icons/icon128.png"
     }
   },
   "permissions": [
@@ -34,8 +28,7 @@
   "content_scripts": [
     {
       "matches": [
-        "http://localhost:*/*",
-        "http://127.0.0.1:*/*",
+        "https://smartnid.aadarshapandit.com.np/*",
         "https://smart-nid-nepal.vercel.app/*"
       ],
       "js": ["content-app.js"]

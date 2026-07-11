@@ -196,6 +196,12 @@ export default function Dashboard({ onNewEnrollment, onEditProfile }: { onNewEnr
             </div>
           )}
         </div>
+
+        <div style={{ textAlign: "center", marginTop: "2rem", paddingBottom: "1rem" }}>
+          <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: "#64748b", textDecoration: "none", fontSize: "0.875rem" }}>
+            Privacy Policy
+          </a>
+        </div>
       </div>
     </div>
   );

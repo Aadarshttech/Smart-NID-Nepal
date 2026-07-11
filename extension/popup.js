@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Open App Button
   btnOpenApp.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'http://localhost:5173' });
+    chrome.tabs.create({ url: 'https://smartnid.aadarshapandit.com.np/' });
   });
 
   // Open Gov Portal Button
