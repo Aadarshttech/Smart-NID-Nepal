@@ -10,6 +10,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnOpenApp = document.getElementById('btnOpenApp');
   const btnOpenGov = document.getElementById('btnOpenGov');
 
+  function escapeHTML(str) {
+    return String(str || '').replace(/[&<>'"]/g, tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag]));
+  }
+
   function updateUI(profiles, activeId) {
     if (profiles && profiles.length > 0) {
       // Data is ready
@@ -34,14 +44,29 @@ document.addEventListener('DOMContentLoaded', () => {
         div.style.boxShadow = isActive ? '0 4px 6px -1px rgba(37, 99, 235, 0.1)' : 'none';
         
         div.innerHTML = `
-          <div style="font-weight: 600; font-size: 0.95rem; color: #0f172a; margin-bottom: 4px; padding-right: 60px;">${p.name || 'Unnamed Profile'}</div>
+          <div style="font-weight: 600; font-size: 0.95rem; color: #0f172a; margin-bottom: 4px; padding-right: 60px;">${escapeHTML(p.name) || 'Unnamed Profile'}</div>
           <div style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 4px;">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            ${p.citNo || 'N/A'}
+            ${escapeHTML(p.citNo) || 'N/A'}
           </div>
-          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;">Saved: ${p.timestamp}</div>
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;">Saved: ${escapeHTML(p.timestamp)}</div>
           ${isActive ? '<div style="position: absolute; top: 14px; right: 14px; background: #2563eb; color: white; font-size: 0.65rem; font-weight: 700; padding: 4px 8px; border-radius: 20px; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">ACTIVE</div>' : ''}
+          <div class="delete-profile-btn" style="position: absolute; bottom: 14px; right: 14px; color: #ef4444; padding: 4px; border-radius: 4px; background: #fee2e2; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" title="Delete Profile">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </div>
         `;
+        
+        div.querySelector('.delete-profile-btn').onclick = (e) => {
+          e.stopPropagation();
+          chrome.storage.local.get(["savedProfiles", "activeProfileId"], (res) => {
+            const newProfiles = (res.savedProfiles || []).filter(prof => prof.id !== p.id);
+            let newActive = res.activeProfileId;
+            if (newActive === p.id) {
+              newActive = newProfiles.length > 0 ? newProfiles[0].id : null;
+            }
+            chrome.storage.local.set({ savedProfiles: newProfiles, activeProfileId: newActive });
+          });
+        };
         
         div.onclick = () => {
           chrome.storage.local.set({ activeProfileId: p.id });
@@ -90,9 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Open App Button
   btnOpenApp.addEventListener('click', () => {
-    // Open localhost or the vercel app. For this extension, we'll open the local app if running, 
-    // or just the vercel production link. Since we don't know if local is running, 
-    // opening the default URL is safest.
     chrome.tabs.create({ url: 'http://localhost:5173' });
   });
 

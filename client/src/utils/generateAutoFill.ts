@@ -131,6 +131,39 @@ function formatADDateForInput(dateStr: string): string {
  * @param additional - The user-entered additional fields
  * @returns A self-contained JavaScript string ready to paste into the console
  */
+/**
+ * Sanitize Mobile Number: exactly 10 digits. Removes country code if present.
+ */
+function sanitizeMobile(val: string | undefined): string {
+  if (!val) return "";
+  let clean = nepaliToEnglishDigits(val).replace(/\D/g, '');
+  if (clean.length > 10 && (clean.startsWith('977') || clean.startsWith('0977'))) {
+    clean = clean.replace(/^(0?977)/, '');
+  }
+  return clean.substring(0, 10);
+}
+
+/**
+ * Sanitize Telephone Number: max 9 digits.
+ */
+function sanitizeTelephone(val: string | undefined): string {
+  if (!val) return "";
+  let clean = nepaliToEnglishDigits(val).replace(/\D/g, '');
+  if (clean.length > 9 && (clean.startsWith('977') || clean.startsWith('0977'))) {
+    clean = clean.replace(/^(0?977)/, '');
+  }
+  return clean.substring(0, 9);
+}
+
+/**
+ * Sanitize Ward Number: extract only digits, convert to Nepali.
+ * The backend expects Devanagari numerals for fields with 'Loc' suffix.
+ */
+function sanitizeWard(val: string | undefined): string {
+  if (!val) return "";
+  return englishToNepaliDigits(nepaliToEnglishDigits(val).replace(/\D/g, ''));
+}
+
 export function generateAutoFillScript(data: ExtractionResult, additional: AdditionalFields): string {
   const birthDistrictVal = findDistrictValue(data.birthPlace);
   const issuingDistrictVal = findDistrictValue(data.issuingDistrict);
@@ -240,7 +273,8 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
 
   if (birthDistrictVal) lines.push(`  setSelect('birthDistrictPlace', ${JSON.stringify(birthDistrictVal)});`);
   lines.push(`  setSelect('ccType', ${JSON.stringify(additional.ccType || '1')});`);
-  lines.push(`  setText('ccNumberLoc', ${JSON.stringify(data.citizenshipNo)});`);
+  const ccNumberNp = englishToNepaliDigits(data.citizenshipNo || "");
+  lines.push(`  setText('ccNumberLoc', ${JSON.stringify(ccNumberNp)});`);
   if (issuingDistrictVal) lines.push(`  setSelect('ccIssuingDistrict', ${JSON.stringify(issuingDistrictVal)});`);
   lines.push(`  setText('ccIssuingDateLoc', ${JSON.stringify(issueDateBS_NP)});`);
   if (genderVal) lines.push(`  setSelect('gender', ${JSON.stringify(genderVal)});`);
@@ -259,14 +293,15 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
 
   // ── Tab 2: Contact Details (Permanent Address) ──
   lines.push(`  // ── Tab 2: Contact Details ──`);
-  lines.push(`  setText('mobilePhone', ${JSON.stringify(additional.mobileNo)});`);
-  lines.push(`  setText('telephone', ${JSON.stringify(additional.phoneNo)});`);
+  // ── Tab 2: Contact Details ──
+  lines.push(`  setText('mobilePhone', ${JSON.stringify(sanitizeMobile(additional.mobileNo))});`);
+  lines.push(`  setText('telephone', ${JSON.stringify(sanitizeTelephone(additional.phoneNo))});`);
   
   lines.push(`  setSelect('permState', ${JSON.stringify(data.permanentAddress.province)});`);
   if (permanentDistrictVal) lines.push(`  await setSelectAsync('permDistrict', ${JSON.stringify(permanentDistrictVal)});`);
   else lines.push(`  await setSelectAsync('permDistrict', ${JSON.stringify(data.permanentAddress.district)});`);
   lines.push(`  await setSelectAsync('permRurMun', ${JSON.stringify(data.permanentAddress.localLevel)});`);
-  lines.push(`  setText('permWardLoc', ${JSON.stringify(data.permanentAddress.wardNo)});`);
+  lines.push(`  setText('permWardLoc', ${JSON.stringify(sanitizeWard(data.permanentAddress.wardNo))});`);
   lines.push(`  setText('permVillageTolLoc', ${JSON.stringify(data.permanentAddress.villageToleNp)});`);
   lines.push(`  setText('permVillageTol', ${JSON.stringify(data.permanentAddress.villageToleEn)});`);
 
@@ -290,7 +325,7 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
     lines.push(`    setSelect('tempState', ${JSON.stringify(additional.temporaryAddress.province)});`);
     lines.push(`    await setSelectAsync('tempDistrict', ${JSON.stringify(tempDistrictVal || additional.temporaryAddress.district)});`);
     lines.push(`    await setSelectAsync('tempRurMun', ${JSON.stringify(additional.temporaryAddress.localLevel)});`);
-    lines.push(`    setText('tempWardLoc', ${JSON.stringify(additional.temporaryAddress.wardNo)});`);
+    lines.push(`    setText('tempWardLoc', ${JSON.stringify(sanitizeWard(additional.temporaryAddress.wardNo))});`);
     lines.push(`    setText('tempVillageTolLoc', ${JSON.stringify(additional.temporaryAddress.villageToleNp)});`);
     lines.push(`    setText('tempVillageTol', ${JSON.stringify(additional.temporaryAddress.villageToleEn)});`);
   }
@@ -365,9 +400,6 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   const pushSelect = (id: string, value: string | undefined, textValue?: string) => {
     if (value || textValue) instructions.push({ id, type: 'select', value: value || "", textValue });
   };
-  const pushDate = (id: string, value: string | undefined) => {
-    if (value) instructions.push({ id, type: 'date', value });
-  };
 
   const birthDistrictVal = findDistrictValue(data.birthPlace);
   const issuingDistrictVal = findDistrictValue(data.issuingDistrict);
@@ -410,7 +442,8 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
     pushText('ccPrevNatRevocationDate', additional.ccPrevNatRevocationDate);
   }
   
-  pushText('ccNumberLoc', data.citizenshipNo);
+  const ccNumberNp = englishToNepaliDigits(data.citizenshipNo || "");
+  pushText('ccNumberLoc', ccNumberNp);
   pushSelect('ccIssuingDistrict', issuingDistrictVal);
   pushText('ccIssuingDateLoc', issueDateBS_NP);
   pushSelect('gender', genderVal);
@@ -421,8 +454,8 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushSelect('caste', additional.caste);
   pushSelect('religion', additional.religion);
 
-  pushText('mobilePhone', additional.mobileNo);
-  pushText('telephone', additional.phoneNo);
+  pushText('mobilePhone', sanitizeMobile(additional.mobileNo));
+  pushText('telephone', sanitizeTelephone(additional.phoneNo));
   
   pushSelect('permState', pProvinceVal, data.permanentAddress.province);
   pushSelect('permDistrict', permanentDistrictVal, data.permanentAddress.district);
@@ -432,7 +465,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
     pushSelect('permRurMun', "", pLocalLevel);
   }
   
-  pushText('permWardLoc', data.permanentAddress.wardNo);
+  pushText('permWardLoc', sanitizeWard(data.permanentAddress.wardNo));
   pushText('permVillageTolLoc', data.permanentAddress.villageToleNp);
   pushText('permVillageTol', data.permanentAddress.villageToleEn?.toUpperCase());
 
@@ -447,7 +480,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
       pushSelect('tempRurMun', "", tLocalLevel);
     }
     
-    pushText('tempWardLoc', additional.temporaryAddress.wardNo);
+    pushText('tempWardLoc', sanitizeWard(additional.temporaryAddress.wardNo));
     pushText('tempVillageTolLoc', additional.temporaryAddress.villageToleNp);
     pushText('tempVillageTol', additional.temporaryAddress.villageToleEn?.toUpperCase());
   }
@@ -484,7 +517,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('fatherFirstName', data.fatherFirstName?.english?.toUpperCase());
   pushText('fatherMiddleName', data.fatherMiddleName?.english?.toUpperCase());
   pushText('fatherLastName', data.fatherLastName?.english?.toUpperCase());
-  pushText('fatherNinLoc', additional.fatherDetails?.nin);
+  pushText('fatherNinLoc', englishToNepaliDigits(additional.fatherDetails?.nin || ""));
   pushText('fatherNationalityLoc', additional.fatherDetails?.nationality === 'NEPALESE' ? 'नेपाली' : additional.fatherDetails?.nationality);
   pushText('fatherNationality', additional.fatherDetails?.nationality || 'NEPALESE');
 
@@ -494,7 +527,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('motherFirstName', data.motherFirstName?.english?.toUpperCase());
   pushText('motherMiddleName', data.motherMiddleName?.english?.toUpperCase());
   pushText('motherLastName', data.motherLastName?.english?.toUpperCase());
-  pushText('motherNinLoc', additional.motherDetails?.nin);
+  pushText('motherNinLoc', englishToNepaliDigits(additional.motherDetails?.nin || ""));
   pushText('motherNationalityLoc', additional.motherDetails?.nationality === 'NEPALESE' ? 'नेपाली' : additional.motherDetails?.nationality);
   pushText('motherNationality', additional.motherDetails?.nationality || 'NEPALESE');
 
@@ -504,7 +537,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('grandFatherFirstName', data.grandfatherFirstName?.english?.toUpperCase());
   pushText('grandFatherMiddleName', data.grandfatherMiddleName?.english?.toUpperCase());
   pushText('grandFatherLastName', data.grandfatherLastName?.english?.toUpperCase());
-  pushText('grandFatherNinLoc', additional.grandfatherDetails?.nin);
+  pushText('grandFatherNinLoc', englishToNepaliDigits(additional.grandfatherDetails?.nin || ""));
   pushText('grandFatherNationalityLoc', additional.grandfatherDetails?.nationality === 'NEPALESE' ? 'नेपाली' : additional.grandfatherDetails?.nationality);
   pushText('grandFatherNationality', additional.grandfatherDetails?.nationality || 'NEPALESE');
 
@@ -514,7 +547,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('grandMotherFirstName', additional.grandmotherFirstName?.english?.toUpperCase());
   pushText('grandMotherMiddleName', additional.grandmotherMiddleName?.english?.toUpperCase());
   pushText('grandMotherLastName', additional.grandmotherLastName?.english?.toUpperCase());
-  pushText('grandMotherNinLoc', additional.grandmotherDetails?.nin);
+  pushText('grandMotherNinLoc', englishToNepaliDigits(additional.grandmotherDetails?.nin || ""));
   pushText('grandMotherNationalityLoc', additional.grandmotherDetails?.nationality === 'NEPALESE' ? 'नेपाली' : additional.grandmotherDetails?.nationality);
   pushText('grandMotherNationality', additional.grandmotherDetails?.nationality || 'NEPALESE');
 

@@ -33,7 +33,7 @@
     const scriptToTransfer = e.detail && e.detail.script;
 
     if (!scriptToTransfer || typeof scriptToTransfer !== "string") {
-      console.error("Smart NID: Invalid or missing script in transfer event.");
+
       window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER_ERROR", {
         detail: { error: "Invalid script data" }
       }));
@@ -42,7 +42,7 @@
 
     // Check if the extension runtime is still connected
     if (!chrome || !chrome.runtime || !chrome.runtime.sendMessage) {
-      console.error("Smart NID: Chrome runtime not available. Extension may have been updated or disabled.");
+
       window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER_ERROR", {
         detail: { error: "Extension disconnected" }
       }));
@@ -61,7 +61,7 @@
         (response) => {
           // Check for runtime errors (extension context invalidated)
           if (chrome.runtime.lastError) {
-            console.error("Smart NID: Message send error —", chrome.runtime.lastError.message);
+
             window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER_ERROR", {
               detail: { error: chrome.runtime.lastError.message }
             }));
@@ -72,7 +72,7 @@
             window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER_SUCCESS"));
           } else {
             const errorMsg = (response && response.message) || "Unknown error";
-            console.error("Smart NID: Transfer failed —", errorMsg);
+
             window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER_ERROR", {
               detail: { error: errorMsg }
             }));
@@ -80,7 +80,7 @@
         }
       );
     } catch (err) {
-      console.error("Smart NID: Exception during message send —", err);
+
       window.dispatchEvent(new CustomEvent("SMART_NID_TRANSFER_ERROR", {
         detail: { error: err.message || "Message send failed" }
       }));

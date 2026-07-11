@@ -1,4 +1,3 @@
-import React from "react";
 import { useEnrollmentStore } from "../store/enrollmentStore";
 
 /** Select dropdown */
@@ -8,7 +7,6 @@ function SelectInput({
   value,
   onChange,
   options,
-  required = false,
   disabled = false,
 }: {
   label: string;
@@ -16,7 +14,6 @@ function SelectInput({
   value: string;
   onChange: (val: string) => void;
   options: { value: string; label: string; text?: string }[];
-  required?: boolean;
   disabled?: boolean;
 }) {
   return (
@@ -84,7 +81,6 @@ export default function AppointmentTab() {
             value={additional.appointmentLocation || ""}
             onChange={(val) => updateAdditionalField("appointmentLocation", val)}
             options={APPOINTMENT_LOCATIONS}
-            required
           />
         </div>
       </div>

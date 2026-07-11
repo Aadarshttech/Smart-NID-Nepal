@@ -15,66 +15,7 @@
 (function () {
   "use strict";
 
-  // ── Network Interceptor (Injected into Page Context) ──
-  // This helps us debug what the server is rejecting without needing the Network Tab
-  const interceptorScript = document.createElement('script');
-  interceptorScript.textContent = `
-    (function() {
-      const originalFetch = window.fetch;
-      window.fetch = async function(...args) {
-        const url = args[0];
-        const options = args[1];
-        if (options && options.body && options.method !== 'GET') {
-           const bodyStr = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
-           if (bodyStr.includes('{')) {
-             window.postMessage({ type: 'NID_INTERCEPTED_ERROR', payload: bodyStr }, '*');
-           }
-        }
-        return originalFetch.apply(this, args);
-      };
-
-      const originalXhrOpen = XMLHttpRequest.prototype.open;
-      const originalXhrSend = XMLHttpRequest.prototype.send;
-      XMLHttpRequest.prototype.open = function(method, url) {
-        this._url = url;
-        this._method = method;
-        return originalXhrOpen.apply(this, arguments);
-      };
-      XMLHttpRequest.prototype.send = function(body) {
-        if (body && this._method !== 'GET') {
-           const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
-           if (bodyStr.includes('{')) {
-             window.postMessage({ type: 'NID_INTERCEPTED_ERROR', payload: bodyStr }, '*');
-           }
-        }
-        return originalXhrSend.apply(this, arguments);
-      };
-    })();
-  `;
-  (document.head || document.documentElement).appendChild(interceptorScript);
-  interceptorScript.remove();
-
-  // Listen for intercepted errors from the main world script
-  window.addEventListener("message", (event) => {
-    if (event.source !== window || !event.data || event.data.type !== 'NID_INTERCEPTED_ERROR') return;
-    
-    // Forward to background script which can securely reach localhost
-    chrome.runtime.sendMessage({ 
-      type: 'NID_LOG_ERROR', 
-      payload: event.data.payload 
-    }, () => {
-      // Optional: Give the user visual feedback that the error was logged
-      const btn = document.getElementById("smart-nid-autofill-btn");
-      if (btn) {
-        btn.innerHTML = "❌ Error Logged";
-        btn.style.backgroundColor = "#dc3545";
-        setTimeout(() => {
-          btn.innerHTML = `✅ <span>Auto-Fill Form</span>`;
-          btn.style.backgroundColor = "#28a745";
-        }, 3000);
-      }
-    });
-  });
+  // (Network interceptor removed for security and compliance)
 
   // ── Guard: Don't run on error pages ──
   function isErrorPage() {
@@ -113,7 +54,6 @@
   function checkAndInject() {
     // Skip error pages entirely
     if (isErrorPage()) {
-      console.log("Smart NID: Skipping error page.");
       return;
     }
 
@@ -125,7 +65,6 @@
 
     chrome.storage.local.get(["savedProfiles", "activeProfileId"], (result) => {
       if (chrome.runtime.lastError) {
-        console.warn("Smart NID: Storage access error —", chrome.runtime.lastError.message);
         return;
       }
 
@@ -225,6 +164,54 @@
     // Chat Bubble (Status Badge)
     const statusBadge = document.createElement("div");
     statusBadge.id = "smart-nid-status";
+    statusBadge.className = "smart-nid-status";
+    
+    // Check if we are restoring state on Appointment Tab
+    const isPreviewTab = document.body.innerText.includes('Main Applicant Data') && document.body.innerText.includes('Appointment Details');
+    const isApptTab = (document.body.innerText.includes('बायोमेट्रिक दिने स्थान') || document.body.innerText.includes('Appointment Details')) && !isPreviewTab;
+    const isApptDone = sessionStorage.getItem('smart_nid_appointment_done') === 'true';
+    
+    // Reusable monitor function
+    const startApptMonitor = () => {
+      if (window.smartNidApptMonitor) clearInterval(window.smartNidApptMonitor);
+      
+      window.smartNidApptMonitor = setInterval(() => {
+        const sb = document.getElementById('smart-nid-status');
+        if (!sb) return;
+        
+        const text = document.body.innerText;
+        const isNowPreview = text.includes('Main Applicant Data') && text.includes('Appointment Details');
+        
+        if (isNowPreview) {
+           sb.innerHTML = "All done! 🎉<br/>Please check your details and <b>Submit</b> your form.";
+           clearInterval(window.smartNidApptMonitor);
+           sessionStorage.removeItem('smart_nid_appointment_done');
+           return;
+        }
+        
+        if (!text.includes('बायोमेट्रिक दिने स्थान')) return;
+        const hasSlots = text.includes('Remaining quota') && text.includes('Time Slot');
+
+        if (hasSlots) {
+           sb.innerHTML = "Awesome! 📅<br/>Now pick a <b>time slot</b>. It will auto-continue!";
+        } else {
+           sb.innerHTML = "Location selected! 📍<br/>Please pick a <b>Date</b> from the calendar and click <b>Search</b>.";
+        }
+      }, 500);
+    };
+
+    if (isApptTab && isApptDone) {
+      statusBadge.innerHTML = "Location selected! 📍<br/>Please pick a <b>Date</b> from the calendar and click <b>Search</b>.";
+      statusBadge.style.backgroundColor = "#fffbeb"; 
+      statusBadge.style.color = "#92400e";
+      statusBadge.style.border = "1px solid #fcd34d";
+      statusBadge.style.opacity = "1";
+      statusBadge.style.visibility = "visible";
+      statusBadge.style.transform = "translateY(0) scale(1)";
+      
+      startApptMonitor();
+    }
+    
     Object.assign(statusBadge.style, {
       position: "fixed",
       bottom: "185px",
@@ -240,7 +227,7 @@
       border: "none",
       boxShadow: "0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)",
       transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-      opacity: "1",
+      opacity: (isApptTab && isApptDone) ? "1" : "0",
       transform: "translateY(0) scale(1)",
       transformOrigin: "bottom right",
       pointerEvents: "none",
@@ -267,8 +254,8 @@
         z-index: 999997;
         pointer-events: none;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        opacity: 1;
-        transform: scale(1);
+        opacity: ${(isApptTab && isApptDone) ? "1" : "0"};
+        transform: scale(${(isApptTab && isApptDone) ? "1" : "0.8"}) translateY(${(isApptTab && isApptDone) ? "0" : "5px"});
       }
       #smart-nid-cloud-dot-2 {
         position: fixed;
@@ -282,8 +269,8 @@
         z-index: 999997;
         pointer-events: none;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        opacity: 1;
-        transform: scale(1);
+        opacity: ${(isApptTab && isApptDone) ? "1" : "0"};
+        transform: scale(${(isApptTab && isApptDone) ? "1" : "0.8"}) translateY(${(isApptTab && isApptDone) ? "0" : "5px"});
       }
       @keyframes smartNidCloudFloat {
         0%, 100% { transform: translateY(0) scale(1); }
@@ -305,6 +292,11 @@
     let isShowingFeedback = false;
 
     const setBubbleVisible = (visible) => {
+      // Force visible if on appt tab and done
+      const isApptTab = document.body.innerText.includes('बायोमेट्रिक दिने स्थान') || document.body.innerText.includes('Appointment Details');
+      const isApptDone = sessionStorage.getItem('smart_nid_appointment_done') === 'true';
+      if (isApptTab && isApptDone) visible = true;
+
       if (visible) {
         statusBadge.style.opacity = "1";
         statusBadge.classList.add('is-floating');
@@ -322,21 +314,36 @@
       }
     };
 
+    const isLoginScreen = window.location.pathname.toLowerCase().includes('/login') || document.body.innerText.includes("Login For Individuals");
+    const isMobileEntryScreen = document.body.innerText.includes("Enter your Mobile Number") || document.body.innerText.includes("मोबाइल नम्बर प्रविष्ट गर्नुहोस्");
+    const isOtpScreen = document.body.innerText.includes("Enter your OTP Number") || document.body.innerText.includes("A message with a verification code");
+
     // Set initial text for tooltip
-    if (isReady) {
-      statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form.<br/>Please press the <b>Auto-Fill</b> button at my side!";
-    } else {
-      const newEnrollBtn = document.getElementById("newEnrollment");
-      if (newEnrollBtn) {
-        statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! Please press the <b>Auto-Fill</b> button at my side to start a New Enrollment and fill everything!";
+    if (!(isApptTab && isApptDone)) {
+      if (isPreviewTab) {
+        statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F389}</span> All done!<br/>Please check your details and <b>Submit</b> your form.";
+      } else if (isReady) {
+        statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste! I'm ready to fill this form.<br/>Please press the <b>Auto-Fill</b> button at my side!";
       } else {
-        statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste!<br/><br/>I don't see a form here! Open a form and I'll help you fill it.";
+        const newEnrollBtn = document.getElementById("newEnrollment");
+        if (newEnrollBtn) {
+          statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F4DD}</span> Please press the <b>Auto-Fill</b> button at my side to start a New Enrollment!";
+        } else if (isOtpScreen) {
+          statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F512}</span> Almost there! Please enter the <b>OTP</b> sent to your mobile device.";
+        } else if (isMobileEntryScreen) {
+          statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F4F1}</span> Please enter your mobile number and click the arrow to receive an OTP!";
+        } else if (isLoginScreen) {
+          statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F44B}</span> Namaste!<br/>You are on the login screen.<br/><br/>Please click <b>Login For Individuals</b> to get started!";
+        } else {
+          statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F914}</span> I don't see a form here! Open a form and I'll help you fill it.";
+        }
       }
     }
 
     setBubbleVisible(true);
+    
     bubbleVisibilityTimeout = setTimeout(() => {
-      if (!isShowingFeedback) setBubbleVisible(false);
+      if (!isShowingFeedback && !(isApptTab && isApptDone)) setBubbleVisible(false);
     }, 5000);
 
     btn.onmouseover = () => {
@@ -346,7 +353,7 @@
     };
     btn.onmouseout = () => {
       btn.style.transform = "scale(1) translateY(0)";
-      if (!isShowingFeedback) setBubbleVisible(false);
+      if (!isShowingFeedback && !(isApptTab && isApptDone)) setBubbleVisible(false);
     };
     
     actionBtn.onmouseover = () => {
@@ -358,9 +365,8 @@
     actionBtn.onmouseout = () => {
       actionBtn.style.transform = "translateY(0) scale(1)";
       actionBtn.style.boxShadow = "0 8px 25px rgba(185, 28, 28, 0.35), 0 0 0 1px rgba(0,0,0,0.05)";
-      if (!isShowingFeedback) setBubbleVisible(false);
+      if (!isShowingFeedback && !(isApptTab && isApptDone)) setBubbleVisible(false);
     };
-
 
     actionBtn.onclick = () => {
       isShowingFeedback = true;
@@ -381,7 +387,15 @@
         }
 
         // User clicked the avatar before reaching the form and no new enrollment btn
-        statusBadge.innerHTML = "Oops! You're not on the form page yet. Please click <b>New Enrollment</b> first! \u{1F60A}";
+        if (isOtpScreen) {
+          statusBadge.innerHTML = "Please enter your OTP to continue! \u{1F512}";
+        } else if (isMobileEntryScreen) {
+          statusBadge.innerHTML = "Please enter your mobile number to proceed! \u{1F4F1}";
+        } else if (isLoginScreen) {
+          statusBadge.innerHTML = "You are on the login screen! Please click <b>Login For Individuals</b> first! \u{1F60A}";
+        } else {
+          statusBadge.innerHTML = "Oops! You're not on the form page yet. Please click <b>New Enrollment</b> first! \u{1F60A}";
+        }
         statusBadge.style.backgroundColor = "#fff5f5";
         statusBadge.style.color = "#c53030";
         statusBadge.style.boxShadow = "0 4px 20px rgba(197,48,48,0.1), 0 0 0 1px rgba(197,48,48,0.1)";
@@ -403,8 +417,16 @@
           statusBadge.style.backgroundColor = "white";
           statusBadge.style.color = "#1e293b";
           statusBadge.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)";
-          statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F64F}</span> Namaste!<br/><br/>I don't see a form here! Open a form and I'll help you fill it.";
-          setBubbleVisible(false);
+          if (isOtpScreen) {
+            statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F512}</span> Almost there! Please enter the <b>OTP</b> sent to your mobile device.";
+          } else if (isMobileEntryScreen) {
+            statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F4F1}</span> Please enter your mobile number and click the arrow to receive an OTP!";
+          } else if (isLoginScreen) {
+            statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F44B}</span> Namaste!<br/>You are on the login screen.<br/><br/>Please click <b>Login For Individuals</b> to get started!";
+          } else {
+            statusBadge.innerHTML = "<span style='font-size:16px;'>\u{1F914}</span> I don't see a form here! Open a form and I'll help you fill it.";
+          }
+          if (!(isApptTab && isApptDone)) setBubbleVisible(false);
         }, 3000);
         return;
       }
@@ -426,49 +448,40 @@
         try {
           let result = null;
           if (instructions) {
-            // Check if this is an old profile (pre-v1.1) by seeing if it lacks permState
             const isOldProfile = !instructions.some(i => i.id === 'permState' || i.id === 'pProvince');
-
             const processInstructions = async () => {
+              const isAppointmentTab = document.body.innerText.includes('बायोमेट्रिक दिने स्थान') || document.body.innerText.includes('Appointment Details');
               let filledCount = 0;
               let skippedCount = 0;
 
               for (const inst of instructions) {
                 if (!inst.value && !inst.textValue) continue;
+                if (inst.id === 'appointmentLocation' && !isAppointmentTab) {
+                   skippedCount++;
+                   continue;
+                }
                 
                 let el = document.getElementById(inst.id);
-                
-                // Fallback for checkbox if ID changed
                 if (!el && inst.id === 'tempAddressCopy') {
                   const labels = Array.from(document.querySelectorAll('label, span, div'));
                   const copyLabel = labels.find(l => l.innerText && l.innerText.includes('Copy Permanent Address'));
                   if (copyLabel) el = copyLabel.querySelector('input[type="checkbox"]') || copyLabel.parentElement?.querySelector('input[type="checkbox"]');
                   if (!el) el = document.querySelector('input[type="checkbox"]');
                 }
-
-                // Fallback for Appointment Location
                 if (!el && inst.id === 'appointmentLocation') {
-                  // The location dropdown is the first (and usually only) select on the final Appointment tab.
                   const visibleSelects = Array.from(document.querySelectorAll('select')).filter(s => s.offsetParent !== null);
                   if (visibleSelects.length > 0) {
                     el = visibleSelects[0];
                   }
                 }
-
                 if (!el) {
                   skippedCount++;
-                  console.warn('Smart NID: Field not found (likely on another tab):', inst.id);
                   continue;
                 }
-
                 if (inst.type === 'text' || inst.type === 'date') {
                   el.focus();
                   el.dispatchEvent(new Event('focus', { bubbles: true }));
-                  
                   let injectVal = inst.value;
-
-                  // Foolproof fallback: Force Uppercase for all English text fields
-                  // This guarantees it works even if the React app wasn't hard-refreshed
                   const englishFields = [
                     'firstName', 'middleName', 'lastName',
                     'permVillageTol', 'tempVillageTol',
@@ -481,23 +494,16 @@
                   if (inst.id && englishFields.includes(inst.id) && typeof injectVal === 'string') {
                     injectVal = injectVal.toUpperCase();
                   }
-
-                  // Use native React value setter to bypass custom UI library keypress listeners
                   const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
                   if (nativeInputValueSetter) {
                     nativeInputValueSetter.call(el, injectVal);
                   } else {
                     el.value = injectVal;
                   }
-                  
-                  // Dispatch core React events
                   el.dispatchEvent(new Event('input', { bubbles: true }));
                   el.dispatchEvent(new Event('change', { bubbles: true }));
-                  
-                  // Dispatch Keyboard events for interceptor scripts (nepalify)
                   el.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter', code: 'Enter', keyCode: 13 }));
                   el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true, key: 'Enter', code: 'Enter', keyCode: 13 }));
-                  
                   el.dispatchEvent(new Event('blur', { bubbles: true }));
                   el.blur();
                   filledCount++;
@@ -508,14 +514,11 @@
                   }
                   filledCount++;
                 } else if (inst.type === 'select') {
-                  // Wait for the specific option to populate (cascading dropdowns like District/Local Level)
                   let attempts = 0;
                   let hasOption = false;
-                  
                   const targetVal = inst.value ? String(inst.value) : "";
                   const targetText = inst.textValue ? String(inst.textValue).toLowerCase().replace(/[\s\/]/g, '') : "";
-
-                  while (!hasOption && attempts < 15) { // Max 1.5s wait to prevent long delays
+                  while (!hasOption && attempts < 15) {
                     const options = Array.from(el.options);
                     hasOption = options.some(opt => {
                       if (targetVal && opt.value === targetVal) return true;
@@ -525,35 +528,33 @@
                       }
                       return false;
                     });
-                    
                     if (!hasOption) {
                       await new Promise(r => setTimeout(r, 100));
                       attempts++;
                     }
                   }
-
                   let matched = false;
-                  // Try to match by value first
+                  let valueChanged = false;
                   if (inst.value) {
                     for (let i = 0; i < el.options.length; i++) {
                       if (el.options[i].value === inst.value) {
-                        const nativeSelectValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')?.set;
-                        if (nativeSelectValueSetter) {
-                          nativeSelectValueSetter.call(el, inst.value);
-                        } else {
-                          el.value = inst.value;
+                        if (el.value !== inst.value) {
+                          const nativeSelectValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')?.set;
+                          if (nativeSelectValueSetter) {
+                            nativeSelectValueSetter.call(el, inst.value);
+                          } else {
+                            el.value = inst.value;
+                          }
+                          valueChanged = true;
                         }
                         matched = true;
                         break;
                       }
                     }
                   }
-                  
-                  // If not matched by value, try to match by text content
                   if (!matched && inst.textValue) {
                     const cleanTarget = String(inst.textValue).toLowerCase().replace(/[\s\/]/g, '');
                     let fuzzyMatch = null;
-                    // 1. Exact text match
                     for (let i = 0; i < el.options.length; i++) {
                       const cleanOpt = el.options[i].text.toLowerCase().replace(/[\s\/]/g, '');
                       if (cleanOpt === cleanTarget) {
@@ -561,7 +562,6 @@
                         break;
                       }
                     }
-                    // 2. Contains match
                     if (!fuzzyMatch) {
                       for (let i = 0; i < el.options.length; i++) {
                         const cleanOpt = el.options[i].text.toLowerCase().replace(/[\s\/]/g, '');
@@ -571,29 +571,29 @@
                         }
                       }
                     }
-                    
                     if (fuzzyMatch) {
-                      const nativeSelectValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')?.set;
-                      if (nativeSelectValueSetter) {
-                        nativeSelectValueSetter.call(el, fuzzyMatch.value);
-                      } else {
-                        el.value = fuzzyMatch.value;
+                      if (el.value !== fuzzyMatch.value) {
+                        const nativeSelectValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')?.set;
+                        if (nativeSelectValueSetter) {
+                          nativeSelectValueSetter.call(el, fuzzyMatch.value);
+                        } else {
+                          el.value = fuzzyMatch.value;
+                        }
+                        valueChanged = true;
                       }
                       matched = true;
                     }
                   }
-                  
-                  el.dispatchEvent(new Event('input', { bubbles: true }));
-                  el.dispatchEvent(new Event('change', { bubbles: true }));
+                  if (valueChanged) {
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                  }
                   filledCount++;
                 }
               }
-
-              // Dynamically inject missing province data for old profiles
               if (isOldProfile) {
                 const pDistInst = instructions.find(i => i.id === 'pDistrict');
                 const tDistInst = instructions.find(i => i.id === 'tDistrict');
-                
                 const getProv = (d) => {
                   const n = parseInt(d, 10);
                   if (isNaN(n)) return "";
@@ -606,75 +606,86 @@
                   if (n >= 69 && n <= 77) return "7";
                   return "";
                 };
-
                 if (pDistInst && pDistInst.value) {
                   const pProv = getProv(pDistInst.value);
                   if (pProv) {
                     const pEl = document.getElementById('pProvince');
-                    if (pEl) { pEl.value = pProv; pEl.dispatchEvent(new Event('change', { bubbles: true })); }
+                    if (pEl && pEl.value !== pProv) { 
+                      pEl.value = pProv; 
+                      pEl.dispatchEvent(new Event('change', { bubbles: true })); 
+                    }
                   }
                 }
                 if (tDistInst && tDistInst.value) {
                   const tProv = getProv(tDistInst.value);
                   if (tProv) {
                     const tEl = document.getElementById('tProvince');
-                    if (tEl) { tEl.value = tProv; tEl.dispatchEvent(new Event('change', { bubbles: true })); }
+                    if (tEl && tEl.value !== tProv) { 
+                      tEl.value = tProv; 
+                      tEl.dispatchEvent(new Event('change', { bubbles: true })); 
+                    }
                   }
                 }
               }
-              
-              // Return counts for status reporting
               return { filledCount, skippedCount };
             };
-
-            // Wait for the async process to complete before updating status
             result = await processInstructions();
-
-          } else if (fallbackScript) {
-            // Fallback to inline script injection for older versions
-            const scriptEl = document.createElement("script");
-            scriptEl.textContent = fallbackScript;
-            (document.head || document.documentElement).appendChild(scriptEl);
-            scriptEl.remove();
+          } else {
+            console.error("Smart NID: No safe instructions available for autofill.");
           }
 
-        // Do NOT clear storage here. DoNIDCR has multiple tabs (Applicant, Contact, Family)
-        // that load lazily. The user needs to click the auto-fill button on each tab.
-        // chrome.storage.local.remove(["autoFillScript", "draftData", "autoFillInstructions"]);
-
-        // Update button to success state momentarily
         const originalHtml = btn.innerHTML;
-        
-        // Update status badge with contextual message based on fill results
         const filled = (typeof result === 'object' && result) ? result.filledCount : 0;
         const skipped = (typeof result === 'object' && result) ? result.skippedCount : 0;
-        
         const isAppointmentTab = document.body.innerText.includes('बायोमेट्रिक दिने स्थान') || document.body.innerText.includes('Appointment Details');
 
         if (filled > 0 && !isAppointmentTab) {
-          // Always try to click Next to proceed through the wizard to Appointment section
           setTimeout(async () => {
             const nextBtn = document.getElementById("nextBtn") || Array.from(document.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().toLowerCase() === 'next');
             if (nextBtn) {
               sessionStorage.setItem('smart_nid_autorun', 'true');
-              // Click Next up to 3 times for the 3 tabs (Contact Details, Family Details, Appointment)
               for (let i = 0; i < 3; i++) {
                 if (nextBtn.innerText.trim().toLowerCase() === 'next') {
                   nextBtn.click();
-                  await new Promise(r => setTimeout(r, 50)); // Fast delay to allow validation and tab switch
+                  await new Promise(r => setTimeout(r, 50)); 
                 }
               }
             }
           }, 50);
-        } else if (filled > 0 && isAppointmentTab) {
-           // On Appointment tab, don't click next. Auto-run is done!
-           sessionStorage.removeItem('smart_nid_autorun');
         }
 
         if (isAppointmentTab) {
-          statusBadge.innerHTML = "Location selected! 📍<br/>Please click the <b>मिति (Date)</b> box to open the calendar, then search for a slot.";
-          statusBadge.style.backgroundColor = "#f0fff4";
-          statusBadge.style.color = "#22543d";
+          let attempts = 0;
+          const maxAttempts = 15;
+          const checkAndClick = setInterval(() => {
+            attempts++;
+            const swalBtn = document.querySelector('.swal-button--confirm');
+            if (swalBtn) {
+              swalBtn.click();
+              clearInterval(checkAndClick);
+              setTimeout(() => {
+                const dateBox = document.getElementById('appointmentDate');
+                if (dateBox) {
+                  dateBox.focus();
+                  dateBox.click();
+                }
+              }, 150);
+            } else if (attempts >= maxAttempts) {
+              clearInterval(checkAndClick);
+              const dateBox = document.getElementById('appointmentDate');
+              if (dateBox) {
+                dateBox.focus();
+                dateBox.click();
+              }
+            }
+          }, 200);
+          sessionStorage.setItem('smart_nid_appointment_done', 'true');
+          statusBadge.innerHTML = "Location selected! 📍<br/>Please pick a <b>Date</b> from the calendar and click <b>Search</b>.";
+          statusBadge.style.backgroundColor = "#fffbeb"; 
+          statusBadge.style.color = "#92400e";
+          statusBadge.style.border = "1px solid #fcd34d";
+          setBubbleVisible(true);
+          startApptMonitor();
         } else if (filled > 0 && skipped > 0) {
           statusBadge.innerHTML = `Yay! I filled <b>${filled} fields</b> for you! Moving to the next section... \u{1F389}`;
           statusBadge.style.backgroundColor = "#f0fff4";
@@ -690,10 +701,11 @@
           sessionStorage.removeItem('smart_nid_autorun');
         }
         
-        // Only revert back to ready state after 4 seconds if we are NOT on the final tab (with successful fill)
-        // This prevents the message from flashing or hiding when we want the user to read it
         setTimeout(() => {
           if (!(isAppointmentTab && filled > 0)) {
+            const isApptTab = document.body.innerText.includes('बायोमेट्रिक दिने स्थान') || document.body.innerText.includes('Appointment Details');
+            const isApptDone = sessionStorage.getItem('smart_nid_appointment_done') === 'true';
+            if (isApptTab && isApptDone) return;
             isShowingFeedback = false;
             btn.innerHTML = originalHtml;
             statusBadge.style.backgroundColor = "white";
@@ -708,7 +720,6 @@
           statusBadge.innerHTML = "Oh no, something went wrong! \u{1F625}<br/>Try refreshing the page and clicking me again.";
           statusBadge.style.backgroundColor = "#fff5f5";
           statusBadge.style.color = "#c53030";
-
           setTimeout(() => {
             isShowingFeedback = false;
             btn.innerHTML = `${logoSvg}`;
@@ -724,7 +735,9 @@
     container.appendChild(statusBadge);
     container.appendChild(dot1);
     container.appendChild(dot2);
-    container.appendChild(actionBtn);
+    if (!isLoginScreen && !isMobileEntryScreen && !isOtpScreen) {
+      container.appendChild(actionBtn);
+    }
     container.appendChild(btn);
     document.body.appendChild(container);
 

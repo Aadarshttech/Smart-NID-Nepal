@@ -62,10 +62,6 @@ export default function ExportTab() {
       const instructions = generateAutoFillInstructions(draft, additional);
       
       if (hasExtension) {
-        if (!window.confirm("Do you want to save this data checkpoint in the extension? You can select it later from the extension menu.")) {
-          return;
-        }
-
         setCopyState("transferring");
         setErrorMsg("");
 

@@ -25,7 +25,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.storage.local.get(["savedProfiles"], (result) => {
       let profiles = result.savedProfiles || [];
       const newProfile = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         timestamp: new Date().toLocaleString(),
         name: `${message.draft?.firstName?.english || ''} ${message.draft?.lastName?.english || ''}`.trim() || 'Unknown Name',
         citNo: message.draft?.citizenshipNo || '',
@@ -92,13 +92,5 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
-  if (message.type === "NID_LOG_ERROR") {
-    fetch('http://localhost:3001/api/log-error', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ payload: message.payload })
-    }).catch(err => console.error("Smart NID: Failed to log to local server", err));
-    sendResponse({ status: "success" });
-    return true;
-  }
+
 });

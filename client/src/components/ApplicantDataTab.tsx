@@ -5,7 +5,7 @@
  * not present on the citizenship certificate but required by DoNIDCR.
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useEnrollmentStore } from "../store/enrollmentStore";
 import type { NameField, ExtractionResult } from "../types/extraction";
 import {

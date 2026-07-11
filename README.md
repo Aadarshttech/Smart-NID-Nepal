@@ -55,12 +55,15 @@ Navigate to [http://localhost:5173](http://localhost:5173)
 
 | Layer     | Tech                                |
 | --------- | ----------------------------------- |
-| Frontend  | React 18 + Vite + TypeScript        |
+| Frontend  | React 19 + Vite + TypeScript        |
 | Styling   | Tailwind CSS v4                     |
 | State     | Zustand                             |
 | Backend   | Express + TypeScript                |
 | AI        | Google Gemini (gemini-2.5-flash)    |
 | OCR       | Gemini Vision API                   |
+
+## Privacy Policy
+You can view our privacy policy here: [Privacy Policy](extension/privacy_policy.md) or on our website at [https://aadarshapandit.com.np](https://aadarshapandit.com.np).
 
 ## Project Structure
 
