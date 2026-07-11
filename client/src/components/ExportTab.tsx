@@ -90,7 +90,6 @@ export default function ExportTab() {
         // Fallback: Manual copy to clipboard
         await navigator.clipboard.writeText(script);
         setCopyState("copied");
-        setTimeout(() => setCopyState("idle"), 4000);
       }
       
       // ✨ NEW: Backup to localStorage in case the extension drops it
@@ -223,10 +222,69 @@ export default function ExportTab() {
             )}
 
             {!hasExtension && (
-              <div style={{ marginTop: "1rem" }}>
-                <p style={{ fontSize: "0.85rem", color: "#6b7280" }}>
-                  💡 <strong>Pro Tip:</strong> Install our Chrome Extension for true 1-click magic without copying!
+              <div style={{ 
+                marginTop: "2rem", 
+                padding: "1.5rem", 
+                background: "linear-gradient(to right, #eff6ff, #f0fdf4)", 
+                border: "1px solid #bfdbfe",
+                borderRadius: "16px",
+                textAlign: "left",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.03)"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
+                  <span style={{ fontSize: "1.4rem" }}>🚀</span>
+                  <h4 style={{ margin: 0, color: "#1e3a8a", fontSize: "1.15rem", fontWeight: 800 }}>Skip the Copy & Paste!</h4>
+                </div>
+                <p style={{ color: "#334155", fontSize: "0.95rem", lineHeight: 1.5, margin: "0 0 1rem 0" }}>
+                  Tired of manually pressing F12 and pasting code? Install the official Smart NID Helper extension for a <strong>true 1-click experience</strong>!
                 </p>
+                <ul style={{ margin: "0 0 1.25rem 0", paddingLeft: "1.5rem", color: "#475569", fontSize: "0.95rem", lineHeight: 1.6 }}>
+                  <li>✨ <strong>Zero Code:</strong> No need to mess with developer consoles.</li>
+                  <li>🔒 <strong>Secure Transfer:</strong> Data moves directly into the portal safely.</li>
+                  <li>⚡ <strong>Instant Fill:</strong> Adds a magic "Auto-Fill" button directly on the government site.</li>
+                </ul>
+                <div style={{ display: "flex", gap: "1rem" }}>
+                  <a 
+                    href="#" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-block",
+                      padding: "0.6rem 1.25rem",
+                      background: "#2563eb",
+                      color: "white",
+                      textDecoration: "none",
+                      fontWeight: 600,
+                      borderRadius: "8px",
+                      fontSize: "0.9rem",
+                      transition: "background 0.2s"
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.background = "#1d4ed8"}
+                    onMouseOut={(e) => e.currentTarget.style.background = "#2563eb"}
+                  >
+                    Get Chrome Extension
+                  </a>
+                  <a 
+                    href="#" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-block",
+                      padding: "0.6rem 1.25rem",
+                      background: "#0f766e",
+                      color: "white",
+                      textDecoration: "none",
+                      fontWeight: 600,
+                      borderRadius: "8px",
+                      fontSize: "0.9rem",
+                      transition: "background 0.2s"
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.background = "#115e59"}
+                    onMouseOut={(e) => e.currentTarget.style.background = "#0f766e"}
+                  >
+                    Get Edge Add-on
+                  </a>
+                </div>
               </div>
             )}
 
