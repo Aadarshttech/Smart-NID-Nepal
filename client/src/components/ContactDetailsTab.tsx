@@ -93,9 +93,17 @@ export default function ContactDetailsTab() {
 
   if (!draft) return null;
 
+  const permAddress = draft.permanentAddress || {
+    province: "", district: "", localLevel: "", wardNo: "", villageToleNp: "", villageToleEn: ""
+  };
+
+  const tempAddress = additional.temporaryAddress || {
+    province: "", district: "", localLevel: "", wardNo: "", villageToleNp: "", villageToleEn: ""
+  };
+
   const handleAddressChange = (subField: keyof AddressField, val: string) => {
     const updatedAddress = {
-      ...draft.permanentAddress,
+      ...permAddress,
       [subField]: val,
     };
     
@@ -114,7 +122,7 @@ export default function ContactDetailsTab() {
 
   const handleTempAddressChange = (subField: keyof AddressField, val: string) => {
     const updatedAddress = {
-      ...additional.temporaryAddress,
+      ...tempAddress,
       [subField]: val,
     };
     
@@ -131,23 +139,23 @@ export default function ContactDetailsTab() {
     updateAdditionalField("temporaryAddress", updatedAddress);
   };
 
-  const permDistricts = draft.permanentAddress.province ? getDistrictsForProvince(draft.permanentAddress.province) : [];
-  const permLocalLevels = draft.permanentAddress.district && draft.permanentAddress.province ? getLocalLevelsForDistrict(draft.permanentAddress.province, draft.permanentAddress.district) : [];
+  const permDistricts = permAddress.province ? getDistrictsForProvince(permAddress.province) : [];
+  const permLocalLevels = permAddress.district && permAddress.province ? getLocalLevelsForDistrict(permAddress.province, permAddress.district) : [];
 
-  const tempDistricts = additional.temporaryAddress.province ? getDistrictsForProvince(additional.temporaryAddress.province) : [];
-  const tempLocalLevels = additional.temporaryAddress.district && additional.temporaryAddress.province ? getLocalLevelsForDistrict(additional.temporaryAddress.province, additional.temporaryAddress.district) : [];
+  const tempDistricts = tempAddress.province ? getDistrictsForProvince(tempAddress.province) : [];
+  const tempLocalLevels = tempAddress.district && tempAddress.province ? getLocalLevelsForDistrict(tempAddress.province, tempAddress.district) : [];
 
   const canProceed =
-    additional.mobileNo.trim() !== "" &&
-    draft.permanentAddress.province.trim() !== "" &&
-    draft.permanentAddress.district.trim() !== "" &&
-    draft.permanentAddress.localLevel.trim() !== "" &&
-    draft.permanentAddress.wardNo.trim() !== "" &&
+    (additional.mobileNo || "").trim() !== "" &&
+    (permAddress.province || "").trim() !== "" &&
+    (permAddress.district || "").trim() !== "" &&
+    (permAddress.localLevel || "").trim() !== "" &&
+    (permAddress.wardNo || "").trim() !== "" &&
     (additional.temporaryAddressSameAsPermanent || (
-      additional.temporaryAddress.province.trim() !== "" &&
-      additional.temporaryAddress.district.trim() !== "" &&
-      additional.temporaryAddress.localLevel.trim() !== "" &&
-      additional.temporaryAddress.wardNo.trim() !== ""
+      (tempAddress.province || "").trim() !== "" &&
+      (tempAddress.district || "").trim() !== "" &&
+      (tempAddress.localLevel || "").trim() !== "" &&
+      (tempAddress.wardNo || "").trim() !== ""
     ));
 
   const handleNextClick = () => {
@@ -194,25 +202,25 @@ export default function ContactDetailsTab() {
           <SelectInput
             label="Province*"
             labelNp="प्रदेश*"
-            value={draft.permanentAddress.province}
+            value={permAddress.province || ""}
             onChange={(val) => handleAddressChange("province", val)}
             options={PROVINCE_OPTIONS}
           />
           <SelectInput
             label="District*"
             labelNp="जिल्ला*"
-            value={draft.permanentAddress.district}
+            value={permAddress.district || ""}
             onChange={(val) => handleAddressChange("district", val)}
             options={[{val: "", text: "-- Select / छान्नुहोस् --"}, ...permDistricts]}
-            disabled={!draft.permanentAddress.province}
+            disabled={!permAddress.province}
           />
           <SelectInput
             label="Local Level*"
             labelNp="स्थानीय तह*"
-            value={draft.permanentAddress.localLevel}
+            value={permAddress.localLevel || ""}
             onChange={(val) => handleAddressChange("localLevel", val)}
             options={[{val: "", text: "-- Select / छान्नुहोस् --"}, ...permLocalLevels]}
-            disabled={!draft.permanentAddress.district}
+            disabled={!permAddress.district}
           />
         </div>
 
@@ -220,20 +228,20 @@ export default function ContactDetailsTab() {
           <TextInput
             label="Ward No.*"
             labelNp="वडा नं.*"
-            value={draft.permanentAddress.wardNo}
+            value={permAddress.wardNo || ""}
             onChange={(val) => handleAddressChange("wardNo", val)}
           />
           <TextInput
             label="Village/Tole (Nepali)"
             labelNp="गाउँ/टोल (नेपाली)"
-            value={draft.permanentAddress.villageToleNp}
+            value={permAddress.villageToleNp || ""}
             onChange={(val) => handleAddressChange("villageToleNp", val)}
             validateNepali={true}
           />
           <TextInput
             label="Village/Tole (English)"
             labelNp="गाउँ/टोल (English)"
-            value={draft.permanentAddress.villageToleEn}
+            value={permAddress.villageToleEn || ""}
             onChange={(val) => handleAddressChange("villageToleEn", val)}
           />
         </div>
@@ -263,45 +271,45 @@ export default function ContactDetailsTab() {
               <SelectInput
                 label="Province"
                 labelNp="प्रदेश"
-                value={additional.temporaryAddress.province}
+                value={tempAddress.province || ""}
                 onChange={(val) => handleTempAddressChange("province", val)}
                 options={PROVINCE_OPTIONS}
               />
               <SelectInput
                 label="District"
                 labelNp="जिल्ला"
-                value={additional.temporaryAddress.district}
+                value={tempAddress.district || ""}
                 onChange={(val) => handleTempAddressChange("district", val)}
                 options={[{val: "", text: "-- Select / छान्नुहोस् --"}, ...tempDistricts]}
-                disabled={!additional.temporaryAddress.province}
+                disabled={!tempAddress.province}
               />
               <SelectInput
                 label="Local Level"
                 labelNp="स्थानीय तह"
-                value={additional.temporaryAddress.localLevel}
+                value={tempAddress.localLevel || ""}
                 onChange={(val) => handleTempAddressChange("localLevel", val)}
                 options={[{val: "", text: "-- Select / छान्नुहोस् --"}, ...tempLocalLevels]}
-                disabled={!additional.temporaryAddress.district}
+                disabled={!tempAddress.district}
               />
             </div>
             <div className="form-grid form-grid--3col fade-in" style={{ marginTop: "1rem" }}>
               <TextInput
                 label="Ward No."
                 labelNp="वडा नं."
-                value={additional.temporaryAddress.wardNo}
+                value={tempAddress.wardNo || ""}
                 onChange={(val) => handleTempAddressChange("wardNo", val)}
               />
               <TextInput
                 label="Village/Tole (Nepali)"
                 labelNp="गाउँ/टोल (नेपाली)"
-                value={additional.temporaryAddress.villageToleNp}
+                value={tempAddress.villageToleNp || ""}
                 onChange={(val) => handleTempAddressChange("villageToleNp", val)}
                 validateNepali={true}
               />
               <TextInput
                 label="Village/Tole (English)"
                 labelNp="गाउँ/टोल (English)"
-                value={additional.temporaryAddress.villageToleEn}
+                value={tempAddress.villageToleEn || ""}
                 onChange={(val) => handleTempAddressChange("villageToleEn", val)}
               />
             </div>
