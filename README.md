@@ -1,98 +1,179 @@
-# 🇳🇵 Smart NID Nepal — स्मार्ट दर्ता
+<div align="center">
+  <h1>🇳🇵 Smart NID Nepal — स्मार्ट दर्ता</h1>
+  <p><strong>AI-powered National ID (NID) pre-enrollment assistant for Nepal</strong></p>
 
-> 🚧 **Work in Progress / Under Construction** 🚧  
-> *This project is currently under active development. Features, UI, and APIs are subject to change.*
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+  [![Vite](https://img.shields.io/badge/Vite-5.0-purple.svg)](https://vitejs.dev/)
+  [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-green.svg)](https://developer.chrome.com/docs/extensions/)
+  
+  > 🚧 **Work in Progress / Under Construction** 🚧  
+  > *This project is currently under active development. Features, UI, and APIs are subject to change.*
+</div>
 
-**Smart NID Nepal** is an AI-powered National ID (NID) pre-enrollment assistant designed to streamline the complex citizenship registration process in Nepal. 
+<br />
 
-By leveraging the cutting-edge Google Gemini Vision API, this application completely automates data entry. Users simply upload a photo of their physical Nepali Citizenship Certificate (नागरिकता प्रमाणपत्र), and the AI instantly reads, translates, and extracts all the necessary fields (both in Nepali and English) to pre-fill the official NID enrollment form.
+## 📖 Overview
 
-### Key Features:
-- **Instant OCR Extraction**: Accurately extracts complex bilingual data (Devanagari and Latin) directly from citizenship cards.
-- **Smart Data Conversion**: Automatically converts dates from Bikram Sambat (BS) to Anno Domini (AD).
-- **Premium User Interface**: A beautifully crafted, responsive Light Mode UI that feels official and trustworthy.
-- **Privacy First**: Built as a secure prototype where image processing happens temporarily in memory—no files or personal data are ever persisted or logged.
+**Smart NID Nepal** is an AI-powered browser extension and web application designed to streamline the complex citizenship registration process for the National ID in Nepal.
 
-## Quick Start
+By leveraging the cutting-edge **Google Gemini Vision API**, this application completely automates the tedious data entry process. Users simply upload a photo of their physical Nepali Citizenship Certificate (नागरिकता प्रमाणपत्र), and the AI instantly reads, translates, and extracts all the necessary fields (both in Nepali and English) to automatically pre-fill the official Department of National ID and Civil Registration (DONIDCR) enrollment form.
 
-### 1. Set up your API key
+## ✨ Key Features
 
-```bash
-# In the server directory
-cp .env.example .env
-# Edit .env and add your Gemini API key from https://aistudio.google.com/apikey
+- **Instant OCR Extraction:** Accurately extracts complex bilingual data (Devanagari and Latin) directly from citizenship cards.
+- **Automated Form Injection:** A companion Chrome Extension that automatically injects the extracted data directly into the official government portal.
+- **Smart Data Conversion:** Automatically converts dates from Bikram Sambat (BS) to Anno Domini (AD) and handles location mappings seamlessly.
+- **Premium User Interface:** A beautifully crafted, responsive Light Mode UI built with Tailwind CSS that feels official and trustworthy.
+- **Privacy First:** Built as a secure architecture where image processing happens temporarily in memory. **No files or personal data are ever persisted or logged.**
+
+---
+
+## 🛠️ Tech Stack & Architecture
+
+This project is built using a modern, scalable monorepo-style structure consisting of three main layers:
+
+| Layer | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend Client** | React 19, Vite, TypeScript, Tailwind CSS v4, Zustand | The primary user interface for uploading and verifying the extracted data. |
+| **Backend API** | Node.js, Express, TypeScript, Google Gemini (2.5 Flash) | Handles secure communication with the Gemini Vision API for advanced OCR extraction. |
+| **Browser Extension** | JavaScript (Manifest V3) | A Chrome Extension that acts as a bridge between the Frontend Client and the DONIDCR web portal for auto-filling forms. |
+
+---
+
+## 📂 Project Structure
+
+```text
+nid auto/
+├── client/              # React frontend application
+│   ├── src/
+│   │   ├── components/  # Reusable UI components (DropZone, JsonViewer, Tabs)
+│   │   ├── pages/       # Application views (UploadPage)
+│   │   ├── store/       # Zustand state management
+│   │   └── utils/       # Helpers for validation and location parsing
+│
+├── server/              # Express backend application
+│   ├── src/
+│   │   ├── ai/          # Gemini API integration & extraction logic
+│   │   ├── prompts/     # Highly-tuned system prompts for OCR
+│   │   └── routes/      # API endpoints
+│
+├── extension/           # Chrome Extension
+│   ├── icons/           # Extension assets
+│   ├── background.js    # Service worker
+│   ├── content-app.js   # Content script for the frontend client
+│   ├── content-donidcr.js # Content script for the government portal
+│   └── manifest.json    # Extension configuration
+│
+└── README.md            # You are here!
 ```
 
-### 2. Install dependencies
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/en/) (v18 or higher)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- A **Google Gemini API Key** (Get one from [Google AI Studio](https://aistudio.google.com/apikey))
+
+### 1. Setup Environment Variables
+
+Navigate to the `server` directory and set up your environment variables:
 
 ```bash
-# Server
+cd server
+cp .env.example .env
+```
+*Edit the `.env` file and insert your Gemini API Key.*
+
+### 2. Install Dependencies
+
+Install the necessary packages for both the server and the client:
+
+```bash
+# Install Server dependencies
 cd server
 npm install
 
-# Client
+# Install Client dependencies
 cd ../client
 npm install
 ```
 
-### 3. Start both servers
+### 3. Run the Development Servers
 
+You will need two terminal windows to run both the backend and frontend simultaneously.
+
+**Terminal 1 (Backend API):**
 ```bash
-# Terminal 1 — Server (port 3001)
 cd server
 npm run dev
+# Runs on http://localhost:3001
+```
 
-# Terminal 2 — Client (port 5173)
+**Terminal 2 (Frontend Client):**
+```bash
 cd client
 npm run dev
+# Runs on http://localhost:5173
 ```
 
-### 4. Open in browser
+### 4. Install the Chrome Extension
 
-Navigate to [http://localhost:5173](http://localhost:5173)
+To enable the auto-fill capabilities on the official portal, you must load the unpacked extension in Chrome:
 
-## Tech Stack
+1. Open Google Chrome and navigate to `chrome://extensions/`.
+2. Enable **Developer mode** (toggle in the top right corner).
+3. Click **Load unpacked** in the top left.
+4. Select the `extension` folder located in this repository.
 
-| Layer     | Tech                                |
-| --------- | ----------------------------------- |
-| Frontend  | React 19 + Vite + TypeScript        |
-| Styling   | Tailwind CSS v4                     |
-| State     | Zustand                             |
-| Backend   | Express + TypeScript                |
-| AI        | Google Gemini (gemini-2.5-flash)    |
-| OCR       | Gemini Vision API                   |
+---
 
-## Privacy Policy
-You can view our privacy policy here: [Privacy Policy](extension/privacy_policy.md) or on our website at [https://aadarshapandit.com.np](https://aadarshapandit.com.np).
+## 🎯 Usage Guide
 
-## Project Structure
+1. Ensure your local client, server, and the Chrome extension are running.
+2. Open the Smart NID Web Client at [http://localhost:5173](http://localhost:5173).
+3. Upload a clear image of a Nepali Citizenship Certificate.
+4. Review the extracted data on the dashboard and make any manual corrections if necessary.
+5. Click on the extension or the action button to automatically inject the validated data into the DONIDCR portal.
 
-```
-nid auto/
-├── client/          # React frontend
-│   ├── src/
-│   │   ├── components/   # DropZone, JsonViewer
-│   │   ├── pages/        # UploadPage
-│   │   ├── store/        # Zustand enrollment store
-│   │   └── types/        # Shared TypeScript types
-│   └── ...
-│
-├── server/          # Express backend
-│   ├── src/
-│   │   ├── ai/           # Gemini API integration
-│   │   ├── prompts/      # System prompts for AI
-│   │   ├── routes/       # API endpoints
-│   │   └── types/        # Shared types
-│   └── ...
-│
-└── README.md
-```
+---
 
-## Phases
+## 🔒 Privacy & Security
 
-- [x] **Phase 1** — Project scaffold + citizenship OCR
-- [ ] **Phase 2** — Multi-tab enrollment form
-- [ ] **Phase 3** — AI review gate
-- [ ] **Phase 4** — AI appointment suggestion
-- [ ] **Phase 5** — Submission + receipt
-- [ ] **Phase 6** — Polish & accessibility
+We take data privacy very seriously. 
+- All image processing is done in volatile memory.
+- We do not store, log, or share any personal identification details or images submitted to the system. 
+- Read our full Privacy Policy [here](extension/privacy_policy.md) or visit [aadarshapandit.com.np](https://aadarshapandit.com.np).
+
+---
+
+## 🗺️ Roadmap / Phases
+
+- [x] **Phase 1:** Project scaffold + core citizenship OCR extraction.
+- [x] **Phase 2:** Multi-tab enrollment form and validation.
+- [x] **Phase 3:** Chrome extension integration for DOM injection.
+- [ ] **Phase 4:** AI review gate & human-in-the-loop verification.
+- [ ] **Phase 5:** AI appointment suggestion & scheduling.
+- [ ] **Phase 6:** Polish, accessibility improvements, and deployment.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! If you'd like to improve the OCR accuracy, enhance the UI, or expand the capabilities of the extension, feel free to open a pull request or submit an issue.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+<div align="center">
+  <p>Built with ❤️ for a smarter Nepal.</p>
+</div>
