@@ -42,6 +42,19 @@ This project is built using a modern, scalable monorepo-style structure consisti
 
 ---
 
+## 🏗️ Extension Architecture (How it Works)
+
+The Smart NID Helper browser extension serves as a vital bridge between our modern React application and the legacy government portal. It operates using the following data flow:
+
+1. **Content Script (Client-Side):** `content-app.js` runs on our React client (`localhost:*` or production domain). It acts as a listener for custom events dispatched by the React app when a user successfully extracts and verifies citizenship data.
+2. **Background Service Worker:** Once data is captured by the client content script, it's sent to `background.js` (the central router of the extension) using Chrome's message passing API (`chrome.runtime.sendMessage`). The background script securely stores this data temporarily in local storage.
+3. **Target Content Script:** `content-donidcr.js` is injected exclusively into the official DONIDCR enrollment portal (`enrollment.donidcr.gov.np`). 
+4. **DOM Injection & Auto-Fill:** When the user navigates to the government portal, they can use the extension popup to trigger the fill process. `content-donidcr.js` fetches the pending data from storage and maps the extracted JSON fields directly to the specific HTML input elements on the government form. It automatically fills them out and triggers the necessary DOM change/input events so the site's internal validation registers the data correctly.
+
+This decoupled architecture ensures that our advanced React UI and Gemini OCR logic remain entirely independent of the government's website infrastructure, interacting strictly through standard browser extension APIs.
+
+---
+
 ## 📂 Project Structure
 
 ```text
