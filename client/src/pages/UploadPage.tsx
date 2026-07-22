@@ -4,7 +4,7 @@ import FormTabs from "../components/FormTabs";
 import { useEnrollmentStore, ENROLLMENT_STEPS } from "../store/enrollmentStore";
 import type { ExtractResponse } from "../types/extraction";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3001";
+const API_BASE = import.meta.env.VITE_API_BASE || "";
 
 export default function UploadPage() {
   const {

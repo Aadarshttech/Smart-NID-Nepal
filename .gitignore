@@ -27,7 +27,12 @@ graphify-out/
 CLAUDE.md
 
 # Scratch and temp files
-scratch_family_tab.tsx
-scratch_generateAutoFill.ts
-scratch_parse_ids.js
-docs/New Text Document.txt
+scratch_*
+temp_*
+html elements.txt
+*.zip
+error-payload.json
+
+# Assets (If they shouldn't be in the repo, otherwise remove this)
+# Uncomment the following line if you don't want screenshots in the repo:
+# store_screenshots*/

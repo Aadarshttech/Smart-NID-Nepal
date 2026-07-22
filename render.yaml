@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: smart-nid-server
+    env: node
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: GEMINI_API_KEY
+        sync: false # User must provide this in the Render dashboard
