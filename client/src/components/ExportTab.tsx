@@ -265,7 +265,7 @@ export default function ExportTab() {
                     Get Chrome Extension
                   </a>
                   <a 
-                    href="#" 
+                    href="https://microsoftedge.microsoft.com/addons/detail/smart-nid-helper/gakoiaflpofkoadcmbdeejpmhgnapbfm" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     style={{

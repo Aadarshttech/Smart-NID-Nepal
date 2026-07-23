@@ -149,7 +149,24 @@ export default function Dashboard({ onNewEnrollment, onEditProfile }: { onNewEnr
           ) : error ? (
             <div style={{ textAlign: "center", padding: "3rem", color: "#ef4444", backgroundColor: "#fef2f2", borderRadius: "12px", border: "1px solid #fecaca" }}>
               <p>{error}</p>
-              <p style={{ fontSize: "0.9rem", marginTop: "0.5rem" }}>Please make sure the Smart NID extension is installed and enabled.</p>
+              <p style={{ fontSize: "0.9rem", marginTop: "0.5rem", marginBottom: "1rem" }}>Please make sure the Smart NID extension is installed and enabled.</p>
+              <a 
+                href="https://microsoftedge.microsoft.com/addons/detail/smart-nid-helper/gakoiaflpofkoadcmbdeejpmhgnapbfm" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-block",
+                  padding: "0.6rem 1.25rem",
+                  background: "#0f766e",
+                  color: "white",
+                  textDecoration: "none",
+                  fontWeight: 600,
+                  borderRadius: "8px",
+                  fontSize: "0.9rem",
+                }}
+              >
+                Get Edge Add-on
+              </a>
             </div>
           ) : profiles.length === 0 ? (
             <div style={{ textAlign: "center", padding: "4rem 2rem", color: "#64748b", backgroundColor: "#f8fafc", borderRadius: "12px", border: "1px dashed #cbd5e1" }}>
