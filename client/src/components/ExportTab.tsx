@@ -243,46 +243,36 @@ export default function ExportTab() {
                   <li>🔒 <strong>Secure Transfer:</strong> Data moves directly into the portal safely.</li>
                   <li>⚡ <strong>Instant Fill:</strong> Adds a magic "Auto-Fill" button directly on the government site.</li>
                 </ul>
-                <div style={{ display: "flex", gap: "1rem" }}>
-                  <a 
-                    href="#" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    style={{
-                      display: "inline-block",
-                      padding: "0.6rem 1.25rem",
-                      background: "#2563eb",
-                      color: "white",
-                      textDecoration: "none",
-                      fontWeight: 600,
-                      borderRadius: "8px",
-                      fontSize: "0.9rem",
-                      transition: "background 0.2s"
-                    }}
-                    onMouseOver={(e) => e.currentTarget.style.background = "#1d4ed8"}
-                    onMouseOut={(e) => e.currentTarget.style.background = "#2563eb"}
-                  >
-                    Get Chrome Extension
-                  </a>
+                <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
                   <a 
                     href="https://microsoftedge.microsoft.com/addons/detail/smart-nid-helper/gakoiaflpofkoadcmbdeejpmhgnapbfm" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     style={{
-                      display: "inline-block",
-                      padding: "0.6rem 1.25rem",
-                      background: "#0f766e",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.6rem",
+                      padding: "0.75rem 1.5rem",
+                      background: "linear-gradient(135deg, #0ea5e9, #2563eb)",
                       color: "white",
                       textDecoration: "none",
-                      fontWeight: 600,
-                      borderRadius: "8px",
-                      fontSize: "0.9rem",
-                      transition: "background 0.2s"
+                      fontWeight: 700,
+                      borderRadius: "999px",
+                      fontSize: "1rem",
+                      boxShadow: "0 4px 15px rgba(37, 99, 235, 0.3)",
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
-                    onMouseOver={(e) => e.currentTarget.style.background = "#115e59"}
-                    onMouseOut={(e) => e.currentTarget.style.background = "#0f766e"}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = "translateY(-2px) scale(1.02)";
+                      e.currentTarget.style.boxShadow = "0 8px 25px rgba(37, 99, 235, 0.5)";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = "translateY(0) scale(1)";
+                      e.currentTarget.style.boxShadow = "0 4px 15px rgba(37, 99, 235, 0.3)";
+                    }}
                   >
-                    Get Edge Add-on
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Install Extension
                   </a>
                 </div>
               </div>
