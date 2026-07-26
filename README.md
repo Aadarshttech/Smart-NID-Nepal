@@ -6,7 +6,7 @@
   [![React](https://img.shields.io/badge/React-19-blue.svg)](https://reactjs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
   [![Vite](https://img.shields.io/badge/Vite-5.0-purple.svg)](https://vitejs.dev/)
-  [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-green.svg)](https://developer.chrome.com/docs/extensions/)
+  [![Edge Add-on](https://img.shields.io/badge/Edge_Add--on-0078D7?style=flat&logo=microsoft-edge&logoColor=white)](https://microsoftedge.microsoft.com/addons/detail/smart-nid-helper/gakoiaflpofkoadcmbdeejpmhgnapbfm)
   
   > 🚧 **Work in Progress / Under Construction** 🚧  
   > *This project is currently under active development. Features, UI, and APIs are subject to change.*
@@ -134,14 +134,13 @@ npm run dev
 # Runs on http://localhost:5173
 ```
 
-### 4. Install the Chrome Extension
+### 4. Install the Extension
 
-To enable the auto-fill capabilities on the official portal, you must load the unpacked extension in Chrome:
+The easiest way to get started is by installing the official browser extension, which adds a magic "Auto-Fill" button directly onto the government site. 
 
-1. Open Google Chrome and navigate to `chrome://extensions/`.
-2. Enable **Developer mode** (toggle in the top right corner).
-3. Click **Load unpacked** in the top left.
-4. Select the `extension` folder located in this repository.
+👉 **[Download the Official Smart NID Helper Extension](https://microsoftedge.microsoft.com/addons/detail/smart-nid-helper/gakoiaflpofkoadcmbdeejpmhgnapbfm)** (Compatible with Microsoft Edge and Google Chrome)
+
+*(Alternatively, developers can still install the extension locally by loading the unpacked `extension` folder in developer mode).*
 
 ---
 
