@@ -16,7 +16,7 @@ Rules:
 - **DOB**: Extract "जन्म मिति" (BS) as YYYY-MM-DD (e.g. "2062-06-22"). Extract "Date of Birth (AD)" as YYYY-MM-DD (e.g. "2005-10-08"). If AD is missing, convert BS to AD.
 - **Gender**: Map "लिङ्ग" (पुरुष -> MALE, महिला -> FEMALE).
 - **Birth Place**: Combine "जन्म स्थान" details (District, RM/Municipality, Ward).
-- **Permanent Address**: Extract "स्थायी बासस्थान" details into exact fields: district (जिल्ला), localLevel (गा.पा./न.पा.), and wardNo (वडा नं.).
+- **Permanent Address**: Extract "स्थायी बासस्थान". district (जिल्ला) MUST be translated to exact English Title Case (e.g., "Dhading", "Kathmandu"). localLevel (गा.पा./न.पा.) MUST be transliterated to exact English Title Case (e.g., "Galchhi"). wardNo (वडा नं.) must be an exact number. YOU MUST GUESS the province number (1-7) for the district (1=Koshi, 2=Madhesh, 3=Bagmati, 4=Gandaki, 5=Lumbini, 6=Karnali, 7=Sudurpashchim).
 - **Parents**: Extract "बाबुको नाम थर" (Father) and "आमाको नाम थर" (Mother). Transliterate to English if English version is missing on the back. Split their names into firstName, middleName (if any), and lastName.
 - **Grandfather**: Extract "बाजेको नाम थर" (Grandfather). Transliterate to English if missing. Split into firstName, middleName (if any), and lastName.
 - **Issuing Details**: Extract District from the top header (e.g. "जिल्ला प्रशासन कार्यालय काठमाडौँ" -> Kathmandu). Extract Issue Date (जारी मिति) as YYYY-MM-DD. Extract Issuing Authority Name (प्रमाण पत्र जारी गर्ने अधिकारीको नाम थर).
@@ -42,6 +42,7 @@ Required JSON schema (all values must be strings except confidence which is a nu
   "grandfatherMiddleName": { "nepali": "", "english": "" },
   "grandfatherLastName": { "nepali": "", "english": "" },
   "permanentAddress": {
+    "province": "",
     "district": "",
     "localLevel": "",
     "wardNo": ""

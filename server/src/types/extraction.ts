@@ -8,6 +8,7 @@ export interface NameField {
 }
 
 export interface AddressField {
+  province?: string;
   district: string;
   localLevel: string;
   wardNo: string;
