@@ -29,7 +29,7 @@
     {
       "matches": [
         "https://smartnid.aadarshapandit.com.np/*",
-        "https://smart-nid-nepal.vercel.app/*",
+        "https://*.vercel.app/*",
         "http://localhost:*/*",
         "http://127.0.0.1:*/*"
       ],
