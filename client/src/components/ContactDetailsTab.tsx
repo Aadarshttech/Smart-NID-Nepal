@@ -269,13 +269,7 @@ export default function ContactDetailsTab() {
             <input
               type="checkbox"
               checked={additional.temporaryAddressSameAsPermanent}
-              onChange={(e) => {
-                const checked = e.target.checked;
-                updateAdditionalField("temporaryAddressSameAsPermanent", checked);
-                if (!checked) {
-                  updateAdditionalField("temporaryAddress", { ...permAddress });
-                }
-              }}
+              onChange={(e) => updateAdditionalField("temporaryAddressSameAsPermanent", e.target.checked)}
               style={{ width: "18px", height: "18px", accentColor: "var(--crimson)" }}
             />
             <span>स्थायी ठेगाना नै अस्थायी ठेगाना हो / Same as Permanent Address</span>
