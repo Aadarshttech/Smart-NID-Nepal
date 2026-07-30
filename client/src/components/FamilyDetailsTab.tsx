@@ -332,7 +332,15 @@ export default function FamilyDetailsTab() {
     (draft.motherFirstName?.nepali || "").trim() !== "" &&
     (draft.motherFirstName?.english || "").trim() !== "" &&
     (draft.motherLastName?.nepali || "").trim() !== "" &&
-    (draft.motherLastName?.english || "").trim() !== "";
+    (draft.motherLastName?.english || "").trim() !== "" &&
+    (draft.grandfatherFirstName?.nepali || "").trim() !== "" &&
+    (draft.grandfatherFirstName?.english || "").trim() !== "" &&
+    (draft.grandfatherLastName?.nepali || "").trim() !== "" &&
+    (draft.grandfatherLastName?.english || "").trim() !== "" &&
+    (additional.grandmotherFirstName?.nepali || "").trim() !== "" &&
+    (additional.grandmotherFirstName?.english || "").trim() !== "" &&
+    (additional.grandmotherLastName?.nepali || "").trim() !== "" &&
+    (additional.grandmotherLastName?.english || "").trim() !== "";
 
   const handleNextClick = () => {
     if (!canProceed) {
@@ -442,8 +450,8 @@ export default function FamilyDetailsTab() {
         </h4>
         <div className="form-grid">
           <NameInput
-            label="Grandfather First Name"
-            labelNp="बाजेको पहिलो नाम"
+            label="Grandfather First Name*"
+            labelNp="बाजेको पहिलो नाम*"
             value={draft.grandfatherFirstName}
             onChange={handleNameChange("grandfatherFirstName")}
           />
@@ -454,8 +462,8 @@ export default function FamilyDetailsTab() {
             onChange={handleNameChange("grandfatherMiddleName")}
           />
           <NameInput
-            label="Grandfather Last Name"
-            labelNp="बाजेको थर"
+            label="Grandfather Last Name*"
+            labelNp="बाजेको थर*"
             value={draft.grandfatherLastName}
             onChange={handleNameChange("grandfatherLastName")}
           />
@@ -471,8 +479,8 @@ export default function FamilyDetailsTab() {
         </h4>
         <div className="form-grid">
           <NameInput
-            label="Grandmother First Name"
-            labelNp="बज्यैको पहिलो नाम"
+            label="Grandmother First Name*"
+            labelNp="बज्यैको पहिलो नाम*"
             value={additional.grandmotherFirstName}
             onChange={handleAdditionalNameChange("grandmotherFirstName")}
           />
@@ -483,8 +491,8 @@ export default function FamilyDetailsTab() {
             onChange={handleAdditionalNameChange("grandmotherMiddleName")}
           />
           <NameInput
-            label="Grandmother Last Name"
-            labelNp="बज्यैको थर"
+            label="Grandmother Last Name*"
+            labelNp="बज्यैको थर*"
             value={additional.grandmotherLastName}
             onChange={handleAdditionalNameChange("grandmotherLastName")}
           />
@@ -551,7 +559,7 @@ export default function FamilyDetailsTab() {
       {showErrors && !canProceed && (
         <div className="form-error-banner bounce-in">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-          <span>Please fill in the First and Last Names for both Father and Mother (Nepali & English) (*) to continue.</span>
+          <span>Please fill in the First and Last Names for Father, Mother, Grandfather, and Grandmother (Nepali & English) (*) to continue.</span>
         </div>
       )}
     </div>
