@@ -343,8 +343,8 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   lines.push(`  setText('fatherMiddleName', ${JSON.stringify(data.fatherMiddleName?.english || "")});`);
   lines.push(`  setText('fatherLastName', ${JSON.stringify(data.fatherLastName?.english || "")});`);
   lines.push(`  setText('fatherNinLoc', ${JSON.stringify(additional.fatherDetails?.nin || "")});`);
-  lines.push(`  setText('fatherNationalityLoc', ${JSON.stringify((additional.fatherDetails?.nationality || 'NEPALESE') === 'NEPALESE' ? 'नेपाली' : additional.fatherDetails?.nationality)});`);
-  lines.push(`  setSelect('fatherNationality', ${JSON.stringify(additional.fatherDetails?.nationality || 'NEPALESE')});`);
+  lines.push(`  setText('fatherNationalityLoc', ${JSON.stringify((additional.fatherDetails?.nationality || '') === 'NEPALESE' ? 'नेपाली' : (additional.fatherDetails?.nationality || ''))});`);
+  lines.push(`  setSelect('fatherNationality', ${JSON.stringify(additional.fatherDetails?.nationality || '')});`);
 
   // Mother
   lines.push(`  setText('motherFirstNameLoc', ${JSON.stringify(data.motherFirstName?.nepali || "")});`);
@@ -354,8 +354,8 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   lines.push(`  setText('motherMiddleName', ${JSON.stringify(data.motherMiddleName?.english || "")});`);
   lines.push(`  setText('motherLastName', ${JSON.stringify(data.motherLastName?.english || "")});`);
   lines.push(`  setText('motherNinLoc', ${JSON.stringify(additional.motherDetails?.nin || "")});`);
-  lines.push(`  setText('motherNationalityLoc', ${JSON.stringify((additional.motherDetails?.nationality || 'NEPALESE') === 'NEPALESE' ? 'नेपाली' : additional.motherDetails?.nationality)});`);
-  lines.push(`  setSelect('motherNationality', ${JSON.stringify(additional.motherDetails?.nationality || 'NEPALESE')});`);
+  lines.push(`  setText('motherNationalityLoc', ${JSON.stringify((additional.motherDetails?.nationality || '') === 'NEPALESE' ? 'नेपाली' : (additional.motherDetails?.nationality || ''))});`);
+  lines.push(`  setSelect('motherNationality', ${JSON.stringify(additional.motherDetails?.nationality || '')});`);
 
   // Grandfather
   lines.push(`  setText('grandFatherFirstNameLoc', ${JSON.stringify(data.grandfatherFirstName?.nepali || "")});`);
@@ -365,8 +365,8 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   lines.push(`  setText('grandFatherMiddleName', ${JSON.stringify(data.grandfatherMiddleName?.english || "")});`);
   lines.push(`  setText('grandFatherLastName', ${JSON.stringify(data.grandfatherLastName?.english || "")});`);
   lines.push(`  setText('grandFatherNinLoc', ${JSON.stringify(additional.grandfatherDetails?.nin || "")});`);
-  lines.push(`  setText('grandFatherNationalityLoc', ${JSON.stringify((additional.grandfatherDetails?.nationality || 'NEPALESE') === 'NEPALESE' ? 'नेपाली' : additional.grandfatherDetails?.nationality)});`);
-  lines.push(`  setSelect('grandFatherNationality', ${JSON.stringify(additional.grandfatherDetails?.nationality || 'NEPALESE')});`);
+  lines.push(`  setText('grandFatherNationalityLoc', ${JSON.stringify((additional.grandfatherDetails?.nationality || '') === 'NEPALESE' ? 'नेपाली' : (additional.grandfatherDetails?.nationality || ''))});`);
+  lines.push(`  setSelect('grandFatherNationality', ${JSON.stringify(additional.grandfatherDetails?.nationality || '')});`);
 
   // Grandmother
   lines.push(`  setText('grandMotherFirstNameLoc', ${JSON.stringify(additional.grandmotherFirstName?.nepali || "")});`);
@@ -376,8 +376,8 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   lines.push(`  setText('grandMotherMiddleName', ${JSON.stringify(additional.grandmotherMiddleName?.english || "")});`);
   lines.push(`  setText('grandMotherLastName', ${JSON.stringify(additional.grandmotherLastName?.english || "")});`);
   lines.push(`  setText('grandMotherNinLoc', ${JSON.stringify(additional.grandmotherDetails?.nin || "")});`);
-  lines.push(`  setText('grandMotherNationalityLoc', ${JSON.stringify((additional.grandmotherDetails?.nationality || 'NEPALESE') === 'NEPALESE' ? 'नेपाली' : additional.grandmotherDetails?.nationality)});`);
-  lines.push(`  setSelect('grandMotherNationality', ${JSON.stringify(additional.grandmotherDetails?.nationality || 'NEPALESE')});`);
+  lines.push(`  setText('grandMotherNationalityLoc', ${JSON.stringify((additional.grandmotherDetails?.nationality || '') === 'NEPALESE' ? 'नेपाली' : (additional.grandmotherDetails?.nationality || ''))});`);
+  lines.push(`  setSelect('grandMotherNationality', ${JSON.stringify(additional.grandmotherDetails?.nationality || '')});`);
 
   // Spouse (if married)
   if (additional.maritalStatus === "1") {
@@ -526,7 +526,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('fatherMiddleName', data.fatherMiddleName?.english?.toUpperCase());
   pushText('fatherLastName', data.fatherLastName?.english?.toUpperCase());
   pushText('fatherNinLoc', englishToNepaliDigits(additional.fatherDetails?.nin || ""));
-  const fNat = additional.fatherDetails?.nationality || 'NEPALESE';
+  const fNat = additional.fatherDetails?.nationality || '';
   pushText('fatherNationalityLoc', fNat === 'NEPALESE' ? 'नेपाली' : fNat);
   pushText('fatherNationality', fNat);
 
@@ -537,7 +537,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('motherMiddleName', data.motherMiddleName?.english?.toUpperCase());
   pushText('motherLastName', data.motherLastName?.english?.toUpperCase());
   pushText('motherNinLoc', englishToNepaliDigits(additional.motherDetails?.nin || ""));
-  const mNat = additional.motherDetails?.nationality || 'NEPALESE';
+  const mNat = additional.motherDetails?.nationality || '';
   pushText('motherNationalityLoc', mNat === 'NEPALESE' ? 'नेपाली' : mNat);
   pushText('motherNationality', mNat);
 
@@ -548,7 +548,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('grandFatherMiddleName', data.grandfatherMiddleName?.english?.toUpperCase());
   pushText('grandFatherLastName', data.grandfatherLastName?.english?.toUpperCase());
   pushText('grandFatherNinLoc', englishToNepaliDigits(additional.grandfatherDetails?.nin || ""));
-  const gfNat = additional.grandfatherDetails?.nationality || 'NEPALESE';
+  const gfNat = additional.grandfatherDetails?.nationality || '';
   pushText('grandFatherNationalityLoc', gfNat === 'NEPALESE' ? 'नेपाली' : gfNat);
   pushText('grandFatherNationality', gfNat);
 
@@ -559,7 +559,7 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   pushText('grandMotherMiddleName', additional.grandmotherMiddleName?.english?.toUpperCase());
   pushText('grandMotherLastName', additional.grandmotherLastName?.english?.toUpperCase());
   pushText('grandMotherNinLoc', englishToNepaliDigits(additional.grandmotherDetails?.nin || ""));
-  const gmNat = additional.grandmotherDetails?.nationality || 'NEPALESE';
+  const gmNat = additional.grandmotherDetails?.nationality || '';
   pushText('grandMotherNationalityLoc', gmNat === 'NEPALESE' ? 'नेपाली' : gmNat);
   pushText('grandMotherNationality', gmNat);
 
