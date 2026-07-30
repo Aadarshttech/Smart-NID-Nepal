@@ -273,7 +273,7 @@ function ExpandableOtherDetails({
           <TextInput
             label="Nationality"
             labelNp="राष्ट्रियता"
-            value={details?.nationality || "NEPALESE"}
+            value={details?.nationality || ""}
             onChange={(val) => onChange("nationality", val)}
           />
         </div>
