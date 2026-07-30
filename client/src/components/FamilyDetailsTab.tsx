@@ -300,13 +300,13 @@ export default function FamilyDetailsTab() {
 
   const handleDetailsChange = (field: keyof AdditionalFields, subfield: keyof FamilyMemberDetails, val: string | boolean) => {
     const defaultAddress = { province: "", district: "", localLevel: "", wardNo: "", villageToleNp: "", villageToleEn: "" };
-    const details = (additional[field] || { nin: "", nationality: "", addressSameAsApplicant: false, address: defaultAddress }) as FamilyMemberDetails;
+    const details = (additional[field] || { nin: "", nationality: "", addressSameAsApplicant: true, address: defaultAddress }) as FamilyMemberDetails;
     updateAdditionalField(field, { ...details, [subfield]: val });
   };
 
   const handleAddressChange = (field: keyof AdditionalFields, subfield: keyof AddressField, val: string) => {
     const defaultAddress = { province: "", district: "", localLevel: "", wardNo: "", villageToleNp: "", villageToleEn: "" };
-    const details = (additional[field] || { nin: "", nationality: "", addressSameAsApplicant: false, address: defaultAddress }) as FamilyMemberDetails;
+    const details = (additional[field] || { nin: "", nationality: "", addressSameAsApplicant: true, address: defaultAddress }) as FamilyMemberDetails;
     const currentAddress = details.address || defaultAddress;
     
     const updatedAddress = { ...currentAddress, [subfield]: val };
@@ -393,7 +393,7 @@ export default function FamilyDetailsTab() {
           title="Father's Permanent Address"
           titleNp="बाबुको स्थायी ठेगाना"
           address={additional.fatherDetails?.address || {} as any}
-          sameAsApplicant={additional.fatherDetails?.addressSameAsApplicant ?? false}
+          sameAsApplicant={additional.fatherDetails?.addressSameAsApplicant ?? true}
           onSameAsApplicantChange={(val) => handleDetailsChange("fatherDetails", "addressSameAsApplicant", val)}
           onAddressChange={(subField, val) => handleAddressChange("fatherDetails", subField, val)}
         />
@@ -430,7 +430,7 @@ export default function FamilyDetailsTab() {
           title="Mother's Permanent Address"
           titleNp="आमाको स्थायी ठेगाना"
           address={additional.motherDetails?.address || {} as any}
-          sameAsApplicant={additional.motherDetails?.addressSameAsApplicant ?? false}
+          sameAsApplicant={additional.motherDetails?.addressSameAsApplicant ?? true}
           onSameAsApplicantChange={(val) => handleDetailsChange("motherDetails", "addressSameAsApplicant", val)}
           onAddressChange={(subField, val) => handleAddressChange("motherDetails", subField, val)}
         />
@@ -535,7 +535,7 @@ export default function FamilyDetailsTab() {
               title="Spouse's Permanent Address"
               titleNp="पति/पत्नीको स्थायी ठेगाना"
               address={additional.spouseDetails?.address || {} as any}
-              sameAsApplicant={additional.spouseDetails?.addressSameAsApplicant ?? false}
+              sameAsApplicant={additional.spouseDetails?.addressSameAsApplicant ?? true}
               onSameAsApplicantChange={(val) => handleDetailsChange("spouseDetails", "addressSameAsApplicant", val)}
               onAddressChange={(subField, val) => handleAddressChange("spouseDetails", subField, val)}
             />

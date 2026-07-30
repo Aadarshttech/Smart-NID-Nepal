@@ -24,7 +24,7 @@ const DEFAULT_FAMILY_DETAILS = {
   ccNumber: "",
   nin: "",
   nationality: "",
-  addressSameAsApplicant: false,
+  addressSameAsApplicant: true,
   address: {
     province: "",
     district: "",
