@@ -12,6 +12,7 @@
   "dependencies": {
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-transliterate": "^1.1.9",
     "zustand": "^5.0.14"
   },
   "devDependencies": {

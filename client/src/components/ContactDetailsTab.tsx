@@ -4,6 +4,7 @@
  */
 
 import { useState } from "react";
+import NepaliTransliterateInput from "./NepaliTransliterateInput";
 import { useEnrollmentStore } from "../store/enrollmentStore";
 import type { AddressField } from "../types/extraction";
 import { PROVINCE_OPTIONS } from "../types/extraction";
@@ -32,14 +33,24 @@ function TextInput({
       <label className="form-field__label">
         {labelNp} / {label}
       </label>
-      <input
-        type="text"
-        className="form-field__input"
-        style={hasError ? { borderColor: '#ef4444' } : {}}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder || label}
-      />
+      {validateNepali ? (
+        <NepaliTransliterateInput
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder || label}
+          className="form-field__input"
+          style={hasError ? { borderColor: '#ef4444' } : {}}
+        />
+      ) : (
+        <input
+          type="text"
+          className="form-field__input"
+          style={hasError ? { borderColor: '#ef4444' } : {}}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder || label}
+        />
+      )}
       {hasError && (
         <div style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem' }}>
           ⚠️ English characters detected in Nepali field!
