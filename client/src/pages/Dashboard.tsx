@@ -91,7 +91,22 @@ export default function Dashboard({ onNewEnrollment, onEditProfile }: { onNewEnr
     const backupStr = localStorage.getItem(`smart_nid_backup_${draft.citizenshipNo}`);
     let backupAdditional = null;
     if (backupStr) {
-      try { backupAdditional = JSON.parse(backupStr); } catch (e) {}
+      try { 
+        backupAdditional = JSON.parse(backupStr);
+        // Migration: Fix bug where addressSameAsApplicant was saved as false by default
+        const fixAddressCopy = (details: any) => {
+          if (details && details.addressSameAsApplicant === false) {
+            if (!details.address?.province && !details.address?.district) {
+              details.addressSameAsApplicant = true;
+            }
+          }
+        };
+        fixAddressCopy(backupAdditional.fatherDetails);
+        fixAddressCopy(backupAdditional.motherDetails);
+        fixAddressCopy(backupAdditional.grandfatherDetails);
+        fixAddressCopy(backupAdditional.grandmotherDetails);
+        fixAddressCopy(backupAdditional.spouseDetails);
+      } catch (e) {}
     }
 
     const additional = backupAdditional || profile.additionalData || {
