@@ -1584,3 +1584,54 @@ details[open] > .form-sidebar__summary::before {
   color: #ef4444;
 }
 
+/* ── Transliteration Dropdown (react-transliterate) ── */
+.np-transliterate-container {
+  margin-top: 6px !important;
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0,0,0,0.02) !important;
+  padding: 0.35rem !important;
+  font-family: var(--font-nepali) !important;
+  font-size: 1.15rem !important;
+  overflow: hidden !important;
+  animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  z-index: 50 !important;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.np-transliterate-container li {
+  padding: 0.6rem 1rem !important;
+  cursor: pointer !important;
+  border-radius: var(--radius-sm) !important;
+  transition: all 0.15s ease !important;
+  color: var(--text-primary) !important;
+  margin-bottom: 2px !important;
+  font-weight: 500 !important;
+}
+
+.np-transliterate-container li:last-child {
+  margin-bottom: 0 !important;
+}
+
+.np-transliterate-container li:hover {
+  background-color: #f1f5f9 !important;
+  color: var(--nepal-blue) !important;
+}
+
+.np-transliterate-active,
+.np-transliterate-container li.np-transliterate-active {
+  background-color: #eff6ff !important;
+  color: var(--nepal-blue) !important;
+  font-weight: 700 !important;
+}
