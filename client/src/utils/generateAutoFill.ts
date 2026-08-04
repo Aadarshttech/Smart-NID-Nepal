@@ -347,6 +347,7 @@ export function generateAutoFillScript(data: ExtractionResult, additional: Addit
   lines.push(`  setSelect('fatherNationality', ${JSON.stringify(additional.fatherDetails?.nationality || '')});`);
 
   // Mother
+  lines.push(`  setSelect('motherStatus', ${JSON.stringify(additional.motherStatus || '1')});`);
   lines.push(`  setText('motherFirstNameLoc', ${JSON.stringify(data.motherFirstName?.nepali || "")});`);
   lines.push(`  setText('motherMiddleNameLoc', ${JSON.stringify(data.motherMiddleName?.nepali || "")});`);
   lines.push(`  setText('motherLastNameLoc', ${JSON.stringify(data.motherLastName?.nepali || "")});`);
@@ -494,6 +495,9 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   }
 
   // Father Address
+  if (additional.fatherStatus) {
+    instructions.push({ id: 'fatherStatus', type: 'select', value: additional.fatherStatus });
+  }
   const fatherCopy = additional.fatherDetails?.addressSameAsApplicant ?? true;
   instructions.push({ id: 'fatherAddressCopy', type: 'checkbox', value: fatherCopy.toString() });
   if (!fatherCopy) {
@@ -505,6 +509,9 @@ export function generateAutoFillInstructions(data: ExtractionResult, additional:
   }
 
   // Mother Address
+  if (additional.motherStatus) {
+    instructions.push({ id: 'motherStatus', type: 'select', value: additional.motherStatus });
+  }
   const motherCopy = additional.motherDetails?.addressSameAsApplicant ?? true;
   instructions.push({ id: 'motherAddressCopy', type: 'checkbox', value: motherCopy.toString() });
   if (!motherCopy) {
