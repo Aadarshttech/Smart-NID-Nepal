@@ -167,11 +167,15 @@ export default function ContactDetailsTab() {
     (permAddress.district || "").trim() !== "" &&
     (permAddress.localLevel || "").trim() !== "" &&
     (permAddress.wardNo || "").trim() !== "" &&
+    (permAddress.villageToleNp || "").trim() !== "" &&
+    (permAddress.villageToleEn || "").trim() !== "" &&
     (additional.temporaryAddressSameAsPermanent || (
       (tempAddress.province || "").trim() !== "" &&
       (tempAddress.district || "").trim() !== "" &&
       (tempAddress.localLevel || "").trim() !== "" &&
-      (tempAddress.wardNo || "").trim() !== ""
+      (tempAddress.wardNo || "").trim() !== "" &&
+      (tempAddress.villageToleNp || "").trim() !== "" &&
+      (tempAddress.villageToleEn || "").trim() !== ""
     ));
 
   const handleNextClick = () => {
@@ -250,16 +254,16 @@ export default function ContactDetailsTab() {
             onChange={(val) => handleAddressChange("wardNo", val)}
           />
           <TextInput
-            label="Village/Tole (Nepali)"
-            labelNp="गाउँ/टोल (नेपाली)"
+            label="Village/Tole (Nepali)*"
+            labelNp="गाउँ/टोल (नेपाली)*"
             value={permAddress.villageToleNp || ""}
             onChange={(val) => handleAddressChange("villageToleNp", val)}
             onBlur={() => handleAddressChange("villageToleNp", sanitizeNepaliName(permAddress.villageToleNp))}
             validateNepali={true}
           />
           <TextInput
-            label="Village/Tole (English)"
-            labelNp="गाउँ/टोल (English)"
+            label="Village/Tole (English)*"
+            labelNp="गाउँ/टोल (English)*"
             value={permAddress.villageToleEn || ""}
             onChange={(val) => handleAddressChange("villageToleEn", val.toUpperCase())}
             onBlur={() => handleAddressChange("villageToleEn", sanitizeEnglishName(permAddress.villageToleEn))}
@@ -314,22 +318,22 @@ export default function ContactDetailsTab() {
             </div>
             <div className="form-grid form-grid--3col fade-in" style={{ marginTop: "1rem" }}>
               <TextInput
-                label="Ward No."
-                labelNp="वडा नं."
+                label="Ward No.*"
+                labelNp="वडा नं.*"
                 value={tempAddress.wardNo || ""}
                 onChange={(val) => handleTempAddressChange("wardNo", val)}
               />
               <TextInput
-                label="Village/Tole (Nepali)"
-                labelNp="गाउँ/टोल (नेपाली)"
+                label="Village/Tole (Nepali)*"
+                labelNp="गाउँ/टोल (नेपाली)*"
                 value={tempAddress.villageToleNp || ""}
                 onChange={(val) => handleTempAddressChange("villageToleNp", val)}
                 onBlur={() => handleTempAddressChange("villageToleNp", sanitizeNepaliName(tempAddress.villageToleNp))}
                 validateNepali={true}
               />
               <TextInput
-                label="Village/Tole (English)"
-                labelNp="गाउँ/टोल (English)"
+                label="Village/Tole (English)*"
+                labelNp="गाउँ/टोल (English)*"
                 value={tempAddress.villageToleEn || ""}
                 onChange={(val) => handleTempAddressChange("villageToleEn", val.toUpperCase())}
                 onBlur={() => handleTempAddressChange("villageToleEn", sanitizeEnglishName(tempAddress.villageToleEn))}
