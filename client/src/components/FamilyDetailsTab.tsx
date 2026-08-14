@@ -59,6 +59,7 @@ function TextInput({
   labelNp,
   value,
   onChange,
+  onBlur,
   placeholder,
   validateNepali,
 }: {

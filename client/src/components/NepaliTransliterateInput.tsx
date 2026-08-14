@@ -14,6 +14,7 @@ interface NepaliTransliterateInputProps {
   placeholder?: string;
   className?: string;
   style?: React.CSSProperties;
+  onBlur?: () => void;
 }
 
 export default function NepaliTransliterateInput({
@@ -22,6 +23,7 @@ export default function NepaliTransliterateInput({
   placeholder,
   className,
   style,
+  onBlur,
 }: NepaliTransliterateInputProps) {
   return (
     <ReactTransliterate
@@ -29,7 +31,6 @@ export default function NepaliTransliterateInput({
       onChangeText={(val: string) => onChange(val)}
       lang="ne"
       containerClassName="np-transliterate-container"
-      activeItemClassName="np-transliterate-active"
       renderComponent={(props: React.InputHTMLAttributes<HTMLInputElement>) => (
         <input
           {...props}
@@ -37,6 +38,10 @@ export default function NepaliTransliterateInput({
           className={className || "form-field__input form-field__input--np"}
           style={style}
           placeholder={placeholder}
+          onBlur={(e) => {
+            if (onBlur) onBlur();
+            if (props.onBlur) props.onBlur(e);
+          }}
         />
       )}
     />
