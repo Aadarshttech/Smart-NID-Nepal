@@ -236,7 +236,7 @@ function ExpandableOtherDetails({
           background: expanded ? "var(--ink-primary)" : "transparent",
           border: "none",
           borderBottom: expanded ? "1px solid var(--hairline)" : "none",
-          color: expanded ? "var(--bg-primary)" : "var(--ink-primary)",
+          color: expanded ? "var(--bg-card)" : "var(--ink-primary)",
           fontWeight: 600,
           fontFamily: "var(--font-mono)",
           fontSize: "0.85rem",
@@ -374,7 +374,7 @@ export default function FamilyDetailsTab() {
         </h3>
 
         {/* Father */}
-        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)", paddingBottom: "0.5rem" }}>
+        <h4 style={{ marginTop: "2rem", marginBottom: "0", padding: "0 1.5rem 0.5rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)" }}>
           बाबुको विवरण / Father's Details
         </h4>
         <div className="form-grid">
@@ -411,7 +411,7 @@ export default function FamilyDetailsTab() {
         />
 
         {/* Mother */}
-        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)", paddingBottom: "0.5rem" }}>
+        <h4 style={{ marginTop: "2rem", marginBottom: "0", padding: "0 1.5rem 0.5rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)" }}>
           आमाको विवरण / Mother's Details
         </h4>
         <div className="form-grid">
@@ -457,7 +457,7 @@ export default function FamilyDetailsTab() {
           यी क्षेत्रहरू नागरिकतामा छैनन् — कृपया आफैं भर्नुहोस्। (These fields are NOT on your citizenship.)
         </p>
 
-        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)", paddingBottom: "0.5rem" }}>
+        <h4 style={{ marginTop: "2rem", marginBottom: "0", padding: "0 1.5rem 0.5rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)" }}>
           बाजेको विवरण / Grandfather's Details
         </h4>
         <div className="form-grid">
@@ -486,7 +486,7 @@ export default function FamilyDetailsTab() {
         />
 
         {/* Grandmother */}
-        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)", paddingBottom: "0.5rem" }}>
+        <h4 style={{ marginTop: "2rem", marginBottom: "0", padding: "0 1.5rem 0.5rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)" }}>
           बज्यैको विवरण / Grandmother's Details
         </h4>
         <div className="form-grid">
@@ -516,7 +516,7 @@ export default function FamilyDetailsTab() {
         {/* Spouse fields */}
         {additional.maritalStatus === "1" && (
           <>
-            <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)", paddingBottom: "0.5rem" }}>
+            <h4 style={{ marginTop: "2rem", marginBottom: "0", padding: "0 1.5rem 0.5rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)" }}>
               पति/पत्नीको विवरण / Spouse's Details
             </h4>
             <div className="form-grid">
