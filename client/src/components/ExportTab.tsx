@@ -274,7 +274,7 @@ export default function ExportTab() {
                       </p>
                     ) : (
                       <p style={{ margin: 0, color: "var(--ink-secondary)", fontSize: "0.85rem", fontFamily: "var(--font-mono)", lineHeight: 1.5 }}>
-                        OPEN CONSOLE [F12] -> PASTE PAYLOAD [CTRL+V] -> EXECUTE [ENTER].
+                        OPEN CONSOLE [F12] -&gt; PASTE PAYLOAD [CTRL+V] -&gt; EXECUTE [ENTER].
                       </p>
                     )}
                   </div>
