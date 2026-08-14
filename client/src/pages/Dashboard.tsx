@@ -141,104 +141,73 @@ export default function Dashboard({ onNewEnrollment, onEditProfile }: { onNewEnr
 
   return (
     <div className="upload-page">
-      <div className="form-container fade-in" style={{ maxWidth: "800px" }}>
+      <div className="form-container fade-in" style={{ maxWidth: "800px", width: "100%" }}>
         <div style={{ padding: "2rem", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#1e293b", margin: 0 }}>Saved Profiles</h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid var(--ink-primary)", paddingBottom: "1rem" }}>
+            <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--ink-primary)", margin: 0, fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>[ SEC_DB ] Saved Profiles</h2>
             <button 
               onClick={onNewEnrollment}
-              className="btn btn-primary"
-              style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              className="btn btn--primary"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              New Enrollment
+              NEW ENROLLMENT
             </button>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>
-              <div className="spinner" style={{ margin: "0 auto 1rem" }}></div>
-              Loading profiles from extension...
+            <div style={{ textAlign: "center", padding: "3rem", color: "var(--ink-muted)", fontFamily: "var(--font-mono)" }}>
+              <div className="loading-spinner" style={{ margin: "0 auto 1rem", width: '30px', height: '30px' }}></div>
+              [ SYS.LOADING ] Fetching profiles from extension...
             </div>
           ) : error ? (
-            <div style={{ textAlign: "center", padding: "3rem", color: "#ef4444", backgroundColor: "#fef2f2", borderRadius: "12px", border: "1px solid #fecaca" }}>
-              <p>{error}</p>
+            <div style={{ textAlign: "center", padding: "3rem", color: "var(--status-error)", backgroundColor: "var(--bg-card)", border: "1px solid var(--status-error)" }}>
+              <p style={{ fontFamily: "var(--font-mono)", textTransform: "uppercase", fontWeight: 700 }}>{error}</p>
               <p style={{ fontSize: "0.9rem", marginTop: "0.5rem", marginBottom: "1rem" }}>Please make sure the Smart NID extension is installed and enabled.</p>
               <a 
                 href="https://microsoftedge.microsoft.com/addons/detail/smart-nid-helper/gakoiaflpofkoadcmbdeejpmhgnapbfm" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.6rem",
-                  padding: "0.75rem 1.5rem",
-                  background: "#09090b",
-                  color: "white",
-                  textDecoration: "none",
-                  fontWeight: 700,
-                  borderRadius: "999px",
-                  fontSize: "1rem",
-                  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  marginTop: "0.5rem",
-                  border: "1px solid #27272a"
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = "translateY(-2px) scale(1.02)";
-                  e.currentTarget.style.boxShadow = "0 8px 25px rgba(0, 0, 0, 0.4)";
-                  e.currentTarget.style.background = "#18181b";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = "translateY(0) scale(1)";
-                  e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.2)";
-                  e.currentTarget.style.background = "#09090b";
-                }}
+                className="btn btn--primary"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Install Extension
+                INSTALL EXTENSION
               </a>
             </div>
           ) : profiles.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "4rem 2rem", color: "#64748b", backgroundColor: "#f8fafc", borderRadius: "12px", border: "1px dashed #cbd5e1" }}>
-              <svg style={{ margin: "0 auto 1rem", color: "#94a3b8" }} width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-              <h3 style={{ fontSize: "1.2rem", fontWeight: 600, color: "#475569", marginBottom: "0.5rem" }}>No profiles found</h3>
-              <p>You haven't saved any enrollments yet. Start a new enrollment to begin.</p>
+            <div style={{ textAlign: "center", padding: "4rem 2rem", color: "var(--ink-secondary)", backgroundColor: "var(--bg-card)", border: "1px dashed var(--hairline-dark)" }}>
+              <svg style={{ margin: "0 auto 1rem", color: "var(--ink-muted)" }} width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              <h3 style={{ fontSize: "1rem", fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--ink-primary)", marginBottom: "0.5rem", textTransform: "uppercase" }}>No profiles found</h3>
+              <p style={{ fontFamily: "var(--font-grotesk)", fontSize: "0.9rem" }}>You haven't saved any enrollments yet. Start a new enrollment to begin.</p>
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1rem" }}>
               {profiles.map((profile) => (
                 <div key={profile.id} style={{
                   padding: "1.5rem",
-                  backgroundColor: "white",
-                  borderRadius: "12px",
-                  border: "1px solid #e2e8f0",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                  backgroundColor: "var(--bg-card)",
+                  border: "1px solid var(--hairline)",
                   display: "flex",
                   flexDirection: "column",
-                  gap: "1rem",
-                  transition: "all 0.2s ease"
+                  gap: "1rem"
                 }}>
                   <div>
-                    <h3 style={{ margin: "0 0 0.25rem 0", fontSize: "1.1rem", fontWeight: 600, color: "#0f172a" }}>
+                    <h3 style={{ margin: "0 0 0.25rem 0", fontSize: "1.1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-grotesk)" }}>
                       {profile.name}
                     </h3>
-                    <p style={{ margin: 0, fontSize: "0.85rem", color: "#64748b" }}>
-                      Citizenship No: {profile.citNo || "N/A"}
+                    <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--ink-secondary)", fontFamily: "var(--font-mono)" }}>
+                      CID: {profile.citNo || "N/A"}
                     </p>
-                    <p style={{ margin: "0.5rem 0 0 0", fontSize: "0.8rem", color: "#94a3b8" }}>
-                      Saved: {profile.timestamp}
+                    <p style={{ margin: "0.5rem 0 0 0", fontSize: "0.75rem", color: "var(--ink-muted)", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
+                      SAVED: {profile.timestamp}
                     </p>
                   </div>
                   
                   <button 
                     onClick={() => handleEdit(profile)}
-                    className="btn btn-secondary"
-                    style={{ width: "100%", justifyContent: "center", display: "flex", gap: "8px", alignItems: "center" }}
+                    className="btn btn--secondary btn--full"
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    Edit & Export
+                    EDIT & EXPORT
                   </button>
                 </div>
               ))}
@@ -247,7 +216,7 @@ export default function Dashboard({ onNewEnrollment, onEditProfile }: { onNewEnr
         </div>
 
         <div style={{ textAlign: "center", marginTop: "2rem", paddingBottom: "1rem" }}>
-          <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: "#64748b", textDecoration: "none", fontSize: "0.875rem" }}>
+          <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: "var(--ink-muted)", textDecoration: "none", fontSize: "0.75rem", fontFamily: "var(--font-mono)", textTransform: "uppercase" }}>
             Privacy Policy
           </a>
         </div>

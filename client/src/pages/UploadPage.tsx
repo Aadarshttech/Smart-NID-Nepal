@@ -112,80 +112,33 @@ export default function UploadPage() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "rgba(255, 255, 255, 0.88)",
-            backdropFilter: "blur(8px)",
           }}
         >
-          <div
-            className="loading-spinner"
-            style={{ width: "70px", height: "70px", borderWidth: "6px", marginBottom: "0" }}
-          />
-          <h3
-            style={{
-              marginTop: "1.5rem",
-              color: "var(--nepal-blue)",
-              fontFamily: "var(--font-nepali)",
-              fontSize: "1.6rem",
-              fontWeight: 700,
-            }}
-          >
+          <div className="loading-spinner" />
+          <h3 style={{ marginTop: "1.5rem" }}>
             नागरिकता प्रमाणपत्र पढ्दै…
           </h3>
-          <p
-            style={{
-              color: "var(--text-secondary)",
-              marginTop: "0.5rem",
-              fontSize: "1.05rem",
-            }}
-          >
-            Extracting data with AI, please wait...
+          <p style={{ marginTop: "0.5rem" }}>
+            [ SYS.PROCESS ] EXTRACTING SECURE DATA
           </p>
-          {/* Animated progress bar */}
-          <div
-            style={{
-              marginTop: "2rem",
-              width: "240px",
-              height: "5px",
-              background: "#e2e8f0",
-              borderRadius: "999px",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                width: "40%",
-                height: "100%",
-                background: "linear-gradient(90deg, var(--nepal-blue), var(--crimson))",
-                borderRadius: "999px",
-                animation: "progressPulse 1.5s ease-in-out infinite",
-              }}
-            />
-          </div>
         </div>
       )}
 
       {/* Hero Header */}
       <header className="upload-header">
-        <div className="upload-header__flag" style={{ marginBottom: '0.5rem' }}>
-          <img 
-            src="/nepal-flag.svg" 
-            alt="Nepal Flag" 
-            style={{ height: "40px", width: "auto", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))", display: "inline-block" }} 
-          />
-        </div>
-        <h1 className="upload-header__title">
-          <span className="upload-header__title--np">स्मार्ट दर्ता</span>
-          <span className="upload-header__title--en">Smart NID Nepal</span>
-        </h1>
-        <p className="upload-header__subtitle">
-          AI-Powered National ID Pre-Enrollment
-        </p>
-        {currentStep === 0 && (
-          <p className="upload-header__description">
-            Upload both sides of your citizenship certificate. The AI will cross-reference
-            the Nepali and English text to fill out your entire NID enrollment form.
+        <div className="upload-header__content">
+          <h1 className="upload-header__title">
+            <span className="upload-header__title--en">Smart NID Nepal // V2.0</span>
+            <span className="upload-header__title--np">राष्ट्रिय परिचयपत्र</span>
+          </h1>
+          <p className="upload-header__subtitle">
+            AI-Powered Document Extraction Protocol
           </p>
-        )}
+        </div>
+        <div className="upload-header__meta">
+          <div>DEP: DONIDCR-AUTO</div>
+          <div>STATUS: SECURE</div>
+        </div>
       </header>
 
       <main className="upload-main">
@@ -197,9 +150,8 @@ export default function UploadPage() {
 
             return (
               <div key={step.label} className="step-indicator__item">
-                {idx > 0 && <div className={`step__connector ${isDone ? "step__connector--done" : ""}`} />}
                 <div className={`step ${isActive ? "step--active" : ""} ${isDone ? "step--done" : ""}`}>
-                  <span className="step__number">{isDone ? "✓" : idx + 1}</span>
+                  <span className="step__number">[{isDone ? "OK" : `0${idx + 1}`}]</span>
                   <span className="step__label">{step.label}</span>
                 </div>
               </div>
@@ -248,17 +200,14 @@ export default function UploadPage() {
                 className="btn btn--primary btn--lg"
                 disabled={!canExtract || loading}
                 onClick={handleExtract}
-                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', minWidth: '280px' }}
               >
                 {loading ? (
                   <>
-                    <div style={{
-                      width: '24px', height: '24px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 1s linear infinite'
-                    }} />
-                    <span>Extracting... Please wait</span>
+                    <div className="loading-spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', marginBottom: '0' }} />
+                    <span>[ PROCESSING ]</span>
                   </>
                 ) : (
-                  <span>Extract Data with AI ✨</span>
+                  <span>INITIATE EXTRACTION ↵</span>
                 )}
               </button>
               {!canExtract && !isExtracting && (
