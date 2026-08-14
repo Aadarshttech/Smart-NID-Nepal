@@ -1,306 +1,266 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    /* System fonts instead of Google Fonts for extensions */
     :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --primary-light: #eff6ff;
-      --secondary: #f1f5f9;
-      --secondary-hover: #e2e8f0;
-      --success: #10b981;
-      --success-light: #d1fae5;
-      --bg: #f8fafc;
-      --text: #0f172a;
-      --text-light: #64748b;
-      --border: #e2e8f0;
+      /* Secure Terminal Palette (Zinc based) */
+      --bg-base: #F4F4F5;
+      --bg-card: #FFFFFF;
+      --bg-secondary: #FAFAFA;
+      
+      --ink-primary: #09090B;
+      --ink-secondary: #52525B;
+      --ink-muted: #A1A1AA;
+      
+      --hairline: #E4E4E7;
+      --hairline-dark: #D4D4D8;
+      
+      --crimson: #E11D48;
+      --success: #10B981;
+
+      /* Typography */
+      --font-sans: system-ui, -apple-system, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
     
     body {
-      width: 340px;
+      width: 360px;
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--ink-primary);
       overflow-x: hidden;
+      border: 1px solid var(--hairline-dark);
     }
 
+    /* ── Header (Terminal Style) ── */
     .header {
-      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-      padding: 30px 20px 24px;
-      text-align: center;
-      color: white;
-      border-bottom-left-radius: 24px;
-      border-bottom-right-radius: 24px;
-      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
-      position: relative;
-      overflow: hidden;
+      background-color: var(--ink-primary);
+      color: var(--bg-card);
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 2px solid var(--crimson);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
-    .header::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-      animation: rotate 20s linear infinite;
+    .header__meta {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
     }
 
-    @keyframes rotate {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .header-content {
-      position: relative;
-      z-index: 1;
-    }
-
-    .header img {
-      width: 64px;
-      height: 64px;
-      margin-bottom: 12px;
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.25));
-      border: 3px solid rgba(255,255,255,0.2);
-      border-radius: 16px;
-      transition: transform 0.3s ease;
-    }
-
-    .header img:hover {
-      transform: scale(1.05) rotate(-5deg);
-    }
-
-    .header h1 {
+    .header__title {
       margin: 0;
-      font-size: 1.4rem;
+      font-size: 1.25rem;
       font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    .header p {
-      margin: 6px 0 0 0;
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.8);
-      font-weight: 500;
-    }
-
-    .content {
-      padding: 24px 20px;
-    }
-
-    .status-card {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 16px;
+      letter-spacing: -0.02em;
       display: flex;
       align-items: center;
-      gap: 16px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-      margin-bottom: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      gap: 0.5rem;
     }
 
-    .status-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+    .header__title img {
+      width: 24px;
+      height: 24px;
+      border-radius: 2px;
+      filter: grayscale(100%) contrast(1.2);
     }
 
-    .status-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
+    .header__subtitle {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--bg-base);
+      opacity: 0.8;
+      text-transform: uppercase;
+    }
+
+    /* ── Data Stream Status (Signature Element) ── */
+    .stream-status {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--hairline);
+      gap: 1rem;
+    }
+
+    .stream-status__indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 0; /* Square block */
       flex-shrink: 0;
     }
 
-    .status-info h3 {
-      margin: 0 0 4px 0;
-      font-size: 1rem;
-      color: var(--text);
-      font-weight: 600;
+    .stream-status.ready .stream-status__indicator {
+      background-color: var(--success);
+      animation: blink 1.5s steps(2, start) infinite;
     }
 
-    .status-info p {
-      margin: 0;
+    .stream-status.waiting .stream-status__indicator {
+      background-color: var(--ink-muted);
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .stream-status__text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stream-status__title {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--ink-primary);
+      text-transform: uppercase;
+    }
+
+    .stream-status__desc {
       font-size: 0.8rem;
-      color: var(--text-light);
-      line-height: 1.4;
+      color: var(--ink-secondary);
+      margin-top: 0.1rem;
     }
 
-    .ready .status-icon {
-      background: var(--success-light);
-      color: var(--success);
-      box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.2);
+    /* ── Content Area ── */
+    .content {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
     }
 
-    .waiting .status-icon {
-      background: var(--secondary);
-      color: var(--text-light);
-      box-shadow: inset 0 0 0 1px rgba(100, 116, 139, 0.2);
-    }
-
+    /* ── Checkpoints ── */
     #savedDataContainer {
       display: none;
-      background: white;
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 24px;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      background: var(--bg-card);
+      border: 1px solid var(--hairline);
+      border-radius: 2px;
     }
 
     #savedDataContainer h4 {
-      margin: 0 0 16px 0;
-      font-size: 0.9rem;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
+      margin: 0;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--ink-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--hairline);
+      background: var(--bg-secondary);
     }
 
     #profilesList {
       display: flex;
       flex-direction: column;
-      gap: 12px;
     }
 
-    .action-btn {
+    /* ── Actions ── */
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 0.5rem;
       width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 14px;
-      font-size: 0.95rem;
-      font-weight: 600;
+      padding: 0.85rem;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      margin-bottom: 12px;
+      transition: all 0.2s ease;
       text-decoration: none;
-      box-sizing: border-box;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .action-btn::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 100%;
-      height: 100%;
-      background: rgba(255, 255, 255, 0.2);
-      transform: translate(-50%, -50%) scale(0);
-      border-radius: 50%;
-      transition: transform 0.4s ease-out;
-    }
-
-    .action-btn:active::after {
-      transform: translate(-50%, -50%) scale(2);
-      opacity: 0;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary), #3b82f6);
-      color: white;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      background-color: var(--ink-primary);
+      color: var(--bg-card);
     }
 
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.35);
+      background-color: var(--ink-secondary);
     }
 
     .btn-secondary {
-      background-color: white;
-      color: var(--text);
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      background-color: transparent;
+      border-color: var(--hairline-dark);
+      color: var(--ink-primary);
     }
 
     .btn-secondary:hover {
-      background-color: var(--secondary);
-      border-color: #cbd5e1;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      background-color: var(--bg-secondary);
+      border-color: var(--ink-primary);
     }
 
     .footer {
       text-align: center;
-      padding: 0 20px 24px;
-      font-size: 0.75rem;
-      color: var(--text-light);
-      font-weight: 500;
-    }
-    
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
+      padding: 0 1.25rem 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--ink-muted);
+      text-transform: uppercase;
     }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <div class="header-content">
-      <img src="icons/icon.png" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'64\' height=\'64\' fill=\'white\' viewBox=\'0 0 24 24\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z\'/></svg>'" alt="Logo">
-      <h1>Smart NID</h1>
-      <p>Seamless Data Transfer</p>
+    <div class="header__meta">[ SYS.CONNECTION ] SMART NID LINK</div>
+    <h1 class="header__title">
+      <img src="icons/icon.png" onerror="this.style.display='none'" alt="Logo">
+      Smart NID
+    </h1>
+    <p class="header__subtitle">Secure Data Transfer Protocol</p>
+  </div>
+
+  <div id="statusContainer" class="stream-status waiting">
+    <div class="stream-status__indicator"></div>
+    <div class="stream-status__text">
+      <div class="stream-status__title" id="statusTitle">Awaiting Data</div>
+      <div class="stream-status__desc" id="statusDesc">Extract NID data first.</div>
     </div>
   </div>
 
   <div class="content">
-    <div id="statusContainer" class="status-card waiting">
-      <div class="status-icon" id="statusIcon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-      </div>
-      <div class="status-info">
-        <h3 id="statusTitle">Awaiting Data</h3>
-        <p id="statusDesc">Please extract your NID data first.</p>
-      </div>
-    </div>
-
     <!-- Saved Data Summary Box -->
     <div id="savedDataContainer">
-      <h4>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-        Saved Checkpoints
-      </h4>
+      <h4>[ DIR_CHECKPOINTS ]</h4>
       <div id="profilesList">
         <!-- Populated dynamically via popup.js -->
       </div>
     </div>
 
-    <button id="btnOpenApp" class="action-btn btn-primary">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-      Web Dashboard
-    </button>
-    
-    <button id="btnOpenGov" class="action-btn btn-secondary">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-      DoNIDCR Portal
-    </button>
+    <div class="actions">
+      <button id="btnOpenApp" class="btn btn-primary">
+        OPEN WEB DASHBOARD &crarr;
+      </button>
+      
+      <button id="btnOpenGov" class="btn btn-secondary">
+        LAUNCH DONIDCR PORTAL &#8599;
+      </button>
+    </div>
   </div>
 
   <div class="footer">
-    Smart NID Helper v1.1.0 • Nepal
+    Smart NID Helper v1.1.0 • DEP-AUTO
   </div>
 
   <script src="popup.js"></script>

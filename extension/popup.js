@@ -23,10 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateUI(profiles, activeId) {
     if (profiles && profiles.length > 0) {
       // Data is ready
-      statusContainer.className = 'status-card ready';
-      statusIcon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="pulse"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
-      statusTitle.textContent = 'Data Ready!';
-      statusDesc.textContent = 'Navigate to DoNIDCR to auto-fill.';
+      statusContainer.className = 'stream-status ready';
+      statusTitle.textContent = '[ STATUS: DATA_READY ]';
+      statusDesc.textContent = 'Awaiting DoNIDCR injection.';
 
       savedDataContainer.style.display = 'block';
       profilesList.innerHTML = '';
@@ -34,24 +33,32 @@ document.addEventListener('DOMContentLoaded', () => {
       profiles.forEach(p => {
         const isActive = p.id === activeId;
         const div = document.createElement('div');
-        div.style.padding = '14px';
-        div.style.border = isActive ? '2px solid #2563eb' : '1px solid #e2e8f0';
-        div.style.borderRadius = '12px';
-        div.style.cursor = 'pointer';
-        div.style.backgroundColor = isActive ? '#eff6ff' : '#fff';
+        div.style.padding = '1rem';
+        div.style.borderBottom = '1px solid var(--hairline)';
+        div.style.backgroundColor = isActive ? 'var(--bg-secondary)' : 'var(--bg-card)';
         div.style.position = 'relative';
-        div.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-        div.style.boxShadow = isActive ? '0 4px 6px -1px rgba(37, 99, 235, 0.1)' : 'none';
+        div.style.display = 'flex';
+        div.style.flexDirection = 'column';
+        div.style.gap = '0.25rem';
+        div.style.cursor = 'pointer';
+        
+        // Active indicator on left border
+        if (isActive) {
+          div.style.boxShadow = 'inset 3px 0 0 var(--crimson)';
+        }
         
         div.innerHTML = `
-          <div style="font-weight: 600; font-size: 0.95rem; color: #0f172a; margin-bottom: 4px; padding-right: 60px;">${escapeHTML(p.name) || 'Unnamed Profile'}</div>
-          <div style="font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 4px;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            ${escapeHTML(p.citNo) || 'N/A'}
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--ink-primary);">${escapeHTML(p.name) || 'Unnamed Profile'}</div>
+            ${isActive ? '<div style="font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700; color: var(--crimson); text-transform: uppercase; letter-spacing: 0.05em; background: #FFE4E6; padding: 2px 6px;">[ ACTIVE ]</div>' : ''}
           </div>
-          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 8px;">Saved: ${escapeHTML(p.timestamp)}</div>
-          ${isActive ? '<div style="position: absolute; top: 14px; right: 14px; background: #2563eb; color: white; font-size: 0.65rem; font-weight: 700; padding: 4px 8px; border-radius: 20px; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">ACTIVE</div>' : ''}
-          <div class="delete-profile-btn" style="position: absolute; bottom: 14px; right: 14px; color: #ef4444; padding: 4px; border-radius: 4px; background: #fee2e2; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" title="Delete Profile">
+          <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-secondary);">
+            CID: ${escapeHTML(p.citNo) || 'N/A'}
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--ink-muted); text-transform: uppercase;">
+            SAVED: ${escapeHTML(p.timestamp)}
+          </div>
+          <div class="delete-profile-btn" style="position: absolute; bottom: 1rem; right: 1rem; color: var(--ink-muted); cursor: pointer;" title="Delete Profile">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           </div>
         `;
@@ -68,33 +75,39 @@ document.addEventListener('DOMContentLoaded', () => {
           });
         };
         
+        div.querySelector('.delete-profile-btn').onmouseover = function() {
+          this.style.color = 'var(--crimson)';
+        };
+        div.querySelector('.delete-profile-btn').onmouseout = function() {
+          this.style.color = 'var(--ink-muted)';
+        };
+        
         div.onclick = () => {
           chrome.storage.local.set({ activeProfileId: p.id });
         };
         
         div.onmouseover = () => {
           if (!isActive) {
-            div.style.backgroundColor = '#f8fafc';
-            div.style.transform = 'translateY(-1px)';
-            div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
+            div.style.backgroundColor = 'var(--bg-secondary)';
           }
         };
         div.onmouseout = () => {
           if (!isActive) {
-            div.style.backgroundColor = '#fff';
-            div.style.transform = 'none';
-            div.style.boxShadow = 'none';
+            div.style.backgroundColor = 'var(--bg-card)';
           }
         };
         
         profilesList.appendChild(div);
       });
+      // Remove last border bottom
+      if (profilesList.lastElementChild) {
+        profilesList.lastElementChild.style.borderBottom = 'none';
+      }
     } else {
       // Waiting for data
-      statusContainer.className = 'status-card waiting';
-      statusIcon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
-      statusTitle.textContent = 'Awaiting Data';
-      statusDesc.textContent = 'Please extract your NID data first.';
+      statusContainer.className = 'stream-status waiting';
+      statusTitle.textContent = '[ STATUS: AWAITING ]';
+      statusDesc.textContent = 'Extract NID data first.';
       savedDataContainer.style.display = 'none';
     }
   }
