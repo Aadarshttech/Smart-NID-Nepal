@@ -18,6 +18,7 @@ import {
   RELIGION_OPTIONS,
 } from "../types/extraction";
 import { containsEnglishChars } from "../utils/validation";
+import { sanitizeEnglishName, sanitizeNepaliName, formatBSDate } from "../utils/sanitizers";
 
 /** Bilingual name input (nepali + english side by side) */
 function NameInput({
@@ -42,6 +43,7 @@ function NameInput({
           <NepaliTransliterateInput
             value={value.nepali}
             onChange={(val) => onChange({ ...value, nepali: val })}
+            onBlur={() => onChange({ ...value, nepali: sanitizeNepaliName(value.nepali) })}
             placeholder={`${labelNp}`}
           />
           {containsEnglishChars(value.nepali) && (
@@ -56,7 +58,8 @@ function NameInput({
             type="text"
             className="form-field__input"
             value={value.english}
-            onChange={(e) => onChange({ ...value, english: e.target.value })}
+            onChange={(e) => onChange({ ...value, english: e.target.value.toUpperCase() })}
+            onBlur={() => onChange({ ...value, english: sanitizeEnglishName(value.english) })}
             placeholder={`${label}`}
           />
         </div>
@@ -78,6 +81,7 @@ function TextInput({
   labelNp: string;
   value: string;
   onChange: (val: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
   validateNepali?: boolean;
 }) {
@@ -92,6 +96,7 @@ function TextInput({
         <NepaliTransliterateInput
           value={value}
           onChange={onChange}
+          onBlur={onBlur}
           placeholder={placeholder || label}
           className="form-field__input"
           style={hasError ? { borderColor: '#ef4444' } : {}}
@@ -103,6 +108,7 @@ function TextInput({
           style={hasError ? { borderColor: '#ef4444' } : {}}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           placeholder={placeholder || label}
         />
       )}
@@ -232,6 +238,7 @@ export default function ApplicantDataTab() {
             labelNp="जन्म मिति*"
             value={draft.dobBS}
             onChange={(val) => updateDraftField("dobBS", val)}
+            onBlur={() => updateDraftField("dobBS", formatBSDate(draft.dobBS))}
             placeholder="YYYY-MM-DD"
           />
           <TextInput
@@ -239,6 +246,7 @@ export default function ApplicantDataTab() {
             labelNp="जन्म मिति (ईस्वी)*"
             value={draft.dobAD}
             onChange={(val) => updateDraftField("dobAD", val)}
+            onBlur={() => updateDraftField("dobAD", formatBSDate(draft.dobAD))}
             placeholder="YYYY-MM-DD"
           />
           <div className="form-field">
@@ -373,6 +381,7 @@ export default function ApplicantDataTab() {
             labelNp="जारी मिति*"
             value={draft.issueDateBS}
             onChange={(val) => updateDraftField("issueDateBS", val)}
+            onBlur={() => updateDraftField("issueDateBS", formatBSDate(draft.issueDateBS))}
             placeholder="YYYY-MM-DD"
           />
         </div>

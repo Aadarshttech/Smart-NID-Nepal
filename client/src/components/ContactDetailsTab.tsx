@@ -10,6 +10,7 @@ import type { AddressField } from "../types/extraction";
 import { PROVINCE_OPTIONS } from "../types/extraction";
 import { getDistrictsForProvince, getLocalLevelsForDistrict } from "../utils/locationHelper";
 import { containsEnglishChars } from "../utils/validation";
+import { sanitizeTelephoneNo, sanitizeMobileNo, sanitizeNepaliName, sanitizeEnglishName } from "../utils/sanitizers";
 
 function TextInput({
   label,
@@ -23,6 +24,7 @@ function TextInput({
   labelNp: string;
   value: string;
   onChange: (val: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
   validateNepali?: boolean;
 }) {
@@ -37,6 +39,7 @@ function TextInput({
         <NepaliTransliterateInput
           value={value}
           onChange={onChange}
+          onBlur={onBlur}
           placeholder={placeholder || label}
           className="form-field__input"
           style={hasError ? { borderColor: '#ef4444' } : {}}
@@ -48,6 +51,7 @@ function TextInput({
           style={hasError ? { borderColor: '#ef4444' } : {}}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           placeholder={placeholder || label}
         />
       )}
@@ -157,7 +161,7 @@ export default function ContactDetailsTab() {
   const tempLocalLevels = tempAddress.district && tempAddress.province ? getLocalLevelsForDistrict(tempAddress.province, tempAddress.district) : [];
 
   const canProceed =
-    (additional.mobileNo || "").trim() !== "" &&
+    (additional.mobileNo || "").trim().length === 10 &&
     (permAddress.province || "").trim() !== "" &&
     (permAddress.district || "").trim() !== "" &&
     (permAddress.localLevel || "").trim() !== "" &&
@@ -193,12 +197,14 @@ export default function ContactDetailsTab() {
             labelNp="फोन नं."
             value={additional.phoneNo}
             onChange={(val) => updateAdditionalField("phoneNo", val)}
+            onBlur={() => updateAdditionalField("phoneNo", sanitizeTelephoneNo(additional.phoneNo))}
           />
           <TextInput
             label="Mobile No.*"
             labelNp="मोबाईल नं.*"
             value={additional.mobileNo}
             onChange={(val) => updateAdditionalField("mobileNo", val)}
+            onBlur={() => updateAdditionalField("mobileNo", sanitizeMobileNo(additional.mobileNo))}
           />
         </div>
       </div>
@@ -247,13 +253,15 @@ export default function ContactDetailsTab() {
             labelNp="गाउँ/टोल (नेपाली)"
             value={permAddress.villageToleNp || ""}
             onChange={(val) => handleAddressChange("villageToleNp", val)}
+            onBlur={() => handleAddressChange("villageToleNp", sanitizeNepaliName(permAddress.villageToleNp))}
             validateNepali={true}
           />
           <TextInput
             label="Village/Tole (English)"
             labelNp="गाउँ/टोल (English)"
             value={permAddress.villageToleEn || ""}
-            onChange={(val) => handleAddressChange("villageToleEn", val)}
+            onChange={(val) => handleAddressChange("villageToleEn", val.toUpperCase())}
+            onBlur={() => handleAddressChange("villageToleEn", sanitizeEnglishName(permAddress.villageToleEn))}
           />
         </div>
       </div>
@@ -315,13 +323,15 @@ export default function ContactDetailsTab() {
                 labelNp="गाउँ/टोल (नेपाली)"
                 value={tempAddress.villageToleNp || ""}
                 onChange={(val) => handleTempAddressChange("villageToleNp", val)}
+                onBlur={() => handleTempAddressChange("villageToleNp", sanitizeNepaliName(tempAddress.villageToleNp))}
                 validateNepali={true}
               />
               <TextInput
                 label="Village/Tole (English)"
                 labelNp="गाउँ/टोल (English)"
                 value={tempAddress.villageToleEn || ""}
-                onChange={(val) => handleTempAddressChange("villageToleEn", val)}
+                onChange={(val) => handleTempAddressChange("villageToleEn", val.toUpperCase())}
+                onBlur={() => handleTempAddressChange("villageToleEn", sanitizeEnglishName(tempAddress.villageToleEn))}
               />
             </div>
           </>
@@ -344,7 +354,7 @@ export default function ContactDetailsTab() {
       {showErrors && !canProceed && (
         <div className="form-error-banner bounce-in">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-          <span>Please fill in your Mobile No. and complete all Address fields (*) to continue.</span>
+          <span>Please ensure your Mobile No. is exactly 10 digits and complete all Address fields (*) to continue.</span>
         </div>
       )}
     </div>

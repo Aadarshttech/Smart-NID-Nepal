@@ -28,6 +28,8 @@ export default function NepaliTransliterateInput({
       value={value}
       onChangeText={(val: string) => onChange(val)}
       lang="ne"
+      containerClassName="np-transliterate-container"
+      activeItemClassName="np-transliterate-active"
       renderComponent={(props: React.InputHTMLAttributes<HTMLInputElement>) => (
         <input
           {...props}

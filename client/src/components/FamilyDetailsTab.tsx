@@ -5,6 +5,7 @@ import type { NameField, ExtractionResult, AdditionalFields, FamilyMemberDetails
 import { PROVINCE_OPTIONS } from "../types/extraction";
 import { getDistrictsForProvince, getLocalLevelsForDistrict } from "../utils/locationHelper";
 import { containsEnglishChars } from "../utils/validation";
+import { sanitizeNepaliName, sanitizeEnglishName } from "../utils/sanitizers";
 
 function NameInput({
   label,
@@ -28,6 +29,7 @@ function NameInput({
           <NepaliTransliterateInput
             value={value?.nepali || ""}
             onChange={(val) => onChange({ nepali: val, english: value?.english || "" })}
+            onBlur={() => onChange({ nepali: sanitizeNepaliName(value?.nepali), english: value?.english || "" })}
             placeholder={labelNp}
           />
           {containsEnglishChars(value?.nepali || "") && (
@@ -42,7 +44,8 @@ function NameInput({
             type="text"
             className="form-field__input"
             value={value?.english || ""}
-            onChange={(e) => onChange({ nepali: value?.nepali || "", english: e.target.value })}
+            onChange={(e) => onChange({ nepali: value?.nepali || "", english: e.target.value.toUpperCase() })}
+            onBlur={() => onChange({ nepali: value?.nepali || "", english: sanitizeEnglishName(value?.english) })}
             placeholder={label}
           />
         </div>
@@ -63,6 +66,7 @@ function TextInput({
   labelNp: string;
   value: string;
   onChange: (val: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
   validateNepali?: boolean;
 }) {
@@ -77,6 +81,7 @@ function TextInput({
         <NepaliTransliterateInput
           value={value || ""}
           onChange={onChange}
+          onBlur={onBlur}
           placeholder={placeholder || label}
           className="form-field__input"
           style={hasError ? { borderColor: '#ef4444' } : {}}
@@ -88,6 +93,7 @@ function TextInput({
           style={hasError ? { borderColor: '#ef4444' } : {}}
           value={value || ""}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           placeholder={placeholder || label}
         />
       )}
