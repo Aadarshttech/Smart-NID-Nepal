@@ -158,16 +158,16 @@ export default function ExportTab() {
             }}
           >
             {copyState === "transferring" ? (
-              <span className="blink">[ TRANSMITTING DATA... ]</span>
+              <span className="blink">[ SAVING DATA... ]</span>
             ) : copyState === "copied" ? (
               <span>
-                 {hasExtension ? "[ DATA CACHED IN EXTENSION ]" : "[ PAYLOAD COPIED ]"}
+                 {hasExtension ? "[ SAVED TO EXTENSION ]" : "[ PAYLOAD COPIED ]"}
               </span>
             ) : copyState === "error" ? (
-              <span>[ TRANSMISSION FAILED - RETRY ]</span>
+              <span>[ SAVE FAILED - RETRY ]</span>
             ) : (
               <span>
-                 {hasExtension ? "[ INITIATE SECURE TRANSFER ]" : "[ COPY SECURE PAYLOAD ]"}
+                 {hasExtension ? "[ SAVE DATA TO EXTENSION ]" : "[ COPY SECURE PAYLOAD ]"}
               </span>
             )}
           </button>
