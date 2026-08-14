@@ -1,78 +1,10 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback } from "react";
 import DropZone from "../components/DropZone";
 import FormTabs from "../components/FormTabs";
 import { useEnrollmentStore, ENROLLMENT_STEPS } from "../store/enrollmentStore";
 import type { ExtractResponse } from "../types/extraction";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
-
-const TerminalLoader = () => {
-  const [logs, setLogs] = useState<string[]>([]);
-  const logsEndRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    const sequences = [
-      "[ OK ] Initiating Secure Enclave Handshake...",
-      "[ OK ] Authenticating Terminal Identity...",
-      "[ .. ] Scanning Document Geometry...",
-      "[ .. ] Detecting Nepali Devanagari Blocks...",
-      "[ OK ] Devanagari Block Recognized: 98.4% Confidence",
-      "[ .. ] Detecting English OCR Blocks...",
-      "[ OK ] English Block Recognized: 99.1% Confidence",
-      "[ .. ] Cross-Referencing Entity Names...",
-      "[ OK ] Semantic Match Found",
-      "[ .. ] Normalizing Dates to YYYY-MM-DD...",
-      "[ OK ] Lexical Validation Passed",
-      "[ SYS ] Finalizing Extraction Payload..."
-    ];
-    
-    let currentIndex = 0;
-    const interval = setInterval(() => {
-      if (currentIndex < sequences.length) {
-        setLogs(prev => [...prev, sequences[currentIndex]]);
-        currentIndex++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 450);
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (logsEndRef.current) {
-      logsEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [logs]);
-
-  return (
-    <div className="extraction-overlay">
-      <div className="terminal-loader">
-        <div className="scanner-bar" />
-        <div className="loading-spinner" style={{ marginBottom: '1rem', borderColor: 'var(--ink-secondary)', borderTopColor: 'var(--status-good)' }} />
-        <h3 style={{ marginTop: "1rem", color: "var(--bg-card)" }}>
-          नागरिकता प्रमाणपत्र पढ्दै…
-        </h3>
-        <p style={{ marginTop: "0.5rem", color: "var(--status-good)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
-          [ SYS.PROCESS ] EXTRACTING SECURE DATA
-        </p>
-        
-        <div className="terminal-logs">
-          {logs.map((log, i) => (
-            <div key={i} className="terminal-log-line">
-              <span style={{ color: log.includes('[ OK ]') ? 'var(--status-good)' : 'var(--status-warning)' }}>
-                {log.substring(0, 7)}
-              </span>
-              {log.substring(7)}
-            </div>
-          ))}
-          <div className="terminal-cursor">_</div>
-          <div ref={logsEndRef} />
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default function UploadPage() {
   const {
@@ -166,7 +98,31 @@ export default function UploadPage() {
           currentStep, extractionError, or any other conditional.
           This guarantees it is always visible when isExtracting is true.
          ══════════════════════════════════════════════════════ */}
-      {loading && <TerminalLoader />}
+      {loading && (
+        <div
+          className="extraction-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div className="loading-spinner" />
+          <h3 style={{ marginTop: "1.5rem" }}>
+            नागरिकता प्रमाणपत्र पढ्दै…
+          </h3>
+          <p style={{ marginTop: "0.5rem" }}>
+            [ SYS.PROCESS ] EXTRACTING SECURE DATA
+          </p>
+        </div>
+      )}
 
       {/* Hero Header */}
       <header className="upload-header">

@@ -7,7 +7,6 @@ import { create } from "zustand";
 import type {
   ExtractionResult,
   AdditionalFields,
-  NameField,
 } from "../types/extraction";
 
 /** Steps in the enrollment wizard */
@@ -149,54 +148,13 @@ const initialState = {
 export const useEnrollmentStore = create<EnrollmentState>((set) => ({
   ...initialState,
 
-  setExtractedData: (data) => {
-    // Helper to ensure we always get a string and never null/undefined
-    const s = (val: any) => (typeof val === 'string' ? val : '');
-    // Helper to ensure NameField is never null
-    const n = (val: any): NameField => ({
-      nepali: typeof val?.nepali === 'string' ? val.nepali : '',
-      english: typeof val?.english === 'string' ? val.english : ''
-    });
-
-    const safeData: ExtractionResult = {
-      citizenshipNo: s(data?.citizenshipNo),
-      firstName: n(data?.firstName),
-      middleName: n(data?.middleName),
-      lastName: n(data?.lastName),
-      dobBS: s(data?.dobBS),
-      dobAD: s(data?.dobAD),
-      birthPlace: s(data?.birthPlace),
-      gender: (["MALE", "FEMALE", "OTHER", ""].includes(data?.gender) ? data.gender : "") as any,
-      fatherFirstName: n(data?.fatherFirstName),
-      fatherMiddleName: n(data?.fatherMiddleName),
-      fatherLastName: n(data?.fatherLastName),
-      motherFirstName: n(data?.motherFirstName),
-      motherMiddleName: n(data?.motherMiddleName),
-      motherLastName: n(data?.motherLastName),
-      grandfatherFirstName: n(data?.grandfatherFirstName),
-      grandfatherMiddleName: n(data?.grandfatherMiddleName),
-      grandfatherLastName: n(data?.grandfatherLastName),
-      permanentAddress: {
-        province: s(data?.permanentAddress?.province),
-        district: s(data?.permanentAddress?.district),
-        localLevel: s(data?.permanentAddress?.localLevel),
-        wardNo: s(data?.permanentAddress?.wardNo),
-        villageToleNp: s(data?.permanentAddress?.villageToleNp),
-        villageToleEn: s(data?.permanentAddress?.villageToleEn),
-      },
-      issuingDistrict: s(data?.issuingDistrict),
-      issueDateBS: s(data?.issueDateBS),
-      issuingAuthority: s(data?.issuingAuthority),
-      confidence: typeof data?.confidence === 'number' ? data.confidence : 0,
-    };
-
+  setExtractedData: (data) =>
     set({
-      extractedData: safeData,
-      draft: JSON.parse(JSON.stringify(safeData)), // Safe deep copy
+      extractedData: data,
+      draft: { ...data }, // Deep copy for independent editing
       extractionError: null,
       currentStep: 1, // Auto-advance to edit step
-    });
-  },
+    }),
 
   setIsExtracting: (value) =>
     set({ isExtracting: value }),
