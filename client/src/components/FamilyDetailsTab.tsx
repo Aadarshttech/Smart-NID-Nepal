@@ -164,17 +164,18 @@ function AddressForm({
     : [];
 
   return (
-    <div style={{ marginTop: "1rem", marginBottom: "2rem", padding: "1rem", border: "1px dashed #cbd5e1", borderRadius: "8px", backgroundColor: "#f8fafc" }}>
-      <h5 style={{ margin: "0 0 1rem 0", fontSize: "0.9rem", color: "#475569" }}>{titleNp} / {title}</h5>
+    <div style={{ marginTop: "1rem", marginBottom: "2rem", padding: "1.5rem", border: "1px solid var(--hairline)", borderLeft: "3px solid var(--ink-muted)", borderRadius: "0", backgroundColor: "transparent" }}>
+      <h5 style={{ margin: "0 0 1.25rem 0", fontSize: "0.85rem", color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{titleNp} / {title}</h5>
       
-      <div style={{ marginBottom: "1rem" }}>
-        <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.9rem", color: "#334155", cursor: "pointer" }}>
+      <div style={{ marginBottom: "1.5rem" }}>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: "0.75rem", fontSize: "0.85rem", color: "var(--ink-primary)", fontFamily: "var(--font-mono)", cursor: "pointer", textTransform: "uppercase" }}>
           <input
             type="checkbox"
             checked={sameAsApplicant}
             onChange={(e) => onSameAsApplicantChange(e.target.checked)}
+            style={{ width: "16px", height: "16px", accentColor: "var(--ink-primary)" }}
           />
-          Copy Applicant's Permanent Address to {title}
+          Copy Applicant's Permanent Address
         </label>
       </div>
 
@@ -226,45 +227,49 @@ function ExpandableOtherDetails({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div style={{ marginTop: "1.5rem", marginBottom: "1.5rem", border: "1px solid #e2e8f0", borderRadius: "8px", overflow: "hidden", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.02)" }}>
+    <div style={{ marginTop: "1rem", marginBottom: "1.5rem", border: "1px solid var(--hairline)", borderLeft: "3px solid var(--ink-muted)", borderRadius: "0", background: "transparent" }}>
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
         style={{
           width: "100%",
-          background: expanded ? "var(--nepal-blue)" : "#f8fafc",
+          background: expanded ? "var(--ink-primary)" : "transparent",
           border: "none",
-          color: expanded ? "#fff" : "#334155",
+          borderBottom: expanded ? "1px solid var(--hairline)" : "none",
+          color: expanded ? "var(--bg-primary)" : "var(--ink-primary)",
           fontWeight: 600,
-          fontSize: "0.95rem",
+          fontFamily: "var(--font-mono)",
+          fontSize: "0.85rem",
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
           cursor: "pointer",
           padding: "1rem 1.25rem",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          transition: "all 0.3s ease"
+          transition: "all 0.2s ease"
         }}
       >
         <span style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
              <polyline points="14 2 14 8 20 8"></polyline>
              <line x1="16" y1="13" x2="8" y2="13"></line>
              <line x1="16" y1="17" x2="8" y2="17"></line>
              <polyline points="10 9 9 9 8 9"></polyline>
           </svg>
-          {expanded ? "Additional Information" : "Add Additional Information (Citizenship, NIN, Nationality)"}
+          [ ADD_INFO: Citizenship, NIN, Nationality ]
         </span>
         <svg 
           width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s ease" }}
+          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }}
         >
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </button>
       
       {expanded && (
-        <div className="form-grid form-grid--3col fade-in" style={{ padding: "1.5rem", backgroundColor: "#fff", alignItems: "flex-end" }}>
+        <div className="form-grid form-grid--3col fade-in" style={{ padding: "1.5rem", backgroundColor: "transparent", alignItems: "flex-end" }}>
           <TextInput
             label="Citizenship No."
             labelNp="नागरिकता प्र. नं."
@@ -369,7 +374,7 @@ export default function FamilyDetailsTab() {
         </h3>
 
         {/* Father */}
-        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1.25rem", fontWeight: 700, color: "var(--nepal-blue)", borderBottom: "2px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)", paddingBottom: "0.5rem" }}>
           बाबुको विवरण / Father's Details
         </h4>
         <div className="form-grid">
@@ -406,7 +411,7 @@ export default function FamilyDetailsTab() {
         />
 
         {/* Mother */}
-        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1.25rem", fontWeight: 700, color: "var(--nepal-blue)", borderBottom: "2px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)", paddingBottom: "0.5rem" }}>
           आमाको विवरण / Mother's Details
         </h4>
         <div className="form-grid">
@@ -452,7 +457,7 @@ export default function FamilyDetailsTab() {
           यी क्षेत्रहरू नागरिकतामा छैनन् — कृपया आफैं भर्नुहोस्। (These fields are NOT on your citizenship.)
         </p>
 
-        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1.25rem", fontWeight: 700, color: "var(--nepal-blue)", borderBottom: "2px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)", paddingBottom: "0.5rem" }}>
           बाजेको विवरण / Grandfather's Details
         </h4>
         <div className="form-grid">
@@ -481,7 +486,7 @@ export default function FamilyDetailsTab() {
         />
 
         {/* Grandmother */}
-        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1.25rem", fontWeight: 700, color: "var(--nepal-blue)", borderBottom: "2px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+        <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)", paddingBottom: "0.5rem" }}>
           बज्यैको विवरण / Grandmother's Details
         </h4>
         <div className="form-grid">
@@ -511,7 +516,7 @@ export default function FamilyDetailsTab() {
         {/* Spouse fields */}
         {additional.maritalStatus === "1" && (
           <>
-            <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1.25rem", fontWeight: 700, color: "var(--nepal-blue)", borderBottom: "2px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+            <h4 style={{ marginTop: "2rem", marginBottom: "1rem", fontSize: "1rem", fontWeight: 700, color: "var(--ink-primary)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid var(--hairline)", paddingBottom: "0.5rem" }}>
               पति/पत्नीको विवरण / Spouse's Details
             </h4>
             <div className="form-grid">
