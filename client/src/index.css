@@ -704,7 +704,7 @@ body {
 
 .form-field__input {
   font-family: var(--font-mono);
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   padding: 0.5rem 0;
   border: none;
   border-bottom: 1px solid var(--hairline);
@@ -722,7 +722,7 @@ body {
 
 .form-field__input--np {
   font-family: var(--font-nepali);
-  font-size: 1.1rem;
+  font-size: 1.35rem;
 }
 
 .form-field__select {
