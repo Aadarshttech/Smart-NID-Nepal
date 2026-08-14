@@ -417,9 +417,10 @@ h1, h2, h3, h4, h5, h6 {
 .loading-spinner {
   width: 50px !important;
   height: 50px !important;
-  border: 2px solid var(--hairline) !important;
+  border: 3px solid var(--hairline) !important;
   border-top-color: var(--ink-primary) !important;
-  border-radius: 0 !important; /* Square spinner for technical feel */
+  border-right-color: var(--ink-muted) !important;
+  border-radius: 50% !important; /* Circular spinner */
   animation: spin 1s linear infinite;
   margin-bottom: 2rem !important;
 }
