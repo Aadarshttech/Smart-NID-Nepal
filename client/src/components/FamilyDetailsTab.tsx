@@ -349,10 +349,15 @@ export default function FamilyDetailsTab() {
     (draft.grandfatherFirstName?.english || "").trim() !== "" &&
     (draft.grandfatherLastName?.nepali || "").trim() !== "" &&
     (draft.grandfatherLastName?.english || "").trim() !== "" &&
-    (additional.grandmotherFirstName?.nepali || "").trim() !== "" &&
     (additional.grandmotherFirstName?.english || "").trim() !== "" &&
     (additional.grandmotherLastName?.nepali || "").trim() !== "" &&
-    (additional.grandmotherLastName?.english || "").trim() !== "";
+    (additional.grandmotherLastName?.english || "").trim() !== "" &&
+    (additional.maritalStatus !== "1" || (
+      (additional.spouseFirstName?.nepali || "").trim() !== "" &&
+      (additional.spouseFirstName?.english || "").trim() !== "" &&
+      (additional.spouseLastName?.nepali || "").trim() !== "" &&
+      (additional.spouseLastName?.english || "").trim() !== ""
+    ));
 
   const handleNextClick = () => {
     if (!canProceed) {
@@ -521,8 +526,8 @@ export default function FamilyDetailsTab() {
             </h4>
             <div className="form-grid">
               <NameInput
-                label="Spouse First Name"
-                labelNp="पति/पत्नीको पहिलो नाम"
+                label="Spouse First Name*"
+                labelNp="पति/पत्नीको पहिलो नाम*"
                 value={additional.spouseFirstName}
                 onChange={handleAdditionalNameChange("spouseFirstName")}
               />
@@ -533,8 +538,8 @@ export default function FamilyDetailsTab() {
                 onChange={handleAdditionalNameChange("spouseMiddleName")}
               />
               <NameInput
-                label="Spouse Last Name"
-                labelNp="पति/पत्नीको थर"
+                label="Spouse Last Name*"
+                labelNp="पति/पत्नीको थर*"
                 value={additional.spouseLastName}
                 onChange={handleAdditionalNameChange("spouseLastName")}
               />
@@ -571,7 +576,7 @@ export default function FamilyDetailsTab() {
       {showErrors && !canProceed && (
         <div className="form-error-banner bounce-in">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-          <span>Please fill in the First and Last Names for Father, Mother, Grandfather, and Grandmother (Nepali & English) (*) to continue.</span>
+          <span>Please fill in the First and Last Names for Father, Mother, Grandfather, Grandmother (and Spouse, if married) in Nepali & English (*) to continue.</span>
         </div>
       )}
     </div>
