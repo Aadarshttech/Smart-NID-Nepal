@@ -51,6 +51,35 @@ export function sanitizeTelephoneNo(val?: string): string {
  */
 export function formatBSDate(val?: string): string {
   if (!val) return "";
+  // Convert slashes or dots to hyphens
   let cleanDate = val.replace(/[\/\.]/g, '-');
-  return cleanDate; // More robust formatting happens during export, but we can do basic replace here
+  
+  // Try to parse parts if it's separated by hyphens
+  const parts = cleanDate.split('-');
+  if (parts.length === 3) {
+    let year = parts[0];
+    let month = parts[1];
+    let day = parts[2];
+
+    // If day is first (e.g. DD-MM-YYYY), swap it
+    if (year.length <= 2 && parts[2].length === 4) {
+      year = parts[2];
+      day = parts[0];
+    }
+
+    // Zero pad month and day
+    month = month.padStart(2, '0');
+    day = day.padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+  // If there are no separators and it's 8 digits long (e.g., 20550504)
+  const digitsOnly = cleanDate.replace(/\D/g, '');
+  if (digitsOnly.length === 8) {
+    return `${digitsOnly.substring(0, 4)}-${digitsOnly.substring(4, 6)}-${digitsOnly.substring(6, 8)}`;
+  }
+
+  // Fallback to the original cleaned string if we couldn't parse it cleanly
+  return cleanDate;
 }
