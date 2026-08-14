@@ -7,6 +7,7 @@ import { create } from "zustand";
 import type {
   ExtractionResult,
   AdditionalFields,
+  NameField,
 } from "../types/extraction";
 
 /** Steps in the enrollment wizard */
@@ -132,38 +133,6 @@ interface EnrollmentState {
   loadProfile: (draft: ExtractionResult, additional: AdditionalFields) => void;
   resetStore: () => void;
 }
-
-const DEFAULT_EXTRACTION_RESULT: ExtractionResult = {
-  citizenshipNo: "",
-  firstName: { nepali: "", english: "" },
-  middleName: { nepali: "", english: "" },
-  lastName: { nepali: "", english: "" },
-  dobBS: "",
-  dobAD: "",
-  birthPlace: "",
-  gender: "",
-  fatherFirstName: { nepali: "", english: "" },
-  fatherMiddleName: { nepali: "", english: "" },
-  fatherLastName: { nepali: "", english: "" },
-  motherFirstName: { nepali: "", english: "" },
-  motherMiddleName: { nepali: "", english: "" },
-  motherLastName: { nepali: "", english: "" },
-  grandfatherFirstName: { nepali: "", english: "" },
-  grandfatherMiddleName: { nepali: "", english: "" },
-  grandfatherLastName: { nepali: "", english: "" },
-  permanentAddress: {
-    province: "",
-    district: "",
-    localLevel: "",
-    wardNo: "",
-    villageToleNp: "",
-    villageToleEn: "",
-  },
-  issuingDistrict: "",
-  issueDateBS: "",
-  issuingAuthority: "",
-  confidence: 0,
-};
 
 const initialState = {
   extractedData: null,
