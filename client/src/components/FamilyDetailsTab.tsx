@@ -312,13 +312,13 @@ export default function FamilyDetailsTab() {
 
   const handleDetailsChange = (field: keyof AdditionalFields, subfield: keyof FamilyMemberDetails, val: string | boolean) => {
     const defaultAddress = { province: "", district: "", localLevel: "", wardNo: "", villageToleNp: "", villageToleEn: "" };
-    const details = (additional[field] || { nin: "", nationality: "", addressSameAsApplicant: true, address: defaultAddress }) as FamilyMemberDetails;
+    const details = (additional[field] || { nin: "", nationality: "", addressSameAsApplicant: field === "spouseDetails" ? false : true, address: defaultAddress }) as FamilyMemberDetails;
     updateAdditionalField(field, { ...details, [subfield]: val });
   };
 
   const handleAddressChange = (field: keyof AdditionalFields, subfield: keyof AddressField, val: string) => {
     const defaultAddress = { province: "", district: "", localLevel: "", wardNo: "", villageToleNp: "", villageToleEn: "" };
-    const details = (additional[field] || { nin: "", nationality: "", addressSameAsApplicant: true, address: defaultAddress }) as FamilyMemberDetails;
+    const details = (additional[field] || { nin: "", nationality: "", addressSameAsApplicant: field === "spouseDetails" ? false : true, address: defaultAddress }) as FamilyMemberDetails;
     const currentAddress = details.address || defaultAddress;
     
     const updatedAddress = { ...currentAddress, [subfield]: val };
@@ -552,7 +552,7 @@ export default function FamilyDetailsTab() {
               title="Spouse's Permanent Address"
               titleNp="पति/पत्नीको स्थायी ठेगाना"
               address={additional.spouseDetails?.address || {} as any}
-              sameAsApplicant={additional.spouseDetails?.addressSameAsApplicant ?? true}
+              sameAsApplicant={additional.spouseDetails?.addressSameAsApplicant ?? false}
               onSameAsApplicantChange={(val) => handleDetailsChange("spouseDetails", "addressSameAsApplicant", val)}
               onAddressChange={(subField, val) => handleAddressChange("spouseDetails", subField, val)}
             />
